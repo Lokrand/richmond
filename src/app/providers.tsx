@@ -1,10 +1,9 @@
-'use client'
-import { HeroUIProvider } from '@heroui/react'
+'use client';
 
-export function Providers({children}: { children: React.ReactNode }) {
-  return (
+import { HeroUIProvider } from '@heroui/react';
+
+export const Providers = ({ children }: { children: React.ReactNode }) => (
     <HeroUIProvider>
-      {children}
+        {children}
     </HeroUIProvider>
-  )
-}
+);

@@ -14,6 +14,7 @@ const Gallery = () => (
           src={`/${image}.jpg`}
           width={300}
           className="w-full rounded-xl"
+          isZoomed
         />
       </div>
     ))}

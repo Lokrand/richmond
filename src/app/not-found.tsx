@@ -6,7 +6,8 @@ import Link from 'next/link';
 
 const NotFound = () => {
   return (
-      <Card className="max-w-lg w-full p-6 shadow-2xl rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-default-200 mx-auto">
+    <div className="flex flex-col items-center justify-center text-center px-4 pt-20">
+      <Card className="max-w-lg w-full p-6 shadow-2xl rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-default-200">
         <CardHeader className="flex flex-col items-center justify-center gap-4">
           <Image
             alt="Lost cat illustration"
@@ -39,6 +40,7 @@ const NotFound = () => {
           </Button>
         </CardBody>
       </Card>
+    </div>
   );
 };
 

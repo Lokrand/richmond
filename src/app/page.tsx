@@ -23,6 +23,7 @@ const HomePage = () => {
           <Image
             src={catOfTheDay.image}
             className="shadow-lg"
+            height={400}
           />
           <h1 className="text-3xl font-bold text-primary">{catOfTheDay.name}</h1>
           <p className="text-foreground/70 text-center">{catOfTheDay.description}</p>

@@ -18,7 +18,7 @@ const Header = () => {
   const links = [
     { href: '/', label: 'Пушистик дня' },
     { href: '/gallery', label: 'Галерея' },
-    { href: '/gpt-cat', label: 'Хаос' },
+    { href: '/chaos', label: 'Хаос' },
   ];
 
   return (

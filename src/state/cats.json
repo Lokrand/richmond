@@ -1,0 +1,13 @@
+{
+  "cats": [
+    {
+      "id": 1,
+      "name": "Ричик",
+      "age": 3,
+      "weight": 5.1,
+      "habits": ["Кусать за ноги", "Ловить лучики солнца"],
+      "description": "Ричик любит уютные места",
+      "gallery": ["/images/cat1.jpg", "/images/cat2.jpg"]
+    }
+  ]
+}

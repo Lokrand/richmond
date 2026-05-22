@@ -16,12 +16,20 @@ import {
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
-    ChevronLeft, ChevronRight, X, RotateCw, RotateCcw, Camera,
+    X,
+    Camera,
+    Trash2,
+    Pencil,
+    RotateCw,
+    RotateCcw,
+    ChevronLeft,
+    ChevronRight,
 } from 'lucide-react';
 import getCatYearNote from '@/utils/getCatAgeNote';
 import { TyCat } from '@/types';
 import { BASE_S3_URL, catApi, getS3Path } from '@/config';
 import { InternalApiCatCatResponse } from '@/client/models';
+import { auth } from '@/lib/auth';
 
 const mapToTyCat = (cat: InternalApiCatCatResponse): TyCat => {
     const birthDate = cat.birthDate ? new Date(cat.birthDate) : new Date();
@@ -50,8 +58,6 @@ const CatPage = ({ params }: CatPageProps) => {
     const { id } = use(params);
     const [cat, setCat] = useState<TyCat | null>(null);
     const [loading, setLoading] = useState(true);
-    const [likes, setLikes] = useState(0);
-    const [dislikes, setDislikes] = useState(0);
 
     const {
         isOpen, onOpen, onOpenChange, onClose,
@@ -62,7 +68,7 @@ const CatPage = ({ params }: CatPageProps) => {
     useEffect(() => {
         const fetchCat = async () => {
             try {
-                const response = await catApi.apiV1CatIdGet({ id: parseInt(id) });
+                const response = await catApi.apiV1CatIdGet({ id: parseInt(id, 10) });
                 setCat(mapToTyCat(response));
             } catch {
                 notFound();
@@ -141,6 +147,19 @@ const CatPage = ({ params }: CatPageProps) => {
     const hasGallery = cat.gallery.length > 0;
     const hasLogo = cat.logo_path !== '';
 
+    const removeCat = async () => {
+        const authHeader = auth.getAuthorizationHeader();
+        if (!authHeader) {
+            // setError('Требуется авторизация');
+            // setIsLoading(false);
+            return;
+        }
+        await catApi.apiV1CatIdDelete({
+            id,
+            authorization: authHeader.Authorization,
+        });
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-pink-50 to-blue-50 dark:from-default-100 dark:to-default-200 py-4 px-1">
             <div className="max-w-6xl mx-auto">
@@ -150,7 +169,7 @@ const CatPage = ({ params }: CatPageProps) => {
                     </Button>
                 </Link>
 
-                <Card className="flex flex-col sm:flex-row gap-4 items-center p-4 mb-8 shadow-xl rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-default-200 dark:border-default-100">
+                <Card className="flex flex-col items-center sm:items-start sm:flex-row gap-4 p-4 mb-8 shadow-xl rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-default-200 dark:border-default-100">
                     {hasLogo ? (
                         <Image
                             src={getS3Path(cat.logo_path)}
@@ -172,53 +191,70 @@ const CatPage = ({ params }: CatPageProps) => {
                     )}
                     <div className="flex flex-col w-full p-0 sm:p-4 ml-0 sm:ml-4 gap-2">
                         <div className="flex flex-nowrap justify-between">
-                            <h1 className="text-3xl font-bold text-primary text-center sm:text-left mb-4">
+                            <h1 className="text-3xl font-bold text-primary text-center sm:text-left">
                                 {cat.name}
                             </h1>
-                            <Button color="primary" variant="shadow" className="mb-4 ml-4">
-                                Редактировать
-                            </Button>
+                            <div className="flex flex-nowrap gap-2">
+                                <Button
+                                    color="primary"
+                                    variant="shadow"
+                                    className="p-2 min-w-10"
+                                >
+                                    <Pencil size={20} />
+                                </Button>
+                                <Button
+                                    color="danger"
+                                    onClick={removeCat}
+                                    className="p-2 min-w-10"
+                                >
+                                    <Trash2 size={20} />
+                                </Button>
+                            </div>
                         </div>
-                        <div className="flex flex-wrap gap-4">
-                            <Chip color="primary">
-                                <strong>Возраст:</strong>
-                                <span>{` ${cat.age} ${getCatYearNote(cat.age)}`}</span>
-                            </Chip>
-                            <Chip color="success">
-                                <strong>Вес:</strong>
-                                <span>{` ${cat.weight} кг`}</span>
-                            </Chip>
-                            <Chip color="secondary">
-                                <strong>Порода:</strong>
-                                <span>{` ${cat.breed}`}</span>
-                            </Chip>
+                        <div className="flex items-center justify-start flex-wrap gap-1 sm:gap-4 text-foreground/70">
+                            <span className="flex items-center gap-1.5">
+                                <span className="text-primary">🎂</span>
+                                <span>
+                                    {cat.age}
+                                    {' '}
+                                    {getCatYearNote(cat.age)}
+                                </span>
+                            </span>
+                            <span className="w-1 h-1 rounded-full bg-default-300 hidden sm:block" />
+                            <span className="flex items-center gap-1.5">
+                                <span className="text-success">⚖️</span>
+                                <span>
+                                    {cat.weight}
+                                    {' '}
+                                    кг
+                                </span>
+                            </span>
+                            <span className="w-1 h-1 rounded-full bg-default-300 hidden sm:block" />
+                            <span className="flex items-center gap-1.5">
+                                <span className="text-secondary">🐱</span>
+                                <span>{cat.breed}</span>
+                            </span>
                         </div>
                         <p className="text-foreground/70 mt-4 mb-4">{cat.description}</p>
-                        <p><strong>Любимые привычки:</strong></p>
-                        <ul className="list-disc list-inside space-y-1 mb-4">
-                            {cat.habits.map((habit, i) => (
-                                <li key={i} className="text-foreground/80">{`${habit};`}</li>
-                            ))}
-                        </ul>
-                        <div className="flex flex-row mt-auto items-center justify-center gap-4">
-                            <Button
-                                color="success"
-                                variant="shadow"
-                                onClick={() => setLikes(likes + 1)}
-                            >
-                                👍
+                        <p className="text-foreground/70 mt-4 mb-4">Ричик такой котик короче вообще какой-то турбо пушка пушистый еще он хвостом своим умеет делать так вжух-вжух и все полетели за ноги всех хватать в квартире, чтобы они испугались и прятались от великого короля Ричарда! Ахахахаха</p>
+                        <div className="space-y-3">
+                            <p className="font-semibold text-foreground flex items-center justify-start gap-2">
+                                <span>🌟</span>
                                 {' '}
-                                {likes}
-                            </Button>
-                            <Button
-                                color="danger"
-                                variant="shadow"
-                                onClick={() => setDislikes(dislikes + 1)}
-                            >
-                                👎
-                                {' '}
-                                {dislikes}
-                            </Button>
+                                Любимые привычки
+                            </p>
+                            <div className="flex flex-wrap justify-start gap-2">
+                                {cat.habits.map((habit, i) => (
+                                    <Chip
+                                        key={i}
+                                        variant="flat"
+                                        color="primary"
+                                        className="px-3 py-1"
+                                    >
+                                        {habit}
+                                    </Chip>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </Card>
@@ -239,7 +275,7 @@ const CatPage = ({ params }: CatPageProps) => {
                                     <Image
                                         alt={`${cat.name} фото ${index + 1}`}
                                         src={getS3Path(image)}
-                                        width={300}
+                                        width={400}
                                         className="w-full rounded-xl cursor-pointer hover:scale-[1.02] transition-transform duration-200"
                                         isZoomed
                                         onClick={() => openImageModal(index)}

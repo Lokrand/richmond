@@ -6,7 +6,29 @@ import {
 } from '@heroui/react';
 import Link from 'next/link';
 import getCatYearNote from '@/utils/getCatAgeNote';
+import { catApi, getS3Path } from '@/config';
+import { InternalApiCatCatResponse } from '@/client/models';
 import { TyCat } from '@/types';
+
+const mapToTyCat = (cat: InternalApiCatCatResponse): TyCat => {
+    const birthDate = cat.birthDate ? new Date(cat.birthDate) : new Date();
+    const now = new Date();
+    const age = cat.birthDate
+        ? Math.floor((now.getTime() - birthDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+        : 0;
+
+    return {
+        id: cat.catId ?? 0,
+        name: cat.name ?? '',
+        age,
+        weight: cat.weight ?? 0,
+        breed: cat.breed ?? '',
+        habits: cat.habits ? cat.habits.split(',').map((h) => h.trim()) : [],
+        description: '',
+        logo_path: cat.titlePhoto?.url ?? '',
+        gallery: cat.galleryPhotos?.map((p) => p?.url ?? '').filter(Boolean) ?? [],
+    };
+};
 
 interface CatsData {
     cats: TyCat[];
@@ -21,13 +43,8 @@ const Gallery = () => {
         const fetchCats = async () => {
             try {
                 setIsLoading(true);
-                const response = await fetch('/api/cats');
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch cats');
-                }
-
-                const cats: TyCat[] = await response.json();
+                const response = await catApi.apiV1CatAllGet();
+                const cats = (response.cats ?? []).map(mapToTyCat);
                 setCats(cats);
             } catch (err) {
                 console.error('Error fetching cats:', err);
@@ -108,7 +125,7 @@ const Gallery = () => {
                                 <Card className="flex flex-row w-full p-2 shadow-lg rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-default-200 dark:border-default-100 hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer">
                                     <Image
                                         // @ts-expect-error
-                                        src={cat.logo || cat.logo_path || '/default-cat.jpg'}
+                                        src={cat.logo || getS3Path(cat.logo_path) || '/default-cat.jpg'}
                                         className="shadow-md rounded-xl object-cover w-48 h-48"
                                         width={200}
                                         height={200}

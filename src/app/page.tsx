@@ -6,6 +6,7 @@ import {
     Chip,
 } from '@heroui/react';
 import getCatYearNote from '@/utils/getCatAgeNote';
+import { catApi } from '@/config';
 
 const catOfTheDay = {
     name: 'Ричик',
@@ -22,9 +23,8 @@ const HomePage = () => {
     const [dislikes, setDislikes] = useState(0);
 
     const fetchCats = async () => {
-        const res = await fetch('/api/cats');
-        const data = await res.json();
-        console.log('cats', data);
+        const res = await catApi.apiV1CatAllGet();
+        console.log('cats', res.cats);
     };
 
     useEffect(() => {

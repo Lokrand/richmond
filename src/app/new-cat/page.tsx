@@ -2,6 +2,8 @@
 
 import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { catApi } from '@/config';
+import { auth } from '@/lib/auth';
 import {
     Card,
     CardHeader,
@@ -12,6 +14,7 @@ import {
     Input,
     Textarea,
 } from '@heroui/react';
+import { InternalApiCatCreateCatRequest, InternalApiCatCreateCatRequestToJSONTyped } from '@/client';
 
 const NewCat = () => {
     const router = useRouter();
@@ -129,34 +132,42 @@ const NewCat = () => {
         }
 
         try {
-            const submitData = new FormData();
-            submitData.append('name', formData.name.trim());
-            submitData.append('age', formData.age);
-            submitData.append('weight', formData.weight);
-            submitData.append('breed', formData.breed);
-            submitData.append('habits', formData.habits);
-            submitData.append('description', formData.description);
+            const authHeader = auth.getAuthorizationHeader();
+            if (!authHeader) {
+                setError('Требуется авторизация');
+                setIsLoading(false);
+                return;
+            }
+            function parseBirthDate(age: string): string {
+                const d = new Date();
+                d.setFullYear(d.getFullYear() - parseInt(age, 10));
+                return d.toISOString().split('T')[0];
+            }
+            const data: InternalApiCatCreateCatRequest = {
+                name: formData.name.trim(),
+                birthDate: parseBirthDate(formData.age),
+                weight: parseFloat(formData.weight),
+                breed: formData.breed.trim(),
+                habits: formData.habits,
+            };
 
-            submitData.append('titlePhoto', titlePhoto.file);
-
+            const files: Blob[] = [titlePhoto.file];
             galleryPhotos.forEach((photo) => {
-                submitData.append('galleryPhotos', photo.file);
+                files.push(photo.file);
             });
 
-            const response = await fetch('/api/cats', {
-                method: 'POST',
-                body: submitData,
+            const result = await catApi.apiV1CatNewPost({
+                authorization: authHeader.Authorization,
+                data: JSON.stringify(data),
+                file: files,
             });
-
-            const result = await response.json();
-
-            if (result.success) {
-                alert('Пушистик успешно добавлен!');
+            if (result.catId) {
+                console.info('New cat created', result);
                 clearForm();
                 router.push('/cats');
                 router.refresh();
             } else {
-                setError(result.error || 'Ошибка при сохранении');
+                setError('Ошибка при сохранении');
             }
         } catch (error) {
             console.error('Submit error:', error);

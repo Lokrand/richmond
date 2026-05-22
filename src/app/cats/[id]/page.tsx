@@ -20,6 +20,27 @@ import {
 } from 'lucide-react';
 import getCatYearNote from '@/utils/getCatAgeNote';
 import { TyCat } from '@/types';
+import { BASE_S3_URL, catApi, getS3Path } from '@/config';
+import { InternalApiCatCatResponse } from '@/client/models';
+
+const mapToTyCat = (cat: InternalApiCatCatResponse): TyCat => {
+    const birthDate = cat.birthDate ? new Date(cat.birthDate) : new Date();
+    const now = new Date();
+    const age = cat.birthDate
+        ? Math.floor((now.getTime() - birthDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+        : 0;
+    return {
+        id: cat.catId ?? 0,
+        name: cat.name ?? '',
+        age,
+        weight: cat.weight ?? 0,
+        breed: cat.breed ?? '',
+        habits: cat.habits ? cat.habits.split(',').map((h: string) => h.trim()) : [],
+        description: '',
+        logo_path: cat.titlePhoto?.url ?? '',
+        gallery: cat.galleryPhotos?.map((p) => p?.url ?? '').filter(Boolean) ?? [],
+    };
+};
 
 interface CatPageProps {
     params: { id: string };
@@ -40,13 +61,14 @@ const CatPage = ({ params }: CatPageProps) => {
 
     useEffect(() => {
         const fetchCat = async () => {
-            const res = await fetch(`/api/cats/${id}`);
-            if (!res.ok) {
+            try {
+                const response = await catApi.apiV1CatIdGet({ id: parseInt(id) });
+                setCat(mapToTyCat(response));
+            } catch {
                 notFound();
+            } finally {
+                setLoading(false);
             }
-            const data = await res.json();
-            setCat(data);
-            setLoading(false);
         };
 
         fetchCat();
@@ -127,7 +149,7 @@ const CatPage = ({ params }: CatPageProps) => {
 
                 <Card className="flex flex-col sm:flex-row gap-4 items-center p-4 mb-8 shadow-xl rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-default-200 dark:border-default-100">
                     <Image
-                        src={cat.logo_path}
+                        src={getS3Path(cat.logo_path)}
                         className="shadow-lg rounded-xl object-cover w-[100%] cursor-pointer hover:opacity-90 transition-opacity"
                         height={400}
                         alt={cat.name}
@@ -199,7 +221,7 @@ const CatPage = ({ params }: CatPageProps) => {
                             <div key={image} className="break-inside-avoid mb-1">
                                 <Image
                                     alt={`${cat.name} фото ${index + 1}`}
-                                    src={image}
+                                    src={getS3Path(image)}
                                     width={300}
                                     className="w-full rounded-xl cursor-pointer hover:scale-[1.02] transition-transform duration-200"
                                     isZoomed
@@ -290,7 +312,7 @@ const CatPage = ({ params }: CatPageProps) => {
 
                             <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
                                 <img
-                                    src={selectedImageIndex === -1 ? cat.logo_path : cat.gallery[selectedImageIndex]}
+                                    src={getS3Path(selectedImageIndex === -1 ? cat.logo_path : cat.gallery[selectedImageIndex])}
                                     alt={`${cat.name} ${selectedImageIndex === -1 ? 'главное фото' : `фото ${selectedImageIndex + 1}`}`}
                                     className="max-w-full max-h-full object-contain transition-transform duration-200"
                                     style={{ transform: `rotate(${rotation}deg)` }}

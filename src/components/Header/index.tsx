@@ -20,6 +20,7 @@ import {
     Input,
 } from '@heroui/react';
 import { Eye, EyeOff } from 'lucide-react';
+import { auth } from '@/lib/auth';
 
 const Header = () => {
     const pathname = usePathname();
@@ -29,6 +30,9 @@ const Header = () => {
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userLogin, setUserLogin] = useState('');
 
     const links = [
         { href: '/', label: 'Пушистик дня' },
@@ -44,20 +48,32 @@ const Header = () => {
         setLogin('');
         setPassword('');
         setShowPasswordReset(false);
+        setIsLoggedIn(auth.isAuthenticated());
+        setUserLogin(auth.getUser() || '');
     }, [isLoginOpen]);
+
+    const handleLogout = () => {
+        auth.logout();
+        setIsLoggedIn(false);
+        setUserLogin('');
+    };
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        setError('');
 
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        console.log('Login attempt:', { login, password });
-
-        setIsLoading(false);
-        setIsLoginOpen(false);
-        setLogin('');
-        setPassword('');
+        try {
+            await auth.login(login, password);
+            setIsLoggedIn(true);
+            setIsLoginOpen(false);
+            setLogin('');
+            setPassword('');
+        } catch (err) {
+            setError('Неверный логин или пароль');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -108,15 +124,34 @@ const Header = () => {
                 </NavbarContent>
 
                 <NavbarContent justify="end" className="gap-3">
-                    <NavbarItem className="hidden lg:flex">
-                        <button
-                            type="button"
-                            onClick={() => setIsLoginOpen(true)}
-                            className="text-foreground/70 hover:text-primary transition-colors"
-                        >
-                            Войти
-                        </button>
-                    </NavbarItem>
+                    {isLoggedIn ? (
+                        <>
+                            <NavbarItem className="hidden lg:flex">
+                                <span className="text-foreground/70">
+                                    Привет, {userLogin}!
+                                </span>
+                            </NavbarItem>
+                            <NavbarItem>
+                                <Button
+                                    color="danger"
+                                    variant="light"
+                                    onPress={handleLogout}
+                                >
+                                    Выйти
+                                </Button>
+                            </NavbarItem>
+                        </>
+                    ) : (
+                        <NavbarItem className="hidden lg:flex">
+                            <button
+                                type="button"
+                                onClick={() => setIsLoginOpen(true)}
+                                className="text-foreground/70 hover:text-primary transition-colors"
+                            >
+                                Войти
+                            </button>
+                        </NavbarItem>
+                    )}
 
                     <NavbarItem>
                         <Button
@@ -151,6 +186,9 @@ const Header = () => {
                             </ModalHeader>
 
                             <ModalBody className="gap-4">
+                                {error && (
+                                    <p className="text-danger text-sm text-center">{error}</p>
+                                )}
                                 <Input
                                     autoFocus
                                     label="Логин"

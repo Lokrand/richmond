@@ -1,36 +1,33 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
-## Getting Started
-
-First, run the development server:
+## Run dev server
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+on [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## API Client Configuration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Set the API URL in `.env.local` or `cp .env.local.example .env.local`:
+```
+NEXT_PUBLIC_API_URL=http://localhost:8080
+NEXT_PUBLIC_BASE_S3_URL=http://localhost:9900
+```
 
-## Learn More
+## API Client Generation
 
-To learn more about Next.js, take a look at the following resources:
+The TypeScript API client is generated from the OpenAPI spec using `openapi-generator`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Prerequisites
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Local API must be running at `http://localhost:8080/doc.json`
+ or use test server at `https://richmond-api.akorz.duckdns.org/swagger/doc.json`
+- Swagger spec available at `http://localhost:8080/swagger/index.html`
 
-## Deploy on Vercel
+### Generate Client
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Run this command from the project root:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm dlx @openapitools/openapi-generator-cli@2.31.1 generate -i http://localhost:8080/swagger/doc.json  -g typescript-fetch  -o src/client  --additional-properties=typescriptVersion=5.0.0
+```

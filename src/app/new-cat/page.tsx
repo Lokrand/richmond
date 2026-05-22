@@ -2,8 +2,6 @@
 
 import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { catApi } from '@/config';
-import { auth } from '@/lib/auth';
 import {
     Card,
     CardHeader,
@@ -14,6 +12,8 @@ import {
     Input,
     Textarea,
 } from '@heroui/react';
+import { catApi } from '@/config';
+import { auth } from '@/lib/auth';
 import { InternalApiCatCreateCatRequest, InternalApiCatCreateCatRequestToJSONTyped } from '@/client';
 
 const NewCat = () => {
@@ -198,12 +198,6 @@ const NewCat = () => {
                 </CardHeader>
 
                 <CardBody>
-                    {error && (
-                        <div className="bg-danger-50 border border-danger-200 text-danger-700 px-4 py-3 rounded-lg mb-4">
-                            {error}
-                        </div>
-                    )}
-
                     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Input
@@ -380,7 +374,13 @@ const NewCat = () => {
                             )}
                         </div>
 
-                        <CardFooter className="flex justify-center gap-4 px-0 pb-0 pt-6">
+                        {error && (
+                            <div className="bg-danger-50 border border-danger-200 text-danger-700 px-4 py-3 rounded-lg">
+                                {error}
+                            </div>
+                        )}
+
+                        <CardFooter className="flex justify-center gap-4 px-0 pb-0 pt-4">
                             <Button
                                 color="primary"
                                 variant="shadow"

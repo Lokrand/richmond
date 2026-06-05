@@ -5,10 +5,10 @@ import {
     Card, Image, Button, Chip,
 } from '@heroui/react';
 import Link from 'next/link';
-import getCatYearNote from '@/utils/getCatAgeNote';
-import { catApi, getS3Path } from '@/config';
-import { InternalApiCatCatResponse } from '@/client/models';
-import { TyCat } from '@/types';
+import getCatYearNote from '../../utils/getCatAgeNote';
+import { catApi, getS3Path } from '../../config';
+import { InternalApiCatCatResponse } from '../../client/models';
+import { TyCat } from '../../types';
 
 const mapToTyCat = (cat: InternalApiCatCatResponse): TyCat => {
     const birthDate = cat.birthDate ? new Date(cat.birthDate) : new Date();
@@ -30,10 +30,6 @@ const mapToTyCat = (cat: InternalApiCatCatResponse): TyCat => {
     };
 };
 
-interface CatsData {
-    cats: TyCat[];
-}
-
 const Gallery = () => {
     const [cats, setCats] = useState<TyCat[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -46,8 +42,7 @@ const Gallery = () => {
                 const response = await catApi.apiV1CatAllGet();
                 const cats = (response.cats ?? []).map(mapToTyCat);
                 setCats(cats);
-            } catch (err) {
-                console.error('Error fetching cats:', err);
+            } catch {
                 setError('Не удалось загрузить пушистиков');
             } finally {
                 setIsLoading(false);

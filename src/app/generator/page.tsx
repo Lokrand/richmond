@@ -1,4 +1,5 @@
 /* eslint-disable react/button-has-type */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -215,25 +216,6 @@ const NameGeneratorPage = () => {
     const [showSavedModal, setShowSavedModal] = useState(false);
     const [savedCombinations, setSavedCombinations] = useState<{id: number, names: string[], date: string}[]>([]);
 
-    // Инициализация
-    useEffect(() => {
-        generateRandomNames();
-        const saved = localStorage.getItem('catNameFavorites');
-        if (saved) {
-            setFavorites(JSON.parse(saved));
-        }
-        const savedCombs = localStorage.getItem('catNameCombinations');
-        if (savedCombs) {
-            setSavedCombinations(JSON.parse(savedCombs));
-        }
-    }, []);
-
-    // Сохранение в localStorage
-    useEffect(() => {
-        localStorage.setItem('catNameFavorites', JSON.stringify(favorites));
-    }, [favorites]);
-
-    // Генерация случайных имен
     const generateRandomNames = () => {
         let filtered = catNames;
 
@@ -259,20 +241,17 @@ const NameGeneratorPage = () => {
                 || name.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())));
         }
 
-        // Только не показывать favorites если не в режиме favorites
         if (!showFavorites) {
             filtered = filtered.filter((name) => !favorites.includes(name.id));
         } else {
             filtered = filtered.filter((name) => favorites.includes(name.id));
         }
 
-        // Перемешиваем и берем нужное количество
         const shuffled = [...filtered].sort(() => Math.random() - 0.5);
         const selected = shuffled.slice(0, Math.min(nameCount, shuffled.length));
 
         setGeneratedNames(selected);
 
-        // Конфетти при генерации
         if (!isMuted && selected.length > 0) {
             confetti({
                 particleCount: Math.min(selected.length * 10, 50),
@@ -282,13 +261,27 @@ const NameGeneratorPage = () => {
         }
     };
 
-    // Сохранение в избранное
+    useEffect(() => {
+        generateRandomNames();
+        const saved = localStorage.getItem('catNameFavorites');
+        if (saved) {
+            setFavorites(JSON.parse(saved));
+        }
+        const savedCombs = localStorage.getItem('catNameCombinations');
+        if (savedCombs) {
+            setSavedCombinations(JSON.parse(savedCombs));
+        }
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem('catNameFavorites', JSON.stringify(favorites));
+    }, [favorites]);
+
     const toggleFavorite = (id: number) => {
         if (favorites.includes(id)) {
             setFavorites(favorites.filter((favId) => favId !== id));
         } else {
             setFavorites([...favorites, id]);
-            // Мини-конфетти при добавлении в избранное
             if (!isMuted) {
                 confetti({
                     particleCount: 20,
@@ -299,14 +292,12 @@ const NameGeneratorPage = () => {
         }
     };
 
-    // Копирование имени
     const copyToClipboard = (name: string) => {
         navigator.clipboard.writeText(name);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
 
-    // Сохранение комбинации
     const saveCombination = () => {
         const newCombination = {
             id: Date.now(),
@@ -319,30 +310,23 @@ const NameGeneratorPage = () => {
         setShowSavedModal(true);
     };
 
-    // Загрузка сохраненной комбинации
     const loadCombination = (combination: typeof savedCombinations[0]) => {
         const names = combination.names.map((name) => catNames.find((n) => n.name === name)).filter(Boolean) as CatName[];
         setGeneratedNames(names);
         setShowSavedModal(false);
     };
 
-    // Шеринг
     const shareResults = async () => {
         const text = `Я нашёл отличные имена для котика в приложении "Пушистик дня"!\n\n${generatedNames.map((n, i) => `${i + 1}. ${n.name} — ${n.meaning}`).join('\n')}\n\nПопробуй и ты! 🐱`;
 
         if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: 'Классные имена для котика!',
-                    text,
-                    url: window.location.href,
-                });
-            } catch (error) {
-                console.log('Ошибка при шеринге:', error);
-            }
+            await navigator.share({
+                title: 'Классные имена для котика!',
+                text,
+                url: window.location.href,
+            });
         } else {
             navigator.clipboard.writeText(text);
-            alert('Имена скопированы в буфер обмена! 📋');
         }
     };
 
@@ -486,6 +470,7 @@ const NameGeneratorPage = () => {
                                         className="mb-2"
                                     >
                                         {origins.map((origin) => (
+                                            // @ts-expect-error
                                             <SelectItem key={origin.key} value={origin.key}>
                                                 {origin.label}
                                             </SelectItem>

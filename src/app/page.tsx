@@ -1,8 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Card, CardHeader, CardBody, Image, Chip } from '@heroui/react';
-import getCatYearNote from '@/utils/getCatAgeNote';
+import {
+    Card, CardHeader, CardBody, Image, Chip,
+} from '@heroui/react';
+import getCatYearNote from '../utils/getCatAgeNote';
 
 const catOfTheDay = {
     name: 'Ричик',

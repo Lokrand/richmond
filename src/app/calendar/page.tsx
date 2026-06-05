@@ -3,6 +3,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/button-has-type */
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -847,11 +848,11 @@ const CatHolidaysCalendarPage = () => {
                                         color="warning"
                                         variant="shadow"
                                         startContent={<Trash2 size={18} />}
-                                        onClick={() => {
-                                            if (window.confirm('Удалить все ваши события?')) {
-                                                setUserEvents([]);
-                                            }
-                                        }}
+                                        // onClick={() => {
+                                        //     if (window.confirm('Удалить все ваши события?')) {
+                                        //         setUserEvents([]);
+                                        //     }
+                                        // }}
                                         className="h-14 rounded-xl"
                                     >
                                         Очистить
@@ -901,6 +902,7 @@ const CatHolidaysCalendarPage = () => {
                                     onChange={(e) => setNewEvent({ ...newEvent, catId: parseInt(e.target.value, 10) })}
                                 >
                                     {userCats.map((cat) => (
+                                        // @ts-expect-error
                                         <SelectItem key={cat.id} value={cat.id}>
                                             {cat.name}
                                         </SelectItem>

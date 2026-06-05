@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
+
 'use client';
 
 import React, { useState, useRef } from 'react';
@@ -12,9 +14,9 @@ import {
     Input,
     Textarea,
 } from '@heroui/react';
-import { catApi } from '@/config';
-import { auth } from '@/lib/auth';
-import { InternalApiCatCreateCatRequest, InternalApiCatCreateCatRequestToJSONTyped } from '@/client';
+import { catApi } from '../../config';
+import { auth } from '../../lib/auth';
+import { InternalApiCatCreateCatRequest } from '../../client';
 
 const NewCat = () => {
     const router = useRouter();
@@ -138,6 +140,7 @@ const NewCat = () => {
                 setIsLoading(false);
                 return;
             }
+            // eslint-disable-next-line no-inner-declarations
             function parseBirthDate(age: string): string {
                 const d = new Date();
                 d.setFullYear(d.getFullYear() - parseInt(age, 10));

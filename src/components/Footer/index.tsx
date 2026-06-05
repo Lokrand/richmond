@@ -1,8 +1,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
-import { Divider } from '@heroui/react';
 
 const Footer = () => (
     <footer

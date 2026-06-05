@@ -20,9 +20,9 @@ import {
     Input,
 } from '@heroui/react';
 import { Eye, EyeOff } from 'lucide-react';
-import { auth } from '@/lib/auth';
-import { userApi } from '@/config';
-import usePageTitle from '@/hooks/usePageTitle';
+import { auth } from '../../lib/auth';
+import { userApi } from '../../config';
+import usePageTitle from '../../hooks/usePageTitle';
 
 const Header = () => {
     const pathname = usePathname();
@@ -37,7 +37,6 @@ const Header = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userLogin, setUserLogin] = useState('');
 
-    // Поля для регистрации
     const [regLogin, setRegLogin] = useState('');
     const [regPassword, setRegPassword] = useState('');
     const [regConfirmPassword, setRegConfirmPassword] = useState('');
@@ -92,7 +91,7 @@ const Header = () => {
             setIsLoginOpen(false);
             setLogin('');
             setPassword('');
-        } catch (err) {
+        } catch {
             setError('Неверный логин или пароль');
         } finally {
             setIsLoading(false);
@@ -104,7 +103,6 @@ const Header = () => {
         setRegError('');
         setRegSuccess('');
 
-        // Валидация
         if (!regLogin.trim() || !regPassword.trim()) {
             setRegError('Заполните все поля');
             return;
@@ -128,8 +126,6 @@ const Header = () => {
         setRegIsLoading(true);
 
         try {
-            // Здесь вызов API для регистрации
-            // await auth.register(regLogin, regPassword);
             await userApi.apiV1UserNewPost({
                 request: {
                     login: regLogin,
@@ -137,15 +133,12 @@ const Header = () => {
                 },
             });
 
-            // Имитация успешной регистрации
-            // await new Promise(resolve => setTimeout(resolve, 1000));
-            
             setRegSuccess('Регистрация успешна! Теперь вы можете войти 🎉');
             setTimeout(() => {
                 setIsRegisterOpen(false);
                 setIsLoginOpen(true);
             }, 1500);
-        } catch (err) {
+        } catch {
             setRegError('Ошибка при регистрации. Возможно, такой пользователь уже существует');
         } finally {
             setRegIsLoading(false);
@@ -241,7 +234,6 @@ const Header = () => {
                 </NavbarContent>
             </Navbar>
 
-            {/* Модальное окно входа */}
             <Modal
                 isOpen={isLoginOpen}
                 onOpenChange={setIsLoginOpen}
@@ -355,8 +347,6 @@ const Header = () => {
                     )}
                 </ModalContent>
             </Modal>
-
-            {/* Модальное окно регистрации */}
             <Modal
                 isOpen={isRegisterOpen}
                 onOpenChange={setIsRegisterOpen}
@@ -381,7 +371,7 @@ const Header = () => {
                                 {regSuccess && (
                                     <p className="text-success text-sm text-center font-medium">{regSuccess}</p>
                                 )}
-                                
+
                                 <Input
                                     autoFocus
                                     label="Придумайте логин"

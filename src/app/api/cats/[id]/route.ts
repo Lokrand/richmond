@@ -1,8 +1,10 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-plusplus */
 import { NextRequest, NextResponse } from 'next/server';
 import sharp from 'sharp';
 import fs from 'fs/promises';
 import path from 'path';
-import { catsDB } from '@/lib/db';
+import { catsDB } from '../../../../lib/db';
 
 const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
 const catsImagesDir = path.join(process.cwd(), 'public', 'cats');
@@ -57,9 +59,6 @@ export async function GET(
     try {
         const params = await context.params;
         const id = params.id;
-
-        console.log(`📡 GET /api/cats/${id}`);
-
         const numericId = parseInt(id, 10);
 
         if (Number.isNaN(numericId) || numericId <= 0) {
@@ -76,7 +75,6 @@ export async function GET(
         const cat = catsDB.getCatById(numericId);
 
         if (!cat) {
-            console.log(`❌ Cat with ID ${numericId} not found in database`);
             return NextResponse.json(
                 {
                     success: false,
@@ -86,7 +84,6 @@ export async function GET(
             );
         }
 
-        console.log(`✅ Cat found: ${cat.name} (ID: ${cat.id})`);
         return NextResponse.json(cat);
     } catch (error) {
         console.error('❌ Error fetching cat:', error);

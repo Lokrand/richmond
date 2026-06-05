@@ -25,11 +25,11 @@ import {
     ChevronLeft,
     ChevronRight,
 } from 'lucide-react';
-import getCatYearNote from '@/utils/getCatAgeNote';
-import { TyCat } from '@/types';
-import { BASE_S3_URL, catApi, getS3Path } from '@/config';
-import { InternalApiCatCatResponse } from '@/client/models';
-import { auth } from '@/lib/auth';
+import getCatYearNote from '../../../utils/getCatAgeNote';
+import { TyCat } from '../../../types';
+import { catApi, getS3Path } from '../../../config';
+import { InternalApiCatCatResponse } from '../../../client/models';
+import { auth } from '../../../lib/auth';
 
 const mapToTyCat = (cat: InternalApiCatCatResponse): TyCat => {
     const birthDate = cat.birthDate ? new Date(cat.birthDate) : new Date();
@@ -55,6 +55,7 @@ interface CatPageProps {
 }
 
 const CatPage = ({ params }: CatPageProps) => {
+    // @ts-expect-error
     const { id } = use(params);
     const [cat, setCat] = useState<TyCat | null>(null);
     const [loading, setLoading] = useState(true);

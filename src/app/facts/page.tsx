@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -141,18 +140,13 @@ const CatFactsPage = () => {
 
     const handleShare = async () => {
         if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: 'Интересный факт о котиках!',
-                    text: dailyFact,
-                    url: window.location.href,
-                });
-            } catch (error) {
-                console.log('Ошибка при шеринге:', error);
-            }
+            await navigator.share({
+                title: 'Интересный факт о котиках!',
+                text: dailyFact,
+                url: window.location.href,
+            });
         } else {
             navigator.clipboard.writeText(`${dailyFact}\n\nУзнай больше на сайте Пушистик дня!`);
-            alert('Факт скопирован в буфер обмена! 📋');
         }
     };
 
@@ -219,9 +213,7 @@ const CatFactsPage = () => {
                                     <h2 className="text-2xl font-bold text-foreground">Факт дня</h2>
                                 </div>
                                 <p className="text-xl italic text-foreground/80 mb-4">
-                                    "
-                                    {dailyFact}
-                                    "
+                                    {`"${dailyFact}"`}
                                 </p>
                                 <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                                     <Button

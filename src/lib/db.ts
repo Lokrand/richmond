@@ -77,8 +77,6 @@ function initDatabase() {
       UPDATE cats SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
     END
   `);
-
-    console.log('✅ База данных инициализирована');
 }
 
 initDatabase();
@@ -103,23 +101,16 @@ export const catsDB = {
     getCatById(id: number): CatWithDetails | null {
         try {
             if (!id || typeof id !== 'number' || Number.isNaN(id)) {
-                console.error('❌ Invalid cat ID:', id);
                 return null;
             }
-
-            console.log(`🔍 Searching for cat with ID: ${id}`);
 
             const cat = db.prepare('SELECT * FROM cats WHERE id = ?').get(id) as Cat;
 
             if (!cat) {
-                console.log(`❌ Cat with ID ${id} not found`);
                 return null;
             }
-
-            console.log(`✅ Found cat: ${cat.name} (ID: ${cat.id})`);
             return this.enrichCatWithDetails(cat);
-        } catch (error) {
-            console.error(`❌ Error getting cat by ID ${id}:`, error);
+        } catch {
             return null;
         }
     },

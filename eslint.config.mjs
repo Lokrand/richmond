@@ -29,6 +29,7 @@ export default [{
         "**/ci-utils",
         "**/*.js",
         "**/*.d.ts",
+        "**/.next",
     ],
 }, ...compat.extends("airbnb").map(config => ({
     ...config,

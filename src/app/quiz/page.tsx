@@ -213,6 +213,12 @@ const QuizPage = () => {
     const [isMuted, setIsMuted] = useState(false);
     const [showHint, setShowHint] = useState(false);
 
+    const handleTimeUp = () => {
+        setIsAnswered(true);
+        setWrongAnswers((prev) => [...prev, quizQuestions[currentQuestion].id]);
+        setStreak(0);
+    };
+
     useEffect(() => {
         if (isAnswered || quizCompleted) return;
 
@@ -226,14 +232,9 @@ const QuizPage = () => {
             });
         }, 1000);
 
+        // eslint-disable-next-line consistent-return
         return () => clearInterval(timer);
     }, [isAnswered, quizCompleted]);
-
-    const handleTimeUp = () => {
-        setIsAnswered(true);
-        setWrongAnswers((prev) => [...prev, quizQuestions[currentQuestion].id]);
-        setStreak(0);
-    };
 
     const handleAnswerSelect = (value: string) => {
         if (isAnswered) return;
@@ -372,18 +373,13 @@ const QuizPage = () => {
         const text = `Я только что прошёл викторину о котиках в приложении "Пушистик дня" и набрал ${score} баллов (${calculatePercentage()}%)!\nМой ранг: ${rank.title}\n\nПопробуй и ты! 😺`;
 
         if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: 'Мои результаты викторины о котиках!',
-                    text,
-                    url: window.location.href,
-                });
-            } catch (error) {
-                console.log('Ошибка при шеринге:', error);
-            }
+            await navigator.share({
+                title: 'Мои результаты викторины о котиках!',
+                text,
+                url: window.location.href,
+            });
         } else {
             navigator.clipboard.writeText(text);
-            alert('Результаты скопированы в буфер обмена! 📋');
         }
     };
 

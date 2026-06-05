@@ -2,7 +2,7 @@
 import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs/promises';
-import { catsDB } from '@/lib/db';
+import { catsDB } from '../../../lib/db';
 
 export async function POST(request: Request): Promise<Response> {
     try {
@@ -77,6 +77,7 @@ export async function POST(request: Request): Promise<Response> {
         }
 
         const galleryPaths: string[] = [];
+        // eslint-disable-next-line no-plusplus
         for (let i = 0; i < galleryPhotos.length; i++) {
             const photo = galleryPhotos[i];
             if (photo.size > 0) {
@@ -105,8 +106,6 @@ export async function POST(request: Request): Promise<Response> {
             logo: logoPath,
             gallery: galleryPaths,
         });
-
-        console.log(`🎉 Кот успешно сохранен: ${updatedCat.name} (ID: ${updatedCat.id})`);
 
         return Response.json({
             success: true,

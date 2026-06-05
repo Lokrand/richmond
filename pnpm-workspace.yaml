@@ -1,5 +1,0 @@
-allowBuilds:
-  '@heroui/shared-utils': false
-  better-sqlite3: false
-  sharp: false
-  unrs-resolver: false

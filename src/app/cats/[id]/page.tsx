@@ -80,6 +80,12 @@ const CatPage = ({ params }: CatPageProps) => {
         fetchCat();
     }, [id]);
 
+    useEffect(() => {
+        if (cat) {
+            document.title = cat.name;
+        }
+    }, [cat]);
+
     const openImageModal = (index: number) => {
         setSelectedImageIndex(index);
         setRotation(0);

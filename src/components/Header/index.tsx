@@ -22,6 +22,7 @@ import {
 import { Eye, EyeOff } from 'lucide-react';
 import { auth } from '@/lib/auth';
 import { userApi } from '@/config';
+import usePageTitle from '@/hooks/usePageTitle';
 
 const Header = () => {
     const pathname = usePathname();
@@ -55,6 +56,8 @@ const Header = () => {
         // { href: '/calendar', label: 'Календарь' },
         { href: '/new-cat', label: 'Добавить пушистика' },
     ];
+
+    usePageTitle();
 
     useEffect(() => {
         setLogin('');

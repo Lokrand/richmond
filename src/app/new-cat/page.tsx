@@ -152,6 +152,8 @@ const NewCat = () => {
                 weight: parseFloat(formData.weight),
                 breed: formData.breed.trim(),
                 habits: formData.habits,
+                // @ts-ignore
+                description: formData.description,
             };
 
             const files: Blob[] = [titlePhoto.file];

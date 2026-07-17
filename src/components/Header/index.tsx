@@ -12,6 +12,9 @@ import {
     NavbarBrand,
     NavbarContent,
     NavbarItem,
+    NavbarMenuToggle,
+    NavbarMenu,
+    NavbarMenuItem,
     Modal,
     ModalContent,
     ModalHeader,
@@ -26,6 +29,7 @@ import usePageTitle from '../../hooks/usePageTitle';
 
 const Header = () => {
     const pathname = usePathname();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [isRegisterOpen, setIsRegisterOpen] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -78,6 +82,7 @@ const Header = () => {
         auth.logout();
         setIsLoggedIn(false);
         setUserLogin('');
+        setIsMenuOpen(false);
     };
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -155,10 +160,17 @@ const Header = () => {
         setTimeout(() => setIsLoginOpen(true), 100);
     };
 
+    const handleMobileLogin = () => {
+        setIsMenuOpen(false);
+        setTimeout(() => setIsLoginOpen(true), 300);
+    };
+
     return (
         <>
             <Navbar
                 maxWidth="xl"
+                isMenuOpen={isMenuOpen}
+                onMenuOpenChange={setIsMenuOpen}
                 className="
                     sticky top-0 z-50
                     bg-white/70 dark:bg-default-50
@@ -167,20 +179,26 @@ const Header = () => {
                     shadow-sm
                 "
             >
-                <NavbarBrand className="flex items-center gap-3">
-                    <Avatar
-                        name="Ричик"
-                        src="/rich.jpg"
-                        size="md"
-                        className="shadow-md hover:scale-105 transition-transform"
+                <NavbarContent justify="start">
+                    <NavbarMenuToggle
+                        aria-label={isMenuOpen ? 'Закрыть меню' : 'Открыть меню'}
+                        className="sm:hidden"
                     />
-                    <Link
-                        href="/"
-                        className="font-bold text-inherit text-lg tracking-wide"
-                    >
-                        Пушистик дня 🐾
-                    </Link>
-                </NavbarBrand>
+                    <NavbarBrand className="flex items-center gap-3">
+                        <Avatar
+                            name="Ричик"
+                            src="/rich.jpg"
+                            size="md"
+                            className="shadow-md hover:scale-105 transition-transform"
+                        />
+                        <Link
+                            href="/"
+                            className="font-bold text-inherit text-lg tracking-wide"
+                        >
+                            Пушистик дня 🐾
+                        </Link>
+                    </NavbarBrand>
+                </NavbarContent>
 
                 <NavbarContent className="hidden sm:flex gap-6" justify="center">
                     {links.map(({ href, label }) => {
@@ -215,23 +233,82 @@ const Header = () => {
                                     color="danger"
                                     variant="bordered"
                                     onPress={handleLogout}
+                                    size="sm"
+                                    className="hidden sm:flex"
                                 >
                                     Выйти
                                 </Button>
                             </NavbarItem>
                         </>
                     ) : (
-                        <NavbarItem className="hidden lg:flex">
-                            <button
-                                type="button"
-                                onClick={() => setIsLoginOpen(true)}
-                                className="text-foreground/70 hover:text-primary transition-colors"
+                        <NavbarItem>
+                            <Button
+                                color="primary"
+                                variant="ghost"
+                                size="sm"
+                                onPress={() => setIsLoginOpen(true)}
+                                className="hidden sm:flex"
                             >
                                 Войти
-                            </button>
+                            </Button>
                         </NavbarItem>
                     )}
                 </NavbarContent>
+
+                <NavbarMenu className="pt-6 gap-2">
+                    {links.map(({ href, label }) => {
+                        const isActiveLink = pathname === href || (href !== '/' && pathname.startsWith(href));
+                        return (
+                            <NavbarMenuItem key={href}>
+                                <Link
+                                    href={href}
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className={`w-full text-lg py-2 px-4 rounded-lg transition-all duration-300 ${
+                                        isActiveLink
+                                            ? 'text-primary font-semibold bg-primary/10'
+                                            : 'text-foreground hover:text-primary hover:bg-default-100'
+                                    }`}
+                                >
+                                    {label}
+                                </Link>
+                            </NavbarMenuItem>
+                        );
+                    })}
+
+                    {isLoggedIn ? (
+                        <>
+                            <NavbarMenuItem>
+                                <div className="px-4 py-2 text-foreground/70 text-sm">
+                                    Привет,
+                                    {' '}
+                                    {userLogin}
+                                    !
+                                </div>
+                            </NavbarMenuItem>
+                            <NavbarMenuItem>
+                                <Button
+                                    color="danger"
+                                    variant="bordered"
+                                    onPress={handleLogout}
+                                    className="w-full"
+                                >
+                                    Выйти
+                                </Button>
+                            </NavbarMenuItem>
+                        </>
+                    ) : (
+                        <NavbarMenuItem>
+                            <Button
+                                color="primary"
+                                variant="ghost"
+                                onPress={handleMobileLogin}
+                                className="w-full"
+                            >
+                                Войти 🐾
+                            </Button>
+                        </NavbarMenuItem>
+                    )}
+                </NavbarMenu>
             </Navbar>
 
             <Modal

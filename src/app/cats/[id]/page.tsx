@@ -33,7 +33,8 @@ const mapToTyCat = (cat: InternalApiCatCatResponse): TyCat => {
         weight: cat.weight ?? 0,
         breed: cat.breed ?? '',
         habits: cat.habits ? cat.habits.split(',').map((h: string) => h.trim()) : [],
-        description: '',
+        // @ts-expect-error
+        description: cat.description,
         logo_path: cat.titlePhoto?.url ?? '',
         gallery: cat.galleryPhotos?.map((p) => p?.url ?? '').filter(Boolean) ?? [],
     };

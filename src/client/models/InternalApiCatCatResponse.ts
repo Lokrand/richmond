@@ -87,6 +87,7 @@ export interface InternalApiCatCatResponse {
      * @memberof InternalApiCatCatResponse
      */
     weight?: number;
+    description?: string;
 }
 
 /**
@@ -116,6 +117,7 @@ export function InternalApiCatCatResponseFromJSONTyped(json: any, ignoreDiscrimi
         'titlePhoto': json['titlePhoto'] == null ? undefined : InternalApiCatFileMetadataFromJSON(json['titlePhoto']),
         'userId': json['userId'] == null ? undefined : json['userId'],
         'weight': json['weight'] == null ? undefined : json['weight'],
+        'description': json['description'] == null ? undefined : json['description'],
     };
 }
 

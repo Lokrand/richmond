@@ -184,7 +184,7 @@ const CatPage = ({ params }: CatPageProps) => {
                                 <span>{cat.breed}</span>
                             </span>
                         </div>
-                        <p className="text-foreground/70 mt-4 mb-4">{cat.description ?? `${cat.name} пока не добавил описание, может быть ему дать вкусняшку, чтобы он рассказал о себе?`}</p>
+                        <p className="text-foreground/70 mt-4 mb-4">{cat.description || `Пушистик ${cat.name} пока не добавил описание, может быть ему дать вкусняшку, чтобы он рассказал о себе?`}</p>
                         <div className="space-y-3">
                             <p className="font-semibold text-foreground flex items-center justify-start gap-2">
                                 <span>🌟</span>

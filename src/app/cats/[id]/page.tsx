@@ -183,8 +183,7 @@ const CatPage = ({ params }: CatPageProps) => {
                                 <span>{cat.breed}</span>
                             </span>
                         </div>
-                        <p className="text-foreground/70 mt-4 mb-4">{cat.description}</p>
-                        <p className="text-foreground/70 mt-4 mb-4">Ричик такой котик короче вообще какой-то турбо пушка пушистый еще он хвостом своим умеет делать так вжух-вжух и все полетели за ноги всех хватать в квартире, чтобы они испугались и прятались от великого короля Ричарда! Ахахахаха</p>
+                        <p className="text-foreground/70 mt-4 mb-4">{cat.description ?? `${cat.name} пока не добавил описание, может быть ему дать вкусняшку, чтобы он рассказал о себе?`}</p>
                         <div className="space-y-3">
                             <p className="font-semibold text-foreground flex items-center justify-start gap-2">
                                 <span>🌟</span>

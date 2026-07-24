@@ -8,6 +8,7 @@ Name | Type
 ------------ | -------------
 `birthDate` | string
 `breed` | string
+`description` | string
 `habits` | string
 `name` | string
 `weight` | number
@@ -21,6 +22,7 @@ import type { InternalApiCatUpdateCatRequest } from ''
 const example = {
   "birthDate": null,
   "breed": null,
+  "description": null,
   "habits": null,
   "name": null,
   "weight": null,

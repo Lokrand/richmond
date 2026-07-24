@@ -53,6 +53,12 @@ export interface InternalApiCatCatResponse {
     createdAt?: string;
     /**
      * 
+     * @type {string}
+     * @memberof InternalApiCatCatResponse
+     */
+    description?: string;
+    /**
+     * 
      * @type {Array<InternalApiCatFileMetadata>}
      * @memberof InternalApiCatCatResponse
      */
@@ -87,7 +93,6 @@ export interface InternalApiCatCatResponse {
      * @memberof InternalApiCatCatResponse
      */
     weight?: number;
-    description?: string;
 }
 
 /**
@@ -111,13 +116,13 @@ export function InternalApiCatCatResponseFromJSONTyped(json: any, ignoreDiscrimi
         'breed': json['breed'] == null ? undefined : json['breed'],
         'catId': json['catId'] == null ? undefined : json['catId'],
         'createdAt': json['createdAt'] == null ? undefined : json['createdAt'],
+        'description': json['description'] == null ? undefined : json['description'],
         'galleryPhotos': json['galleryPhotos'] == null ? undefined : ((json['galleryPhotos'] as Array<any>).map(InternalApiCatFileMetadataFromJSON)),
         'habits': json['habits'] == null ? undefined : json['habits'],
         'name': json['name'] == null ? undefined : json['name'],
         'titlePhoto': json['titlePhoto'] == null ? undefined : InternalApiCatFileMetadataFromJSON(json['titlePhoto']),
         'userId': json['userId'] == null ? undefined : json['userId'],
         'weight': json['weight'] == null ? undefined : json['weight'],
-        'description': json['description'] == null ? undefined : json['description'],
     };
 }
 
@@ -136,6 +141,7 @@ export function InternalApiCatCatResponseToJSONTyped(value?: InternalApiCatCatRe
         'breed': value['breed'],
         'catId': value['catId'],
         'createdAt': value['createdAt'],
+        'description': value['description'],
         'galleryPhotos': value['galleryPhotos'] == null ? undefined : ((value['galleryPhotos'] as Array<any>).map(InternalApiCatFileMetadataToJSON)),
         'habits': value['habits'],
         'name': value['name'],

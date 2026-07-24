@@ -36,6 +36,12 @@ export interface InternalApiCatUpdateCatRequest {
      * @type {string}
      * @memberof InternalApiCatUpdateCatRequest
      */
+    description?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InternalApiCatUpdateCatRequest
+     */
     habits?: string;
     /**
      * 
@@ -70,6 +76,7 @@ export function InternalApiCatUpdateCatRequestFromJSONTyped(json: any, ignoreDis
         
         'birthDate': json['birthDate'] == null ? undefined : json['birthDate'],
         'breed': json['breed'] == null ? undefined : json['breed'],
+        'description': json['description'] == null ? undefined : json['description'],
         'habits': json['habits'] == null ? undefined : json['habits'],
         'name': json['name'] == null ? undefined : json['name'],
         'weight': json['weight'] == null ? undefined : json['weight'],
@@ -89,6 +96,7 @@ export function InternalApiCatUpdateCatRequestToJSONTyped(value?: InternalApiCat
         
         'birthDate': value['birthDate'],
         'breed': value['breed'],
+        'description': value['description'],
         'habits': value['habits'],
         'name': value['name'],
         'weight': value['weight'],

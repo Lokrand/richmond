@@ -10,6 +10,7 @@ Name | Type
 `breed` | string
 `catId` | number
 `createdAt` | string
+`description` | string
 `galleryPhotos` | [Array&lt;InternalApiCatFileMetadata&gt;](InternalApiCatFileMetadata.md)
 `habits` | string
 `name` | string
@@ -28,6 +29,7 @@ const example = {
   "breed": null,
   "catId": null,
   "createdAt": null,
+  "description": null,
   "galleryPhotos": null,
   "habits": null,
   "name": null,

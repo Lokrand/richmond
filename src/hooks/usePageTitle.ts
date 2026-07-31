@@ -4,12 +4,12 @@ import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
 const ROUTE_TITLES: Record<string, string> = {
-    '/': 'Пушистик дня 🐱',
-    '/new-cat': 'Добавить пушистика 🐱',
-    '/cats': 'Наши Пушистики 🐱',
+    '/': 'Пушистик дня',
+    '/new-cat': 'Добавить пушистика',
+    '/cats': 'Наши Пушистики',
 };
 
-const DEFAULT_TITLE = 'Дашборды';
+const DEFAULT_TITLE = 'Пушистик дня';
 
 export const usePageTitle = () => {
     const pathname = usePathname();
@@ -25,7 +25,7 @@ export const usePageTitle = () => {
             pageTitle = matchingRoutes[0][1];
         }
 
-        document.title = pageTitle;
+        document.title = `${pageTitle} 🐱`;
     }, [pathname]);
 };
 

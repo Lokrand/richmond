@@ -15,9 +15,10 @@ import { notFound } from 'next/navigation';
 import { Camera, Trash2, Pencil } from 'lucide-react';
 import EditCatModal from '@/components/EditCatModal';
 import ViewPhotoModal from '@/components/ViewPhotoModal';
+import makeFirstCharUppercase from '@/utils/makeFirstCharUppercase';
+import getCatYearNote from '../../../utils/getCatAgeNote';
 import { auth } from '../../../lib/auth';
 import { catApi, getS3Path } from '../../../config';
-import getCatYearNote from '../../../utils/getCatAgeNote';
 import { InternalApiCatCatResponse } from '../../../client/models';
 import { TyCat } from '../../../types';
 
@@ -214,7 +215,7 @@ const CatPage = ({ params }: CatPageProps) => {
                                         color="primary"
                                         className="px-3 py-1"
                                     >
-                                        {habit}
+                                        {makeFirstCharUppercase(habit)}
                                     </Chip>
                                 ))}
                             </div>

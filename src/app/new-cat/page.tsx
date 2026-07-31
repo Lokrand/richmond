@@ -32,6 +32,7 @@ const NewCat = () => {
     const [galleryPhotos, setGalleryPhotos] = useState<Array<{ file: File; preview: string }>>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
     const titlePhotoInputRef = useRef<HTMLInputElement>(null);
     const galleryPhotosInputRef = useRef<HTMLInputElement>(null);
 
@@ -42,6 +43,7 @@ const NewCat = () => {
             [name]: value,
         }));
         setError('');
+        setFieldErrors((prev) => ({ ...prev, [name]: '' }));
     };
 
     const handleTitlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,6 +60,7 @@ const NewCat = () => {
             preview: URL.createObjectURL(file),
         });
         setError('');
+        setFieldErrors((prev) => ({ ...prev, titlePhoto: '' }));
 
         if (titlePhotoInputRef.current) {
             titlePhotoInputRef.current.value = '';
@@ -114,24 +117,48 @@ const NewCat = () => {
         setTitlePhoto(null);
         setGalleryPhotos([]);
         setError('');
+        setFieldErrors({});
+    };
+
+    const validateForm = () => {
+        const errors: Record<string, string> = {};
+
+        if (!formData.name.trim()) {
+            errors.name = 'Введите имя пушистика';
+        }
+        if (!formData.age || parseInt(formData.age, 10) <= 0) {
+            errors.age = 'Укажите возраст';
+        }
+        if (!formData.weight || parseFloat(formData.weight) <= 0) {
+            errors.weight = 'Укажите вес';
+        }
+        if (!formData.breed.trim()) {
+            errors.breed = 'Укажите породу';
+        }
+        if (!formData.habits.trim()) {
+            errors.habits = 'Укажите привычки';
+        }
+        if (!formData.description.trim()) {
+            errors.description = 'Добавьте описание';
+        }
+        if (!titlePhoto) {
+            errors.titlePhoto = 'Добавьте главное фото';
+        }
+
+        setFieldErrors(errors);
+        return Object.keys(errors).length === 0;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!validateForm()) {
+            setIsLoading(false);
+            return;
+        }
+
         setIsLoading(true);
         setError('');
-
-        if (!formData.name.trim()) {
-            setError('Введите имя пушистика');
-            setIsLoading(false);
-            return;
-        }
-
-        if (!titlePhoto) {
-            setError('Добавьте главное фото');
-            setIsLoading(false);
-            return;
-        }
 
         try {
             const authHeader = auth.getAuthorizationHeader();
@@ -140,12 +167,13 @@ const NewCat = () => {
                 setIsLoading(false);
                 return;
             }
-            // eslint-disable-next-line no-inner-declarations
+
             function parseBirthDate(age: string): string {
                 const d = new Date();
                 d.setFullYear(d.getFullYear() - parseInt(age, 10));
                 return d.toISOString().split('T')[0];
             }
+
             const data: InternalApiCatCreateCatRequest = {
                 name: formData.name.trim(),
                 birthDate: parseBirthDate(formData.age),
@@ -156,7 +184,7 @@ const NewCat = () => {
                 description: formData.description,
             };
 
-            const files: Blob[] = [titlePhoto.file];
+            const files: Blob[] = [titlePhoto!.file];
             galleryPhotos.forEach((photo) => {
                 files.push(photo.file);
             });
@@ -166,6 +194,7 @@ const NewCat = () => {
                 data: JSON.stringify(data),
                 file: files,
             });
+
             if (result.catId) {
                 console.info('New cat created', result);
                 clearForm();
@@ -203,66 +232,82 @@ const NewCat = () => {
                 </CardHeader>
 
                 <CardBody>
-                    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+                    <form id="new-cat-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Input
-                                label="Имя пушистика"
+                                label="Имя пушистика *"
                                 name="name"
                                 value={formData.name}
                                 onChange={handleInputChange}
                                 required
                                 variant="bordered"
-                                isInvalid={!!error && !formData.name.trim()}
+                                isInvalid={!!fieldErrors.name}
+                                errorMessage={fieldErrors.name}
                             />
                             <Input
-                                label="Возраст (лет)"
+                                label="Возраст (лет) *"
                                 name="age"
                                 type="number"
                                 value={formData.age}
                                 onChange={handleInputChange}
+                                required
                                 min="0"
                                 max="30"
                                 variant="bordered"
+                                isInvalid={!!fieldErrors.age}
+                                errorMessage={fieldErrors.age}
                             />
                             <Input
-                                label="Вес (кг)"
+                                label="Вес (кг) *"
                                 name="weight"
                                 type="number"
                                 step="0.1"
                                 value={formData.weight}
                                 onChange={handleInputChange}
+                                required
                                 min="0"
                                 max="20"
                                 variant="bordered"
+                                isInvalid={!!fieldErrors.weight}
+                                errorMessage={fieldErrors.weight}
                             />
                             <Input
-                                label="Порода"
+                                label="Порода *"
                                 name="breed"
                                 value={formData.breed}
                                 onChange={handleInputChange}
+                                required
                                 placeholder="Например: Британская, Сиамская..."
                                 variant="bordered"
+                                isInvalid={!!fieldErrors.breed}
+                                errorMessage={fieldErrors.breed}
                             />
                         </div>
 
                         <Textarea
-                            label="Описание"
+                            label="Описание *"
                             name="description"
                             value={formData.description}
                             onChange={handleInputChange}
+                            required
                             placeholder="Расскажите о характере и особенностях вашего пушистика..."
                             variant="bordered"
                             minRows={3}
+                            isInvalid={!!fieldErrors.description}
+                            errorMessage={fieldErrors.description}
                         />
 
                         <Textarea
-                            label="Привычки"
+                            label="Привычки *"
                             name="habits"
                             value={formData.habits}
                             onChange={handleInputChange}
+                            required
                             placeholder="Перечислите привычки через запятую (например: Мурлыкать, Играть, Спать...)"
                             variant="bordered"
                             minRows={2}
+                            isInvalid={!!fieldErrors.habits}
+                            errorMessage={fieldErrors.habits}
                         />
 
                         <div className="space-y-4">
@@ -287,6 +332,9 @@ const NewCat = () => {
                                     className="hidden"
                                 />
                             </div>
+                            {fieldErrors.titlePhoto && (
+                                <p className="text-danger text-sm">{fieldErrors.titlePhoto}</p>
+                            )}
 
                             {titlePhoto && (
                                 <div className="relative group">
@@ -384,31 +432,36 @@ const NewCat = () => {
                                 {error}
                             </div>
                         )}
-
-                        <CardFooter className="flex justify-center gap-4 px-0 pb-0 pt-4">
-                            <Button
-                                color="primary"
-                                variant="shadow"
-                                size="lg"
-                                type="submit"
-                                className="min-w-32"
-                                startContent={!isLoading && <Image src="/lapka.svg" width={16} height={16} alt="Лапка" />}
-                                isLoading={isLoading}
-                            >
-                                {isLoading ? 'Сохранение...' : 'Сохранить'}
-                            </Button>
-                            <Button
-                                color="default"
-                                variant="flat"
-                                size="lg"
-                                onClick={clearForm}
-                                type="button"
-                            >
-                                Очистить
-                            </Button>
-                        </CardFooter>
                     </form>
                 </CardBody>
+
+                <CardFooter className="flex justify-center gap-4 px-6 pb-6">
+                    <Button
+                        color="primary"
+                        variant="shadow"
+                        size="lg"
+                        type="submit"
+                        form="new-cat-form"
+                        className="min-w-32"
+                        startContent={!isLoading && <Image src="/lapka.svg" width={16} height={16} alt="Лапка" />}
+                        isLoading={isLoading}
+                        onPress={() => {
+                            const form = document.getElementById('new-cat-form') as HTMLFormElement;
+                            form?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                        }}
+                    >
+                        {isLoading ? 'Сохранение...' : 'Сохранить'}
+                    </Button>
+                    <Button
+                        color="default"
+                        variant="flat"
+                        size="lg"
+                        onClick={clearForm}
+                        type="button"
+                    >
+                        Очистить
+                    </Button>
+                </CardFooter>
             </Card>
         </div>
     );

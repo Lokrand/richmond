@@ -24,7 +24,7 @@ const HomePage = () => (
                     src={catOfTheDay.image}
                     alt={catOfTheDay.name}
                     height={400}
-                    className="shadow-lg rounded-lg w-full h-[400px] object-cover"
+                    className="w-full h-100 object-contain"
                 />
 
                 <h1 className="text-3xl font-bold text-primary">{catOfTheDay.name}</h1>

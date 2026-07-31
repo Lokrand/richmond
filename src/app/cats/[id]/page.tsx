@@ -13,6 +13,7 @@ import {
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Camera, Trash2, Pencil } from 'lucide-react';
+import EditCatModal from '@/components/EditCatModal';
 import ViewPhotoModal from '@/components/ViewPhotoModal';
 import { auth } from '../../../lib/auth';
 import { catApi, getS3Path } from '../../../config';
@@ -49,6 +50,7 @@ const CatPage = ({ params }: CatPageProps) => {
     const { id } = use(params);
     const [cat, setCat] = useState<TyCat | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     const {
         isOpen, onOpen, onOpenChange, onClose,
@@ -109,6 +111,18 @@ const CatPage = ({ params }: CatPageProps) => {
         });
     };
 
+    const handleCatUpdate = () => {
+        const fetchCat = async () => {
+            try {
+                const response = await catApi.apiV1CatIdGet({ id: parseInt(id, 10) });
+                setCat(mapToTyCat(response));
+            } catch {
+                notFound();
+            }
+        };
+        fetchCat();
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-pink-50 to-blue-50 dark:from-default-100 dark:to-default-200 py-4 px-1">
             <div className="max-w-6xl mx-auto">
@@ -148,6 +162,7 @@ const CatPage = ({ params }: CatPageProps) => {
                                     color="primary"
                                     variant="shadow"
                                     className="p-2 min-w-10"
+                                    onClick={() => setIsEditModalOpen(true)}
                                 >
                                     <Pencil size={20} />
                                 </Button>
@@ -270,6 +285,12 @@ const CatPage = ({ params }: CatPageProps) => {
                     onOpenChange={onOpenChange}
                     selectedImageIndex={selectedImageIndex}
                     setSelectedImageIndex={setSelectedImageIndex}
+                />
+                <EditCatModal
+                    cat={cat}
+                    isOpen={isEditModalOpen}
+                    onClose={() => setIsEditModalOpen(false)}
+                    onUpdate={handleCatUpdate}
                 />
             </div>
         </div>

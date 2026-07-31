@@ -66,6 +66,9 @@ export default [{
 
     settings: {
         "import/resolver": {
+            typescript: {
+                alwaysTryTypes: true,
+            },
             node: {
                 extensions: [".js", ".jsx", ".ts", ".tsx", ".migr.ts", ".migr.tsx"],
             },

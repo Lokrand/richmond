@@ -132,7 +132,7 @@ const NewCat = () => {
         }
 
         try {
-            const authHeader = auth.getAuthorizationHeader();
+            const authHeader = await auth.getAuthorizationHeader();
             if (!authHeader) {
                 setError('Требуется авторизация');
                 setIsLoading(false);

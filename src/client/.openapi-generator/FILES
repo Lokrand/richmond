@@ -19,6 +19,7 @@ docs/InternalApiPostPostResponse.md
 docs/InternalApiPostUpdatePostRequest.md
 docs/InternalApiUserCreateRequest.md
 docs/InternalApiUserLoginRequest.md
+docs/InternalApiUserRefreshRequest.md
 docs/InternalApiUserTokenResponse.md
 docs/InternalApiUserUserResponse.md
 docs/PostApi.md
@@ -38,6 +39,7 @@ models/InternalApiPostPostResponse.ts
 models/InternalApiPostUpdatePostRequest.ts
 models/InternalApiUserCreateRequest.ts
 models/InternalApiUserLoginRequest.ts
+models/InternalApiUserRefreshRequest.ts
 models/InternalApiUserTokenResponse.ts
 models/InternalApiUserUserResponse.ts
 models/RichmondApiInternalApiErrorsErrorResponse.ts

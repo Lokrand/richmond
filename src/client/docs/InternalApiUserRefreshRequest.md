@@ -1,26 +1,22 @@
 
-# InternalApiUserTokenResponse
+# InternalApiUserRefreshRequest
 
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`expiresAt` | string
 `refreshToken` | string
-`token` | string
 
 ## Example
 
 ```typescript
-import type { InternalApiUserTokenResponse } from ''
+import type { InternalApiUserRefreshRequest } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "expiresAt": null,
   "refreshToken": null,
-  "token": null,
-} satisfies InternalApiUserTokenResponse
+} satisfies InternalApiUserRefreshRequest
 
 console.log(example)
 
@@ -29,7 +25,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as InternalApiUserTokenResponse
+const exampleParsed = JSON.parse(exampleJSON) as InternalApiUserRefreshRequest
 console.log(exampleParsed)
 ```
 

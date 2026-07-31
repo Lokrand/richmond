@@ -48,8 +48,10 @@ const Header = () => {
         setLogin('');
         setPassword('');
         setShowPasswordReset(false);
-        setIsLoggedIn(auth.isAuthenticated());
-        setUserLogin(auth.getUser() || '');
+        void auth.getAuthorizationHeader().then((header) => {
+            setIsLoggedIn(!!header);
+            setUserLogin(header ? auth.getUser() || '' : '');
+        });
     }, [isLoginOpen]);
 
     const handleLogout = () => {

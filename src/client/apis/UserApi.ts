@@ -17,6 +17,7 @@ import * as runtime from '../runtime';
 import type {
   InternalApiUserCreateRequest,
   InternalApiUserLoginRequest,
+  InternalApiUserRefreshRequest,
   InternalApiUserTokenResponse,
   InternalApiUserUserResponse,
   RichmondApiInternalApiErrorsErrorResponse,
@@ -26,6 +27,8 @@ import {
     InternalApiUserCreateRequestToJSON,
     InternalApiUserLoginRequestFromJSON,
     InternalApiUserLoginRequestToJSON,
+    InternalApiUserRefreshRequestFromJSON,
+    InternalApiUserRefreshRequestToJSON,
     InternalApiUserTokenResponseFromJSON,
     InternalApiUserTokenResponseToJSON,
     InternalApiUserUserResponseFromJSON,
@@ -44,6 +47,10 @@ export interface ApiV1UserLoginPostRequest {
 
 export interface ApiV1UserNewPostRequest {
     request: InternalApiUserCreateRequest;
+}
+
+export interface ApiV1UserRefreshPostRequest {
+    request: InternalApiUserRefreshRequest;
 }
 
 /**
@@ -131,7 +138,7 @@ export class UserApi extends runtime.BaseAPI {
     }
 
     /**
-     * Login with credentials, returns auth token
+     * Login with credentials, returns access and refresh tokens
      * Login
      */
     async apiV1UserLoginPostRaw(requestParameters: ApiV1UserLoginPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<InternalApiUserTokenResponse>> {
@@ -142,7 +149,7 @@ export class UserApi extends runtime.BaseAPI {
     }
 
     /**
-     * Login with credentials, returns auth token
+     * Login with credentials, returns access and refresh tokens
      * Login
      */
     async apiV1UserLoginPost(requestParameters: ApiV1UserLoginPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<InternalApiUserTokenResponse> {
@@ -196,6 +203,55 @@ export class UserApi extends runtime.BaseAPI {
      */
     async apiV1UserNewPost(requestParameters: ApiV1UserNewPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<InternalApiUserUserResponse> {
         const response = await this.apiV1UserNewPostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Creates request options for apiV1UserRefreshPost without sending the request
+     */
+    async apiV1UserRefreshPostRequestOpts(requestParameters: ApiV1UserRefreshPostRequest): Promise<runtime.RequestOpts> {
+        if (requestParameters['request'] == null) {
+            throw new runtime.RequiredError(
+                'request',
+                'Required parameter "request" was null or undefined when calling apiV1UserRefreshPost().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/v1/user/refresh`;
+
+        return {
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: InternalApiUserRefreshRequestToJSON(requestParameters['request']),
+        };
+    }
+
+    /**
+     * Exchanges a refresh token for new access and refresh tokens
+     * Refresh access token
+     */
+    async apiV1UserRefreshPostRaw(requestParameters: ApiV1UserRefreshPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<InternalApiUserTokenResponse>> {
+        const requestOptions = await this.apiV1UserRefreshPostRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => InternalApiUserTokenResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Exchanges a refresh token for new access and refresh tokens
+     * Refresh access token
+     */
+    async apiV1UserRefreshPost(requestParameters: ApiV1UserRefreshPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<InternalApiUserTokenResponse> {
+        const response = await this.apiV1UserRefreshPostRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

@@ -12,6 +12,7 @@ export * from './InternalApiPostPostResponse';
 export * from './InternalApiPostUpdatePostRequest';
 export * from './InternalApiUserCreateRequest';
 export * from './InternalApiUserLoginRequest';
+export * from './InternalApiUserRefreshRequest';
 export * from './InternalApiUserTokenResponse';
 export * from './InternalApiUserUserResponse';
 export * from './RichmondApiInternalApiErrorsErrorResponse';

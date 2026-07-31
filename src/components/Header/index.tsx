@@ -42,8 +42,10 @@ const Header = () => {
     usePageTitle();
 
     useEffect(() => {
-        setIsLoggedIn(auth.isAuthenticated());
-        setUserLogin(auth.getUser() || '');
+        void auth.getAuthorizationHeader().then((header) => {
+            setIsLoggedIn(!!header);
+            setUserLogin(header ? auth.getUser() || '' : '');
+        });
     }, []);
 
     const handleLogout = () => {

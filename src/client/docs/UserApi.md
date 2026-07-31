@@ -7,6 +7,7 @@ All URIs are relative to *http://localhost*
 | [**apiV1UserGet**](UserApi.md#apiv1userget) | **GET** /api/v1/user | Get current user |
 | [**apiV1UserLoginPost**](UserApi.md#apiv1userloginpost) | **POST** /api/v1/user/login | Login |
 | [**apiV1UserNewPost**](UserApi.md#apiv1usernewpost) | **POST** /api/v1/user/new | Create a new user |
+| [**apiV1UserRefreshPost**](UserApi.md#apiv1userrefreshpost) | **POST** /api/v1/user/refresh | Refresh access token |
 
 
 
@@ -84,7 +85,7 @@ No authorization required
 
 Login
 
-Login with credentials, returns auth token
+Login with credentials, returns access and refresh tokens
 
 ### Example
 
@@ -210,6 +211,74 @@ No authorization required
 |-------------|-------------|------------------|
 | **201** | Created |  -  |
 | **409** | Conflict |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## apiV1UserRefreshPost
+
+> InternalApiUserTokenResponse apiV1UserRefreshPost(request)
+
+Refresh access token
+
+Exchanges a refresh token for new access and refresh tokens
+
+### Example
+
+```ts
+import {
+  Configuration,
+  UserApi,
+} from '';
+import type { ApiV1UserRefreshPostRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new UserApi();
+
+  const body = {
+    // InternalApiUserRefreshRequest | Refresh token
+    request: ...,
+  } satisfies ApiV1UserRefreshPostRequest;
+
+  try {
+    const data = await api.apiV1UserRefreshPost(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **request** | [InternalApiUserRefreshRequest](InternalApiUserRefreshRequest.md) | Refresh token | |
+
+### Return type
+
+[**InternalApiUserTokenResponse**](InternalApiUserTokenResponse.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | OK |  -  |
+| **401** | Unauthorized |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 

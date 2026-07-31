@@ -7,7 +7,7 @@ const USER_QUERY_KEY = ['user'] as const;
 export const useUser = () => useQuery({
     queryKey: USER_QUERY_KEY,
     queryFn: async () => {
-        const authHeader = auth.getAuthorizationHeader();
+        const authHeader = await auth.getAuthorizationHeader();
         if (!authHeader) {
             return null;
         }

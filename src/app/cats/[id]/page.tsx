@@ -100,7 +100,7 @@ const CatPage = ({ params }: CatPageProps) => {
     const hasLogo = cat.logo_path !== '';
 
     const removeCat = async () => {
-        const authHeader = auth.getAuthorizationHeader();
+        const authHeader = await auth.getAuthorizationHeader();
         if (!authHeader) {
             // setError('Требуется авторизация');
             // setIsLoading(false);

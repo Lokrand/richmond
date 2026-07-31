@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { HeroUIProvider } from '@heroui/react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
     const [queryClient] = useState(
@@ -19,9 +19,9 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <QueryClientProvider client={queryClient}>
-            <HeroUIProvider>
+            <TooltipProvider>
                 {children}
-            </HeroUIProvider>
+            </TooltipProvider>
 
             <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>

@@ -9,15 +9,13 @@ import {
     Chip,
     Progress,
     RadioGroup,
-    Radio,
+    RadioGroupItem,
     Badge,
-    Tooltip,
-    Modal,
-    ModalContent,
-    ModalBody,
-    ModalFooter,
-    CardBody,
-} from '@heroui/react';
+    Tip,
+    Dialog,
+    DialogContent,
+    CardContent,
+} from '@/components/ui';
 import {
     Brain,
     Trophy,
@@ -240,8 +238,7 @@ const QuizPage = () => {
         if (isAnswered) return;
 
         const answerIndex = parseInt(value, 10);
-        // setSelectedAnswer(answerIndex);
-        setSelectedAnswer(null);
+        setSelectedAnswer(answerIndex);
         setIsAnswered(true);
 
         const currentQ = quizQuestions[currentQuestion];
@@ -267,14 +264,6 @@ const QuizPage = () => {
             setWrongAnswers((prev) => [...prev, currentQ.id]);
             setStreak(0);
         }
-
-        // setTimeout(() => {
-        //     if (currentQuestion < quizQuestions.length - 1) {
-        //         nextQuestion();
-        //     } else {
-        //         completeQuiz();
-        //     }
-        // }, 10000);
     };
 
     const nextQuestion = () => {
@@ -404,7 +393,7 @@ const QuizPage = () => {
 
                 {!quizCompleted ? (
                     <Card className="mb-6 shadow-xl rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-white/50">
-                        <CardBody className="p-6">
+                        <CardContent className="p-6">
                             <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
                                 <div className="flex items-center gap-4">
                                     <Chip color="primary" variant="flat" startContent={<Brain size={16} />}>
@@ -429,7 +418,7 @@ const QuizPage = () => {
                                 </div>
 
                                 <div className="flex items-center gap-3">
-                                    <Tooltip content={isMuted ? 'Включить звук' : 'Выключить звук'}>
+                                    <Tip content={isMuted ? 'Включить звук' : 'Выключить звук'}>
                                         <Button
                                             isIconOnly
                                             variant="light"
@@ -438,7 +427,7 @@ const QuizPage = () => {
                                         >
                                             {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
                                         </Button>
-                                    </Tooltip>
+                                    </Tip>
                                     <Chip
                                         color={difficultyColors[currentQ.difficulty]}
                                         variant="flat"
@@ -473,13 +462,13 @@ const QuizPage = () => {
                                     {currentQ.category}
                                 </Badge>
                             </div>
-                        </CardBody>
+                        </CardContent>
                     </Card>
                 ) : null}
 
                 {!quizCompleted ? (
                     <Card className="shadow-2xl rounded-3xl bg-gradient-to-br from-white to-blue-50/50 dark:from-default-100 dark:to-default-200 backdrop-blur-md border-2 border-white/50">
-                        <CardBody className="p-8">
+                        <CardContent className="p-8">
                             <div className="mb-8">
                                 <div className="flex items-start gap-3 mb-4">
                                     <div className="p-2 rounded-full bg-gradient-to-r from-cyan-100 to-purple-100 dark:from-cyan-900/30 dark:to-purple-900/30">
@@ -488,12 +477,12 @@ const QuizPage = () => {
                                     <h2 className="text-2xl font-bold text-foreground flex-grow">
                                         {currentQ.question}
                                     </h2>
-                                    <Tooltip content="Подсказка (стоит 5 очков)">
+                                    <Tip content="Подсказка (стоит 5 очков)">
                                         <Button
                                             isIconOnly
                                             variant="light"
                                             size="sm"
-                                            disabled={isAnswered || showHint || score < 5}
+                                            isDisabled={isAnswered || showHint || score < 5}
                                             onClick={() => {
                                                 setShowHint(true);
                                                 setScore((prev) => prev - 5);
@@ -501,7 +490,7 @@ const QuizPage = () => {
                                         >
                                             <Sparkles size={20} />
                                         </Button>
-                                    </Tooltip>
+                                    </Tip>
                                 </div>
 
                                 {showHint && (
@@ -518,7 +507,7 @@ const QuizPage = () => {
                             <RadioGroup
                                 value={selectedAnswer?.toString()}
                                 onValueChange={handleAnswerSelect}
-                                isDisabled={isAnswered}
+                                disabled={isAnswered}
                                 className="gap-4"
                             >
                                 {currentQ.options.map((option, index) => {
@@ -537,36 +526,35 @@ const QuizPage = () => {
                                     }
 
                                     return (
-                                        <div key={index} className={`p-0 rounded-xl transition-all ${bgColor}`}>
-                                            <Radio
+                                        <label
+                                            key={index}
+                                            htmlFor={`quiz-option-${index}`}
+                                            className={`flex items-center gap-3 rounded-xl p-4 transition-all cursor-pointer ${bgColor}`}
+                                        >
+                                            <RadioGroupItem
+                                                id={`quiz-option-${index}`}
                                                 value={index.toString()}
-                                                classNames={{
-                                                    base: 'inline-flex m-0 w-full max-w-full items-center gap-4 p-4 rounded-xl cursor-pointer',
-                                                    label: 'w-full',
-                                                }}
+                                                disabled={isAnswered}
+                                            />
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                                isAnswered && isCorrect ? 'bg-green-500 text-white'
+                                                    : isAnswered && isSelected && !isCorrect ? 'bg-red-500 text-white'
+                                                        : 'bg-white/50 dark:bg-default-200'
+                                            }`}
                                             >
-                                                <div className="flex items-center gap-3 w-full">
-                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                                        isAnswered && isCorrect ? 'bg-green-500 text-white'
-                                                            : isAnswered && isSelected && !isCorrect ? 'bg-red-500 text-white'
-                                                                : 'bg-white/50 dark:bg-default-200'
-                                                    }`}
-                                                    >
-                                                        {String.fromCharCode(65 + index)}
-                                                    </div>
-                                                    <span className="text-lg font-medium flex-grow">{option}</span>
-                                                    {isAnswered && (
-                                                        <div className="ml-2">
-                                                            {isCorrect ? (
-                                                                <CheckCircle2 className="text-green-500" size={24} />
-                                                            ) : isSelected && !isCorrect ? (
-                                                                <XCircle className="text-red-500" size={24} />
-                                                            ) : null}
-                                                        </div>
-                                                    )}
+                                                {String.fromCharCode(65 + index)}
+                                            </div>
+                                            <span className="text-lg font-medium flex-grow">{option}</span>
+                                            {isAnswered && (
+                                                <div className="ml-2">
+                                                    {isCorrect ? (
+                                                        <CheckCircle2 className="text-green-500" size={24} />
+                                                    ) : isSelected && !isCorrect ? (
+                                                        <XCircle className="text-red-500" size={24} />
+                                                    ) : null}
                                                 </div>
-                                            </Radio>
-                                        </div>
+                                            )}
+                                        </label>
                                     );
                                 })}
                             </RadioGroup>
@@ -623,11 +611,11 @@ const QuizPage = () => {
                                     </Button>
                                 </div>
                             )}
-                        </CardBody>
+                        </CardContent>
                     </Card>
                 ) : (
                     <Card className="shadow-2xl rounded-3xl bg-gradient-to-br from-gradient-to-r from-yellow-100 via-pink-100 to-purple-100 dark:from-yellow-900/20 dark:via-pink-900/20 dark:to-purple-900/20 backdrop-blur-md border-2 border-white/50">
-                        <CardBody className="p-8 text-center">
+                        <CardContent className="p-8 text-center">
                             <div className="mb-6">
                                 <div className="inline-block p-4 rounded-full bg-gradient-to-r from-yellow-400 to-pink-400 mb-4">
                                     <Trophy className="text-white" size={48} />
@@ -717,13 +705,13 @@ const QuizPage = () => {
                                     Посмотреть ответы
                                 </Button>
                             </div>
-                        </CardBody>
+                        </CardContent>
                     </Card>
                 )}
 
-                <Modal isOpen={showResults} onClose={() => setShowResults(false)} size="3xl">
-                    <ModalContent>
-                        <ModalBody className="py-6">
+                <Dialog open={showResults} onOpenChange={(o) => setShowResults(o)}>
+                    <DialogContent className="sm:max-w-3xl p-0 gap-0">
+                        <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
                             <h3 className="text-2xl font-bold mb-4 text-center">Все ответы</h3>
                             <div className="space-y-4">
                                 {quizQuestions.map((q, index) => {
@@ -738,7 +726,7 @@ const QuizPage = () => {
                                                     : isWrong ? 'border-red-200' : 'border-default-200'
                                             }`}
                                         >
-                                            <CardBody className="p-4">
+                                            <CardContent className="p-4">
                                                 <div className="flex justify-between items-start mb-2">
                                                     <div className="flex items-center gap-2">
                                                         <span className="font-bold">
@@ -766,22 +754,22 @@ const QuizPage = () => {
                                                     </p>
                                                     <p className="text-foreground/70 mt-1">{q.explanation}</p>
                                                 </div>
-                                            </CardBody>
+                                            </CardContent>
                                         </Card>
                                     );
                                 })}
                             </div>
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button color="primary" onPress={() => setShowResults(false)}>
+                        </div>
+                        <div className="flex justify-end px-6 pb-6">
+                            <Button color="primary" onClick={() => setShowResults(false)}>
                                 Закрыть
                             </Button>
-                        </ModalFooter>
-                    </ModalContent>
-                </Modal>
+                        </div>
+                    </DialogContent>
+                </Dialog>
 
                 <div className="fixed bottom-4 right-4 z-10">
-                    <Tooltip content="Сбросить викторину">
+                    <Tip content="Сбросить викторину" side="left">
                         <Button
                             isIconOnly
                             color="warning"
@@ -791,7 +779,7 @@ const QuizPage = () => {
                         >
                             <RefreshCw size={24} />
                         </Button>
-                    </Tooltip>
+                    </Tip>
                 </div>
 
                 <div className="fixed top-20 left-4 opacity-20 pointer-events-none z-0 animate-bounce">

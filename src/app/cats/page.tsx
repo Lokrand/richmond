@@ -1,9 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import {
-    Card, Image, Button, Chip,
-} from '@heroui/react';
+import { Card, Button, Chip } from '@/components/ui';
 import Link from 'next/link';
 import getCatYearNote from '../../utils/getCatAgeNote';
 import { catApi, getS3Path } from '../../config';
@@ -118,10 +116,10 @@ const Gallery = () => {
                         {cats.map((cat) => (
                             <Link key={cat.id} href={`/cats/${cat.id}`}>
                                 <Card className="flex flex-row w-full p-2 shadow-lg rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-default-200 dark:border-default-100 hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer">
-                                    <Image
+                                    <img
                                         // @ts-expect-error
                                         src={cat.logo || getS3Path(cat.logo_path) || '/default-cat.jpg'}
-                                        className="shadow-md rounded-xl object-cover w-48 h-48"
+                                        className="shadow-md rounded-xl object-cover w-48 h-48 shrink-0"
                                         width={200}
                                         height={200}
                                         alt={cat.name}

@@ -11,24 +11,25 @@ import {
     Card,
     Button,
     Badge,
-    Tooltip,
-    Modal,
-    ModalContent,
-    ModalBody,
-    ModalFooter,
-    Divider,
+    Tip,
+    Dialog,
+    DialogContent,
+    Separator,
     Popover,
     PopoverTrigger,
     PopoverContent,
     Input,
     Textarea,
     Switch,
-    ScrollShadow,
+    ScrollArea,
     Progress,
-    CardBody,
+    CardContent,
     Select,
+    SelectValue,
+    SelectTrigger,
+    SelectContent,
     SelectItem,
-} from '@heroui/react';
+} from '@/components/ui';
 import {
     Calendar as CalendarIcon,
     PartyPopper,
@@ -451,7 +452,7 @@ const CatHolidaysCalendarPage = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2">
                         <Card className="shadow-2xl rounded-3xl bg-gradient-to-br from-white to-orange-50/50 dark:from-default-100 dark:to-orange-900/10 backdrop-blur-md border-2 border-white/50">
-                            <CardBody className="p-8">
+                            <CardContent className="p-8">
                                 <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
                                     <div className="flex items-center gap-4">
                                         <Button
@@ -518,8 +519,8 @@ const CatHolidaysCalendarPage = () => {
                                         const isSelected = selectedDate === date;
 
                                         return (
-                                            <Popover key={date} placement="bottom" showArrow>
-                                                <PopoverTrigger>
+                                            <Popover key={date}>
+                                                <PopoverTrigger asChild>
                                                     <button
                                                         onClick={() => setSelectedDate(date)}
                                                         className={`aspect-square rounded-xl p-2 flex flex-col items-center justify-start transition-all relative
@@ -567,7 +568,7 @@ const CatHolidaysCalendarPage = () => {
                                                         )}
                                                     </button>
                                                 </PopoverTrigger>
-                                                <PopoverContent className="w-80">
+                                                <PopoverContent className="w-80 p-0">
                                                     <div className="px-1 py-2">
                                                         <div className="text-small font-bold mb-2">
                                                             {day}
@@ -669,18 +670,18 @@ const CatHolidaysCalendarPage = () => {
                                         </div>
                                     </div>
                                 </div>
-                            </CardBody>
+                            </CardContent>
                         </Card>
                     </div>
 
                     <div className="lg:col-span-1 space-y-6">
                         <Card className="shadow-xl rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 backdrop-blur-md border border-white/50">
-                            <CardBody className="p-6">
+                            <CardContent className="p-6">
                                 <h3 className="text-xl font-bold mb-4 flex items-center gap-3">
                                     <Clock className="text-green-500" />
                                     Ближайшие праздники
                                 </h3>
-                                <ScrollShadow className="h-64">
+                                <ScrollArea className="h-64">
                                     <div className="space-y-3">
                                         {upcomingHolidays.map((holiday) => {
                                             const [month, day] = holiday.date.split('-').map(Number);
@@ -724,12 +725,12 @@ const CatHolidaysCalendarPage = () => {
                                             );
                                         })}
                                     </div>
-                                </ScrollShadow>
-                            </CardBody>
+                                </ScrollArea>
+                            </CardContent>
                         </Card>
 
                         <Card className="shadow-xl rounded-2xl bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 backdrop-blur-md border border-white/50">
-                            <CardBody className="p-6">
+                            <CardContent className="p-6">
                                 <h3 className="text-xl font-bold mb-4 flex items-center gap-3">
                                     <Trophy className="text-blue-500" />
                                     Статистика праздников
@@ -769,7 +770,7 @@ const CatHolidaysCalendarPage = () => {
                                         />
                                     </div>
                                 </div>
-                                <Divider className="my-4" />
+                                <Separator className="my-4" />
                                 <div className="text-center">
                                     <div className="text-2xl font-bold text-primary mb-2">
                                         {userEvents.filter((e) => e.reminder).length}
@@ -778,11 +779,11 @@ const CatHolidaysCalendarPage = () => {
                                         событий с напоминаниями
                                     </div>
                                 </div>
-                            </CardBody>
+                            </CardContent>
                         </Card>
 
                         <Card className="shadow-xl rounded-2xl bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 backdrop-blur-md border border-white/50">
-                            <CardBody className="p-6">
+                            <CardContent className="p-6">
                                 <h3 className="text-xl font-bold mb-4 flex items-center gap-3">
                                     {notificationsEnabled ? (
                                         <Bell className="text-purple-500" />
@@ -800,9 +801,9 @@ const CatHolidaysCalendarPage = () => {
                                             </div>
                                         </div>
                                         <Switch
-                                            isSelected={notificationsEnabled}
-                                            onValueChange={requestNotificationPermission}
-                                            color="secondary"
+                                            checked={notificationsEnabled}
+                                            onCheckedChange={requestNotificationPermission}
+                                            className="data-[state=checked]:bg-secondary"
                                         />
                                     </div>
                                     {!notificationsEnabled && (
@@ -817,11 +818,11 @@ const CatHolidaysCalendarPage = () => {
                                         </Button>
                                     )}
                                 </div>
-                            </CardBody>
+                            </CardContent>
                         </Card>
 
                         <Card className="shadow-xl rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 backdrop-blur-md border border-white/50">
-                            <CardBody className="p-6">
+                            <CardContent className="p-6">
                                 <h3 className="text-xl font-bold mb-4 flex items-center gap-3">
                                     <Zap className="text-amber-500" />
                                     Быстрые действия
@@ -848,11 +849,6 @@ const CatHolidaysCalendarPage = () => {
                                         color="warning"
                                         variant="shadow"
                                         startContent={<Trash2 size={18} />}
-                                        // onClick={() => {
-                                        //     if (window.confirm('Удалить все ваши события?')) {
-                                        //         setUserEvents([]);
-                                        //     }
-                                        // }}
                                         className="h-14 rounded-xl"
                                     >
                                         Очистить
@@ -867,14 +863,14 @@ const CatHolidaysCalendarPage = () => {
                                         Сегодня
                                     </Button>
                                 </div>
-                            </CardBody>
+                            </CardContent>
                         </Card>
                     </div>
                 </div>
 
-                <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)}>
-                    <ModalContent>
-                        <ModalBody className="py-6">
+                <Dialog open={showAddModal} onOpenChange={(o) => setShowAddModal(o)}>
+                    <DialogContent className="p-0 gap-0">
+                        <div className="px-6 py-6 max-h-[75vh] overflow-y-auto">
                             <h3 className="text-xl font-bold mb-4 text-center">Добавить событие</h3>
                             <div className="space-y-4">
                                 <Input
@@ -896,18 +892,24 @@ const CatHolidaysCalendarPage = () => {
                                     }}
                                     startContent={<CalendarIcon size={20} />}
                                 />
-                                <Select
-                                    label="Для котика"
-                                    placeholder="Выберите котика"
-                                    onChange={(e) => setNewEvent({ ...newEvent, catId: parseInt(e.target.value, 10) })}
-                                >
-                                    {userCats.map((cat) => (
-                                        // @ts-expect-error
-                                        <SelectItem key={cat.id} value={cat.id}>
-                                            {cat.name}
-                                        </SelectItem>
-                                    ))}
-                                </Select>
+                                <div className="flex flex-col gap-1.5">
+                                    <span className="text-sm font-medium text-foreground/80">Для котика</span>
+                                    <Select
+                                        value={newEvent.catId ? String(newEvent.catId) : undefined}
+                                        onValueChange={(v) => setNewEvent({ ...newEvent, catId: parseInt(v, 10) })}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Выберите котика" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {userCats.map((cat) => (
+                                                <SelectItem key={cat.id} value={String(cat.id)}>
+                                                    {cat.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                                 <Textarea
                                     label="Описание"
                                     placeholder="Описание события..."
@@ -920,8 +922,8 @@ const CatHolidaysCalendarPage = () => {
                                         <span>Напоминание</span>
                                     </div>
                                     <Switch
-                                        isSelected={newEvent.reminder || false}
-                                        onValueChange={(val) => setNewEvent({ ...newEvent, reminder: val })}
+                                        checked={newEvent.reminder || false}
+                                        onCheckedChange={(val) => setNewEvent({ ...newEvent, reminder: val })}
                                     />
                                 </div>
                                 <div>
@@ -943,21 +945,21 @@ const CatHolidaysCalendarPage = () => {
                                     </div>
                                 </div>
                             </div>
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button color="default" variant="light" onPress={() => setShowAddModal(false)}>
+                        </div>
+                        <div className="flex justify-end gap-2 px-6 pb-6">
+                            <Button color="default" variant="light" onClick={() => setShowAddModal(false)}>
                                 Отмена
                             </Button>
-                            <Button color="primary" onPress={handleAddEvent}>
+                            <Button color="primary" onClick={handleAddEvent}>
                                 Добавить
                             </Button>
-                        </ModalFooter>
-                    </ModalContent>
-                </Modal>
+                        </div>
+                    </DialogContent>
+                </Dialog>
 
-                <Modal isOpen={showEventModal} onClose={() => setShowEventModal(false)}>
-                    <ModalContent>
-                        <ModalBody className="py-6">
+                <Dialog open={showEventModal} onOpenChange={(o) => setShowEventModal(o)}>
+                    <DialogContent className="p-0 gap-0">
+                        <div className="px-6 py-6 max-h-[75vh] overflow-y-auto">
                             {selectedEvent && (
                                 <>
                                     <div className={`w-full h-32 rounded-xl mb-4 ${selectedEvent.color}`} />
@@ -996,20 +998,20 @@ const CatHolidaysCalendarPage = () => {
                                     </div>
                                 </>
                             )}
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button color="danger" variant="light" onPress={() => handleDeleteEvent(selectedEvent!.id)}>
+                        </div>
+                        <div className="flex justify-between gap-2 px-6 pb-6">
+                            <Button color="danger" variant="light" onClick={() => handleDeleteEvent(selectedEvent!.id)}>
                                 Удалить
                             </Button>
-                            <Button color="primary" onPress={() => setShowEventModal(false)}>
+                            <Button color="primary" onClick={() => setShowEventModal(false)}>
                                 Закрыть
                             </Button>
-                        </ModalFooter>
-                    </ModalContent>
-                </Modal>
+                        </div>
+                    </DialogContent>
+                </Dialog>
 
                 <div className="fixed bottom-4 right-4 z-10">
-                    <Tooltip content="Добавить событие">
+                    <Tip content="Добавить событие" side="left">
                         <Button
                             isIconOnly
                             color="primary"
@@ -1019,7 +1021,7 @@ const CatHolidaysCalendarPage = () => {
                         >
                             <Plus size={24} />
                         </Button>
-                    </Tooltip>
+                    </Tip>
                 </div>
 
                 <div className="fixed top-20 left-4 opacity-10 pointer-events-none z-0">

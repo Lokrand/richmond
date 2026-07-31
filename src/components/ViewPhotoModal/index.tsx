@@ -1,7 +1,7 @@
 'use client';
 
 import React, { FC, useEffect, useState } from 'react';
-import { Modal, ModalBody, ModalContent } from '@heroui/react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import {
     X,
     RotateCw,
@@ -14,7 +14,7 @@ import { getS3Path } from '@/config';
 
 type Props = {
     isOpen: boolean;
-    onOpenChange: () => void;
+    onOpenChange: (value: boolean) => void;
     onClose: () => void;
     cat: TyCat;
     selectedImageIndex: number;
@@ -49,9 +49,6 @@ const ViewPhotoModal: FC<Props> = (props) => {
             if (!isOpen || !cat) return;
 
             switch (e.key) {
-                case 'Escape':
-                    onClose();
-                    break;
                 case 'ArrowLeft':
                     navigateImage('prev');
                     break;
@@ -80,32 +77,12 @@ const ViewPhotoModal: FC<Props> = (props) => {
     };
 
     return (
-        <Modal
-            isOpen={isOpen}
-            onOpenChange={onOpenChange}
-            size="full"
-            placement="center"
-            hideCloseButton
-            motionProps={{
-                variants: {
-                    enter: {
-                        opacity: 1,
-                        transition: { duration: 0.2 },
-                    },
-                    exit: {
-                        opacity: 0,
-                        transition: { duration: 0.15 },
-                    },
-                },
-            }}
-            classNames={{
-                base: 'bg-black/95',
-                wrapper: 'p-0',
-                body: 'p-0',
-            }}
-        >
-            <ModalContent>
-                <ModalBody className="relative p-0 flex items-center justify-center touch-none min-h-screen">
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+            <DialogContent
+                hideCloseButton
+                className="h-[100dvh] w-[100dvw] max-w-none border-0 bg-black/95 p-0 sm:rounded-none"
+            >
+                <div className="relative flex min-h-screen items-center justify-center touch-none p-0">
                     <button
                         type="button"
                         className="absolute top-4 right-4 z-50 bg-black/50 text-white hover:bg-black/70 rounded-full p-2 transition-colors"
@@ -142,9 +119,9 @@ const ViewPhotoModal: FC<Props> = (props) => {
                             onDoubleClick={resetTransform}
                         />
                     )}
-                </ModalBody>
-            </ModalContent>
-        </Modal>
+                </div>
+            </DialogContent>
+        </Dialog>
     );
 };
 

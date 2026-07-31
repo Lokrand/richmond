@@ -10,18 +10,19 @@ import {
     Input,
     Slider,
     Select,
+    SelectValue,
+    SelectTrigger,
+    SelectContent,
     SelectItem,
     Badge,
-    Tooltip,
-    Modal,
-    ModalContent,
-    ModalBody,
-    ModalFooter,
-    Divider,
+    Tip,
+    Dialog,
+    DialogContent,
+    Separator,
     Switch,
-    ScrollShadow,
-    CardBody,
-} from '@heroui/react';
+    ScrollArea,
+    CardContent,
+} from '@/components/ui';
 import {
     Sparkles,
     Search,
@@ -386,13 +387,13 @@ const NameGeneratorPage = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-1">
                         <Card className="shadow-xl rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-white/50 sticky top-6">
-                            <CardBody className="p-6">
+                            <CardContent className="p-6">
                                 <div className="flex items-center justify-between mb-6">
                                     <div className="flex items-center gap-3">
                                         <Filter className="text-purple-500" />
                                         <h2 className="text-xl font-bold">Фильтры</h2>
                                     </div>
-                                    <Tooltip content="Сбросить фильтры">
+                                    <Tip content="Сбросить фильтры">
                                         <Button
                                             isIconOnly
                                             variant="light"
@@ -401,7 +402,7 @@ const NameGeneratorPage = () => {
                                         >
                                             <RefreshCw size={18} />
                                         </Button>
-                                    </Tooltip>
+                                    </Tip>
                                 </div>
 
                                 <div className="mb-6">
@@ -434,7 +435,7 @@ const NameGeneratorPage = () => {
                                         <Palette size={18} />
                                         Категория
                                     </h3>
-                                    <ScrollShadow className="h-40">
+                                    <ScrollArea className="h-40">
                                         <div className="space-y-2">
                                             {categories.map((cat) => (
                                                 <button
@@ -456,7 +457,7 @@ const NameGeneratorPage = () => {
                                                 </button>
                                             ))}
                                         </div>
-                                    </ScrollShadow>
+                                    </ScrollArea>
                                 </div>
 
                                 <div className="mb-6">
@@ -465,16 +466,19 @@ const NameGeneratorPage = () => {
                                         Происхождение
                                     </h3>
                                     <Select
-                                        selectedKeys={[selectedOrigin]}
-                                        onChange={(e) => setSelectedOrigin(e.target.value)}
-                                        className="mb-2"
+                                        value={selectedOrigin}
+                                        onValueChange={(v) => setSelectedOrigin(v)}
                                     >
-                                        {origins.map((origin) => (
-                                            // @ts-expect-error
-                                            <SelectItem key={origin.key} value={origin.key}>
-                                                {origin.label}
-                                            </SelectItem>
-                                        ))}
+                                        <SelectTrigger className="mb-2">
+                                            <SelectValue placeholder="Выберите происхождение" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {origins.map((origin) => (
+                                                <SelectItem key={origin.key} value={origin.key}>
+                                                    {origin.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
                                     </Select>
                                 </div>
 
@@ -515,10 +519,10 @@ const NameGeneratorPage = () => {
                                         <span className="text-lg font-bold text-primary">{nameCount}</span>
                                     </div>
                                     <Slider
-                                        value={nameCount}
-                                        onChange={(value) => setNameCount(value as number)}
-                                        minValue={1}
-                                        maxValue={10}
+                                        value={[nameCount]}
+                                        onValueChange={(value) => setNameCount(value[0])}
+                                        min={1}
+                                        max={10}
                                         step={1}
                                         color="secondary"
                                         className="max-w-md"
@@ -531,9 +535,9 @@ const NameGeneratorPage = () => {
                                         <span className="font-medium">Звуковые эффекты</span>
                                     </div>
                                     <Switch
-                                        isSelected={!isMuted}
-                                        onValueChange={(val) => setIsMuted(!val)}
-                                        color="secondary"
+                                        checked={!isMuted}
+                                        onCheckedChange={(val) => setIsMuted(!val)}
+                                        className="data-[state=checked]:bg-secondary"
                                     />
                                 </div>
 
@@ -558,11 +562,11 @@ const NameGeneratorPage = () => {
                                 >
                                     {showFavorites ? 'Показать все' : `Избранное (${favorites.length})`}
                                 </Button>
-                            </CardBody>
+                            </CardContent>
                         </Card>
 
                         <Card className="shadow-xl rounded-2xl bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 backdrop-blur-md border border-white/50 mt-6">
-                            <CardBody className="p-6">
+                            <CardContent className="p-6">
                                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
                                     <TrendingUp size={20} />
                                     Статистика
@@ -585,13 +589,13 @@ const NameGeneratorPage = () => {
                                         <span className="font-bold text-green-600">{generatedNames.length}</span>
                                     </div>
                                 </div>
-                            </CardBody>
+                            </CardContent>
                         </Card>
                     </div>
 
                     <div className="lg:col-span-2">
                         <Card className="shadow-2xl rounded-3xl bg-gradient-to-br from-white to-pink-50/50 dark:from-default-100 dark:to-pink-900/10 backdrop-blur-md border-2 border-white/50 mb-6">
-                            <CardBody className="p-8">
+                            <CardContent className="p-8">
                                 <div className="flex justify-between items-center mb-8">
                                     <div>
                                         <h2 className="text-2xl font-bold flex items-center gap-3">
@@ -608,7 +612,7 @@ const NameGeneratorPage = () => {
                                         </p>
                                     </div>
                                     <div className="flex gap-2">
-                                        <Tooltip content="Сохранить этот набор">
+                                        <Tip content="Сохранить этот набор">
                                             <Button
                                                 isIconOnly
                                                 color="success"
@@ -618,8 +622,8 @@ const NameGeneratorPage = () => {
                                             >
                                                 <Bookmark size={20} />
                                             </Button>
-                                        </Tooltip>
-                                        <Tooltip content="Поделиться">
+                                        </Tip>
+                                        <Tip content="Поделиться">
                                             <Button
                                                 isIconOnly
                                                 color="primary"
@@ -629,7 +633,7 @@ const NameGeneratorPage = () => {
                                             >
                                                 <Share2 size={20} />
                                             </Button>
-                                        </Tooltip>
+                                        </Tip>
                                     </div>
                                 </div>
 
@@ -654,7 +658,7 @@ const NameGeneratorPage = () => {
                                                         : 'border-default-200'
                                                 }`}
                                             >
-                                                <CardBody className="p-5">
+                                                <CardContent className="p-5">
                                                     <div className="flex justify-between items-start mb-3">
                                                         <div>
                                                             <div className="flex items-center gap-2 mb-1">
@@ -674,7 +678,7 @@ const NameGeneratorPage = () => {
                                                             </div>
                                                         </div>
                                                         <div className="flex gap-1">
-                                                            <Tooltip content={favorites.includes(name.id) ? 'Убрать из избранного' : 'Добавить в избранное'}>
+                                                            <Tip content={favorites.includes(name.id) ? 'Убрать из избранного' : 'Добавить в избранное'}>
                                                                 <Button
                                                                     isIconOnly
                                                                     variant="light"
@@ -687,8 +691,8 @@ const NameGeneratorPage = () => {
                                                                         className={favorites.includes(name.id) ? 'text-pink-500' : ''}
                                                                     />
                                                                 </Button>
-                                                            </Tooltip>
-                                                            <Tooltip content="Скопировать">
+                                                            </Tip>
+                                                            <Tip content="Скопировать">
                                                                 <Button
                                                                     isIconOnly
                                                                     variant="light"
@@ -697,7 +701,7 @@ const NameGeneratorPage = () => {
                                                                 >
                                                                     <Copy size={18} />
                                                                 </Button>
-                                                            </Tooltip>
+                                                            </Tip>
                                                         </div>
                                                     </div>
 
@@ -716,7 +720,7 @@ const NameGeneratorPage = () => {
                                                             </Badge>
                                                         ))}
                                                     </div>
-                                                </CardBody>
+                                                </CardContent>
                                             </Card>
                                         ))}
                                     </div>
@@ -727,11 +731,11 @@ const NameGeneratorPage = () => {
                                         Скопировано! 📋
                                     </div>
                                 )}
-                            </CardBody>
+                            </CardContent>
                         </Card>
 
                         <Card className="shadow-xl rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 backdrop-blur-md border border-white/50">
-                            <CardBody className="p-6">
+                            <CardContent className="p-6">
                                 <h3 className="text-xl font-bold mb-4 flex items-center gap-3">
                                     <Sparkle className="text-amber-500" />
                                     Советы по выбору имени
@@ -766,14 +770,14 @@ const NameGeneratorPage = () => {
                                         </p>
                                     </div>
                                 </div>
-                            </CardBody>
+                            </CardContent>
                         </Card>
                     </div>
                 </div>
 
-                <Modal isOpen={showSavedModal} onClose={() => setShowSavedModal(false)}>
-                    <ModalContent>
-                        <ModalBody className="py-6">
+                <Dialog open={showSavedModal} onOpenChange={(o) => setShowSavedModal(o)}>
+                    <DialogContent className="sm:max-w-md p-0 gap-0">
+                        <div className="px-6 py-6">
                             <h3 className="text-xl font-bold mb-4 text-center">Сохранённый набор!</h3>
                             <div className="text-center mb-6">
                                 <div className="inline-block p-4 rounded-full bg-gradient-to-r from-green-100 to-emerald-100 mb-4">
@@ -784,7 +788,7 @@ const NameGeneratorPage = () => {
 
                             {savedCombinations.length > 0 && (
                                 <>
-                                    <Divider className="my-4" />
+                                    <Separator className="my-4" />
                                     <h4 className="font-bold mb-3">Предыдущие наборы:</h4>
                                     <div className="space-y-2 max-h-60 overflow-y-auto">
                                         {savedCombinations.map((combo) => (
@@ -793,7 +797,7 @@ const NameGeneratorPage = () => {
                                                 className="cursor-pointer hover:bg-default-100"
                                                 onClick={() => loadCombination(combo)}
                                             >
-                                                <CardBody className="p-3">
+                                                <CardContent className="p-3">
                                                     <div className="flex justify-between items-center">
                                                         <div>
                                                             <p className="font-medium">
@@ -806,23 +810,23 @@ const NameGeneratorPage = () => {
                                                             Загрузить
                                                         </Button>
                                                     </div>
-                                                </CardBody>
+                                                </CardContent>
                                             </Card>
                                         ))}
                                     </div>
                                 </>
                             )}
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button color="primary" onPress={() => setShowSavedModal(false)}>
+                        </div>
+                        <div className="flex justify-end px-6 pb-6">
+                            <Button color="primary" onClick={() => setShowSavedModal(false)}>
                                 Продолжить
                             </Button>
-                        </ModalFooter>
-                    </ModalContent>
-                </Modal>
+                        </div>
+                    </DialogContent>
+                </Dialog>
 
                 <div className="fixed bottom-4 right-4 z-10">
-                    <Tooltip content="Сохранить текущий набор">
+                    <Tip content="Сохранить текущий набор" side="left">
                         <Button
                             isIconOnly
                             color="success"
@@ -833,7 +837,7 @@ const NameGeneratorPage = () => {
                         >
                             <Bookmark size={24} />
                         </Button>
-                    </Tooltip>
+                    </Tip>
                 </div>
 
                 <div className="fixed top-20 left-4 opacity-10 pointer-events-none z-0">

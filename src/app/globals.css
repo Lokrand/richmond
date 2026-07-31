@@ -1,18 +1,207 @@
 @import "tailwindcss";
-@plugin '../../hero.ts';
-@source '../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+@import "tw-animate-css";
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  --card: #ffffff;
+  --card-foreground: #171717;
+
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+
+  --primary: #006fee;
+  --primary-foreground: #ffffff;
+
+  --secondary: #7828c8;
+  --secondary-foreground: #ffffff;
+
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+
+  --destructive: #f31260;
+  --destructive-foreground: #ffffff;
+
+  --danger: #f31260;
+  --success: #17c964;
+  --success-foreground: #ffffff;
+
+  --warning: #f5a524;
+  --warning-foreground: #ffffff;
+
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #006fee;
+
+  --radius: 0.5rem;
+
+  --default-50: #fafafa;
+  --default-100: #f4f4f5;
+  --default-200: #e4e4e7;
+  --default-300: #d4d4d8;
+  --default-400: #a1a1aa;
+  --default-500: #71717a;
+  --default-600: #52525b;
+  --default-700: #3f3f46;
+  --default-800: #27272a;
+  --default-900: #18181b;
+
+  --danger-50: #ffe9ee;
+  --danger-100: #ffd1dc;
+  --danger-200: #ffa7ba;
+  --danger-300: #ff7c97;
+  --danger-400: #ff5275;
+  --danger-500: #f31260;
+  --danger-600: #c2114e;
+  --danger-700: #91123d;
+  --danger-800: #600f2e;
+  --danger-900: #3a0b1f;
+
+  --primary-50: #ecf3fe;
+  --primary-100: #d6e7fd;
+  --primary-200: #a8cffc;
+  --primary-300: #79b8fb;
+  --primary-400: #4ba0fa;
+  --primary-500: #1d88f9;
+  --primary-600: #006fee;
+  --primary-700: #005bc4;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+
+  --card: #0a0a0a;
+  --card-foreground: #ededed;
+
+  --popover: #0a0a0a;
+  --popover-foreground: #ededed;
+
+  --primary: #4ba0fa;
+  --primary-foreground: #000000;
+
+  --secondary: #9750dd;
+  --secondary-foreground: #ffffff;
+
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+
+  --accent: #27272a;
+  --accent-foreground: #fafafa;
+
+  --destructive: #ff5275;
+  --destructive-foreground: #000000;
+
+  --danger: #ff5275;
+  --success: #17c964;
+  --success-foreground: #000000;
+
+  --warning: #f5a524;
+  --warning-foreground: #000000;
+
+  --border: #3f3f46;
+  --input: #3f3f46;
+  --ring: #4ba0fa;
+
+  --default-50: #18181b;
+  --default-100: #27272a;
+  --default-200: #3f3f46;
+  --default-300: #52525b;
+  --default-400: #71717a;
+  --default-500: #a1a1aa;
+  --default-600: #d4d4d8;
+  --default-700: #e4e4e7;
+  --default-800: #f4f4f5;
+  --default-900: #fafafa;
+
+  --danger-50: #3a0b1f;
+  --danger-100: #600f2e;
+  --danger-200: #91123d;
+  --danger-300: #c2114e;
+  --danger-400: #f31260;
+  --danger-500: #ff5275;
+  --danger-600: #ff7c97;
+  --danger-700: #ffa7ba;
+  --danger-800: #ffd1dc;
+  --danger-900: #ffe9ee;
+
+  --primary-50: #0a2342;
+  --primary-100: #0c3561;
+  --primary-200: #0d4885;
+  --primary-300: #0d5cb0;
+  --primary-400: #1d88f9;
+  --primary-500: #4ba0fa;
+  --primary-600: #79b8fb;
+  --primary-700: #a8cffc;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-default-50: var(--default-50);
+  --color-default-100: var(--default-100);
+  --color-default-200: var(--default-200);
+  --color-default-300: var(--default-300);
+  --color-default-400: var(--default-400);
+  --color-default-500: var(--default-500);
+  --color-default-600: var(--default-600);
+  --color-default-700: var(--default-700);
+  --color-default-800: var(--default-800);
+  --color-default-900: var(--default-900);
+
+  --color-danger-50: var(--danger-50);
+  --color-danger-100: var(--danger-100);
+  --color-danger-200: var(--danger-200);
+  --color-danger-300: var(--danger-300);
+  --color-danger-400: var(--danger-400);
+  --color-danger-500: var(--danger-500);
+  --color-danger-600: var(--danger-600);
+  --color-danger-700: var(--danger-700);
+  --color-danger-800: var(--danger-800);
+  --color-danger-900: var(--danger-900);
+
+  --color-primary-50: var(--primary-50);
+  --color-primary-100: var(--primary-100);
+  --color-primary-200: var(--primary-200);
+  --color-primary-300: var(--primary-300);
+  --color-primary-400: var(--primary-400);
+  --color-primary-500: var(--primary-500);
+  --color-primary-600: var(--primary-600);
+  --color-primary-700: var(--primary-700);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
 html,

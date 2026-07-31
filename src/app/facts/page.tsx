@@ -4,14 +4,15 @@ import React, { useState, useEffect } from 'react';
 import {
     Card,
     Button,
-    Image,
     Chip,
     Accordion,
     AccordionItem,
+    AccordionTrigger,
+    AccordionContent,
     Badge,
-    Tooltip,
-    CardBody,
-} from '@heroui/react';
+    Tip,
+    CardContent,
+} from '@/components/ui';
 import {
     Heart,
     Sparkles,
@@ -191,7 +192,7 @@ const CatFactsPage = () => {
                 </div>
 
                 <Card className="mb-10 shadow-2xl rounded-3xl bg-gradient-to-r from-pink-100 to-blue-100 dark:from-pink-900/20 dark:to-blue-900/20 backdrop-blur-md border-2 border-white/50">
-                    <CardBody className="p-8">
+                    <CardContent className="p-8">
                         <div className="flex flex-col md:flex-row items-center gap-6">
                             <div className="flex-shrink-0">
                                 <div className="relative">
@@ -235,7 +236,7 @@ const CatFactsPage = () => {
                                 </div>
                             </div>
                         </div>
-                    </CardBody>
+                    </CardContent>
                 </Card>
 
                 <div className="mb-10 p-6 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-3xl shadow-xl border-2 border-emerald-100 dark:border-emerald-800/30">
@@ -269,7 +270,7 @@ const CatFactsPage = () => {
                             key={category.id}
                             className={`shadow-xl rounded-2xl backdrop-blur-md border-2 border-white/50 bg-gradient-to-br ${category.color} dark:bg-gradient-to-br dark:from-default-200 dark:to-default-300`}
                         >
-                            <CardBody className="p-6">
+                            <CardContent className="p-6">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="p-2 rounded-full bg-white/50 dark:bg-default-100">
                                         {category.icon}
@@ -304,13 +305,15 @@ const CatFactsPage = () => {
                                     </Button>
                                 </div>
 
-                                <Accordion variant="splitted" className="px-0">
+                                <Accordion type="single" collapsible className="px-0">
                                     {category.facts.map((fact, index) => (
                                         <AccordionItem
                                             key={index}
-                                            aria-label={`Факт ${index + 1}`}
-                                            title={(
-                                                <div className="flex items-center gap-2">
+                                            value={`fact-${index}`}
+                                            className="rounded-xl border border-default-200 dark:border-default-100 bg-white/60 dark:bg-default-100/60 mb-2 px-0 overflow-hidden"
+                                        >
+                                            <AccordionTrigger className="py-3 px-4">
+                                                <div className="flex items-center gap-2 min-w-0">
                                                     <Badge
                                                         color="default"
                                                         variant="flat"
@@ -321,37 +324,32 @@ const CatFactsPage = () => {
                                                     </Badge>
                                                     <span className="line-clamp-1">{fact}</span>
                                                 </div>
-                                            )}
-                                            classNames={{
-                                                base: 'mb-2',
-                                                heading: 'p-0',
-                                                trigger: 'py-3 px-4',
-                                                content: 'px-4 pb-4 text-foreground/70',
-                                            }}
-                                        >
-                                            <div className="pl-6">
-                                                <p className="text-foreground/80">
-                                                    {index === 0 && 'Интересно, что...'}
-                                                    {index === 1 && 'Знаете ли вы...'}
-                                                    {index === 2 && 'А ещё...'}
-                                                    {index === 3 && 'И напоследок...'}
-                                                </p>
-                                                <p className="mt-2">{fact}</p>
-                                            </div>
+                                            </AccordionTrigger>
+                                            <AccordionContent className="px-4 pb-4 text-foreground/70">
+                                                <div className="pl-6">
+                                                    <p className="text-foreground/80">
+                                                        {index === 0 && 'Интересно, что...'}
+                                                        {index === 1 && 'Знаете ли вы...'}
+                                                        {index === 2 && 'А ещё...'}
+                                                        {index === 3 && 'И напоследок...'}
+                                                    </p>
+                                                    <p className="mt-2">{fact}</p>
+                                                </div>
+                                            </AccordionContent>
                                         </AccordionItem>
                                     ))}
                                 </Accordion>
-                            </CardBody>
+                            </CardContent>
                         </Card>
                     ))}
                 </div>
 
                 <Card className="shadow-2xl rounded-3xl bg-gradient-to-r from-rose-50 to-amber-50 dark:from-rose-900/20 dark:to-amber-900/20 backdrop-blur-md border-2 border-white/50 overflow-hidden">
-                    <CardBody className="p-8">
+                    <CardContent className="p-8">
                         <div className="flex flex-col md:flex-row items-center gap-8">
                             <div className="flex-shrink-0">
                                 <div className="relative">
-                                    <Image
+                                    <img
                                         src="/cat-facts-illustration.png"
                                         alt="Милый котик"
                                         width={200}
@@ -379,7 +377,7 @@ const CatFactsPage = () => {
                                 </div>
                             </div>
                         </div>
-                    </CardBody>
+                    </CardContent>
                 </Card>
 
                 <div className="text-center mt-10 pt-6 border-t border-default-200">
@@ -399,7 +397,7 @@ const CatFactsPage = () => {
                 </div>
 
                 <div className="fixed bottom-4 right-4 z-10">
-                    <Tooltip content="Нашли ошибку? Сообщите нам!" placement="left">
+                    <Tip content="Нашли ошибку? Сообщите нам!" side="left">
                         <Button
                             isIconOnly
                             color="warning"
@@ -408,7 +406,7 @@ const CatFactsPage = () => {
                         >
                             <AlertCircle size={24} />
                         </Button>
-                    </Tooltip>
+                    </Tip>
                 </div>
             </div>
 

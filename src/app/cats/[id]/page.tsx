@@ -6,10 +6,8 @@ import React, { useEffect, useState, use } from 'react';
 import {
     Card,
     Button,
-    Image,
     Chip,
-    useDisclosure,
-} from '@heroui/react';
+} from '@/components/ui';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Camera, Trash2, Pencil } from 'lucide-react';
@@ -52,10 +50,7 @@ const CatPage = ({ params }: CatPageProps) => {
     const [cat, setCat] = useState<TyCat | null>(null);
     const [loading, setLoading] = useState(true);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-    const {
-        isOpen, onOpen, onOpenChange, onClose,
-    } = useDisclosure();
+    const [isPhotoOpen, setIsPhotoOpen] = useState(false);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
     useEffect(() => {
@@ -81,7 +76,7 @@ const CatPage = ({ params }: CatPageProps) => {
 
     const openImageModal = (index: number) => {
         setSelectedImageIndex(index);
-        onOpen();
+        setIsPhotoOpen(true);
     };
 
     if (loading) {
@@ -102,8 +97,6 @@ const CatPage = ({ params }: CatPageProps) => {
     const removeCat = async () => {
         const authHeader = await auth.getAuthorizationHeader();
         if (!authHeader) {
-            // setError('Требуется авторизация');
-            // setIsLoading(false);
             return;
         }
         await catApi.apiV1CatIdDelete({
@@ -135,13 +128,18 @@ const CatPage = ({ params }: CatPageProps) => {
 
                 <Card className="flex flex-col items-center sm:items-start sm:flex-row gap-4 p-4 mb-8 shadow-xl rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-default-200 dark:border-default-100">
                     {hasLogo ? (
-                        <Image
-                            src={getS3Path(cat.logo_path)}
-                            className="shadow-lg rounded-xl object-cover w-100 cursor-pointer hover:opacity-90 transition-opacity"
-                            height={400}
-                            alt={cat.name}
+                        <button
+                            type="button"
                             onClick={() => openImageModal(-1)}
-                        />
+                            className="shrink-0 cursor-pointer"
+                        >
+                            <img
+                                src={getS3Path(cat.logo_path)}
+                                className="shadow-lg rounded-xl object-cover w-100 h-100 hover:opacity-90 transition-opacity"
+                                height={400}
+                                alt={cat.name}
+                            />
+                        </button>
                     ) : (
                         <div className="shadow-lg rounded-xl w-full h-100 bg-default-100 dark:bg-default-200 flex flex-col items-center justify-center gap-4 border-2 border-dashed border-default-300 dark:border-default-100">
                             <Camera size={64} className="text-default-400" />
@@ -236,14 +234,18 @@ const CatPage = ({ params }: CatPageProps) => {
                         <div className="columns-2 sm:columns-2 md:columns-3 lg:columns-4 gap-1">
                             {cat.gallery.map((image, index) => (
                                 <div key={image} className="break-inside-avoid mb-1">
-                                    <Image
-                                        alt={`${cat.name} фото ${index + 1}`}
-                                        src={getS3Path(image)}
-                                        width={400}
-                                        className="w-full rounded-xl cursor-pointer hover:scale-[1.02] transition-transform duration-200"
-                                        isZoomed
+                                    <button
+                                        type="button"
                                         onClick={() => openImageModal(index)}
-                                    />
+                                        className="w-full cursor-pointer"
+                                    >
+                                        <img
+                                            alt={`${cat.name} фото ${index + 1}`}
+                                            src={getS3Path(image)}
+                                            width={400}
+                                            className="w-full rounded-xl hover:scale-[1.02] transition-transform duration-200"
+                                        />
+                                    </button>
                                 </div>
                             ))}
                         </div>
@@ -281,9 +283,9 @@ const CatPage = ({ params }: CatPageProps) => {
                 </div>
                 <ViewPhotoModal
                     cat={cat}
-                    isOpen={isOpen}
-                    onClose={onClose}
-                    onOpenChange={onOpenChange}
+                    isOpen={isPhotoOpen}
+                    onClose={() => setIsPhotoOpen(false)}
+                    onOpenChange={setIsPhotoOpen}
                     selectedImageIndex={selectedImageIndex}
                     setSelectedImageIndex={setSelectedImageIndex}
                 />

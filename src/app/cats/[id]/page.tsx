@@ -10,14 +10,32 @@ import {
 } from '@/components/ui';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Camera, Trash2, Pencil } from 'lucide-react';
+import { toast } from 'sonner';
+import {
+    Camera, Trash2, Pencil, ImagePlus,
+} from 'lucide-react';
+import AddPostModal from '@/components/AddPostModal';
 import EditCatModal from '@/components/EditCatModal';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import ViewPhotoModal from '@/components/ViewPhotoModal';
 import makeFirstCharUppercase from '@/utils/makeFirstCharUppercase';
+import groupHabitTags from '@/utils/groupHabitTags';
 import getCatYearNote from '../../../utils/getCatAgeNote';
 import { auth } from '../../../lib/auth';
-import { catApi, getS3Path } from '../../../config';
-import { InternalApiCatCatResponse } from '../../../client/models';
+import { catApi, getS3Path, postApi } from '../../../config';
+import {
+    InternalApiCatCatResponse,
+    InternalApiPostPostResponse,
+} from '../../../client/models';
 import { TyCat } from '../../../types';
 
 const mapToTyCat = (cat: InternalApiCatCatResponse): TyCat => {
@@ -50,6 +68,14 @@ const CatPage = ({ params }: CatPageProps) => {
     const [cat, setCat] = useState<TyCat | null>(null);
     const [loading, setLoading] = useState(true);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isAddPostModalOpen, setIsAddPostModalOpen] = useState(false);
+    const [posts, setPosts] = useState<InternalApiPostPostResponse[]>([]);
+    const [editingPost, setEditingPost] = useState<InternalApiPostPostResponse | null>(null);
+    const [postTitle, setPostTitle] = useState('');
+    const [postBody, setPostBody] = useState('');
+    const [postError, setPostError] = useState('');
+    const [isPostSaving, setIsPostSaving] = useState(false);
+    const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
     const [isPhotoOpen, setIsPhotoOpen] = useState(false);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
@@ -66,6 +92,19 @@ const CatPage = ({ params }: CatPageProps) => {
         };
 
         fetchCat();
+    }, [id]);
+
+    useEffect(() => {
+        const fetchPosts = async () => {
+            try {
+                const response = await postApi.apiV1PostAllGet({ limit: 100 });
+                setPosts((response.posts ?? []).filter((post) => post.catId === id));
+            } catch {
+                setPosts([]);
+            }
+        };
+
+        fetchPosts();
     }, [id]);
 
     useEffect(() => {
@@ -93,6 +132,7 @@ const CatPage = ({ params }: CatPageProps) => {
 
     const hasGallery = cat.gallery.length > 0;
     const hasLogo = cat.logo_path !== '';
+    const habitTags = groupHabitTags(cat.habits);
 
     const removeCat = async () => {
         const authHeader = await auth.getAuthorizationHeader();
@@ -105,16 +145,97 @@ const CatPage = ({ params }: CatPageProps) => {
         });
     };
 
-    const handleCatUpdate = () => {
-        const fetchCat = async () => {
-            try {
-                const response = await catApi.apiV1CatIdGet({ id: parseInt(id, 10) });
-                setCat(mapToTyCat(response));
-            } catch {
-                notFound();
+    const handleCatUpdate = async () => {
+        try {
+            const response = await catApi.apiV1CatIdGet(
+                { id: parseInt(id, 10) },
+                { cache: 'no-store' },
+            );
+            setCat(mapToTyCat(response));
+        } catch {
+            notFound();
+        }
+    };
+
+    const handlePostCreated = (post: InternalApiPostPostResponse) => {
+        setPosts((currentPosts) => [post, ...currentPosts]);
+    };
+
+    const openPostEditor = (post: InternalApiPostPostResponse) => {
+        setEditingPost(post);
+        setPostTitle(post.title ?? '');
+        setPostBody(post.body ?? '');
+        setPostError('');
+    };
+
+    const closePostEditor = () => {
+        setEditingPost(null);
+        setPostError('');
+    };
+
+    const updatePost = async (event: React.FormEvent) => {
+        event.preventDefault();
+        const postId = Number(editingPost?.postId);
+        if (!postTitle.trim()) {
+            setPostError('Добавьте заголовок записи');
+            return;
+        }
+        if (!Number.isInteger(postId)) {
+            setPostError('Не удалось определить запись');
+            return;
+        }
+
+        setIsPostSaving(true);
+        setPostError('');
+        try {
+            const authorization = await auth.getAuthorizationHeader();
+            if (!authorization) {
+                setPostError('Войдите, чтобы редактировать запись');
+                return;
             }
-        };
-        fetchCat();
+
+            await postApi.apiV1PostIdPut({
+                id: postId,
+                authorization: authorization.Authorization,
+                data: { title: postTitle.trim(), body: postBody.trim() },
+            });
+            setPosts((currentPosts) => currentPosts.map((post) => (
+                post.postId === editingPost?.postId
+                    ? { ...post, title: postTitle.trim(), body: postBody.trim() }
+                    : post
+            )));
+            closePostEditor();
+        } catch (error) {
+            console.error('Update post error:', error);
+            setPostError('Не удалось обновить запись. Попробуйте ещё раз');
+        } finally {
+            setIsPostSaving(false);
+        }
+    };
+
+    const deletePost = async (post: InternalApiPostPostResponse) => {
+        const postId = Number(post.postId);
+        // eslint-disable-next-line no-alert
+        if (!Number.isInteger(postId) || !window.confirm(`Удалить запись «${post.title ?? ''}»?`)) {
+            return;
+        }
+
+        setDeletingPostId(postId);
+        try {
+            const authorization = await auth.getAuthorizationHeader();
+            if (!authorization) {
+                toast.error('Войдите, чтобы удалить запись');
+                return;
+            }
+
+            await postApi.apiV1PostIdDelete({ id: postId, authorization: authorization.Authorization });
+            setPosts((currentPosts) => currentPosts.filter((currentPost) => currentPost.postId !== post.postId));
+        } catch (error) {
+            console.error('Delete post error:', error);
+            toast.error('Не удалось удалить запись. Попробуйте ещё раз');
+        } finally {
+            setDeletingPostId(null);
+        }
     };
 
     return (
@@ -158,10 +279,20 @@ const CatPage = ({ params }: CatPageProps) => {
                             </h1>
                             <div className="flex flex-nowrap gap-2">
                                 <Button
+                                    color="success"
+                                    variant="shadow"
+                                    className="p-2 min-w-10"
+                                    onClick={() => setIsAddPostModalOpen(true)}
+                                    aria-label="Добавить запись"
+                                >
+                                    <ImagePlus size={20} />
+                                </Button>
+                                <Button
                                     color="primary"
                                     variant="shadow"
                                     className="p-2 min-w-10"
                                     onClick={() => setIsEditModalOpen(true)}
+                                    aria-label="Редактировать кота"
                                 >
                                     <Pencil size={20} />
                                 </Button>
@@ -205,17 +336,27 @@ const CatPage = ({ params }: CatPageProps) => {
                                 {' '}
                                 Любимые привычки
                             </p>
-                            <div className="flex flex-wrap justify-start gap-2">
-                                {cat.habits.map((habit, i) => (
+                            <div className="flex flex-wrap justify-start gap-2 rounded-xl border border-primary/10 bg-primary/5 p-3">
+                                {habitTags.length ? habitTags.map((habit) => (
                                     <Chip
-                                        key={i}
+                                        key={habit.label.toLocaleLowerCase('ru-RU')}
                                         variant="flat"
                                         color="primary"
-                                        className="px-3 py-1"
+                                        size="sm"
+                                        startContent={<span aria-hidden="true">🐾</span>}
+                                        className="h-auto max-w-full whitespace-normal break-words px-3 py-1.5 text-left leading-5"
                                     >
-                                        {makeFirstCharUppercase(habit)}
+                                        <span>{makeFirstCharUppercase(habit.label)}</span>
+                                        {habit.occurrences > 1 && (
+                                            <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-bold leading-none">
+                                                ×
+                                                {habit.occurrences}
+                                            </span>
+                                        )}
                                     </Chip>
-                                ))}
+                                )) : (
+                                    <p className="text-sm text-foreground/60">Пока нет привычек</p>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -267,20 +408,135 @@ const CatPage = ({ params }: CatPageProps) => {
                                     <p>😴 Кот спит и не позирует</p>
                                 </div>
                                 <div className="mt-6">
-                                    <Link href="/new-cat">
-                                        <Button
-                                            color="primary"
-                                            variant="shadow"
-                                            startContent={<Camera size={18} />}
-                                        >
-                                            Добавить фото пушистика
-                                        </Button>
-                                    </Link>
+                                    <Button
+                                        color="primary"
+                                        variant="shadow"
+                                        startContent={<Camera size={18} />}
+                                        onClick={() => setIsAddPostModalOpen(true)}
+                                    >
+                                        Добавить фото пушистика
+                                    </Button>
                                 </div>
                             </div>
                         </div>
                     )}
                 </div>
+                <section className="mt-8 rounded-2xl border border-default-200 bg-white/70 p-4 shadow-xl backdrop-blur-md dark:border-default-100 dark:bg-default-50 sm:p-6">
+                    <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                        <h2 className="text-2xl font-bold text-primary">
+                            Записи о
+                            {' '}
+                            {cat.name}
+                        </h2>
+                        <Button
+                            color="success"
+                            variant="shadow"
+                            startContent={<ImagePlus size={18} />}
+                            onClick={() => setIsAddPostModalOpen(true)}
+                        >
+                            Добавить запись
+                        </Button>
+                    </div>
+
+                    {posts.length ? (
+                        <div className="space-y-4">
+                            {posts.map((post) => (
+                                <Card key={post.postId} className="bg-background/80 p-4">
+                                    <div className="flex items-start justify-between gap-4">
+                                        <h3 className="text-lg font-semibold">{post.title}</h3>
+                                        <div className="flex shrink-0 items-center gap-2">
+                                            {post.createdAt && (
+                                                <time dateTime={post.createdAt} className="text-sm text-foreground/50">
+                                                    {new Date(post.createdAt).toLocaleDateString('ru-RU')}
+                                                </time>
+                                            )}
+                                            <Button
+                                                type="button"
+                                                color="primary"
+                                                variant="flat"
+                                                size="sm"
+                                                isIconOnly
+                                                aria-label="Редактировать запись"
+                                                onClick={() => openPostEditor(post)}
+                                                isDisabled={deletingPostId !== null}
+                                            >
+                                                <Pencil size={16} />
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                color="danger"
+                                                variant="flat"
+                                                size="sm"
+                                                isIconOnly
+                                                aria-label="Удалить запись"
+                                                onClick={() => deletePost(post)}
+                                                isLoading={deletingPostId === Number(post.postId)}
+                                                isDisabled={deletingPostId !== null}
+                                            >
+                                                <Trash2 size={16} />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    {post.body && <p className="mt-2 whitespace-pre-wrap text-foreground/75">{post.body}</p>}
+                                    {!!post.photos?.length && (
+                                        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+                                            {post.photos.map((photo, index) => photo.url && (
+                                                <img
+                                                    key={photo.key ?? `${post.postId}-${index}`}
+                                                    src={getS3Path(photo.url)}
+                                                    alt={`${post.title} — фото ${index + 1}`}
+                                                    className="aspect-square w-full rounded-lg object-cover"
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
+                                </Card>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="py-8 text-center text-foreground/60">Записей пока нет. Добавьте первую фотографию!</p>
+                    )}
+                </section>
+
+                <AddPostModal
+                    catId={cat.id}
+                    catName={cat.name}
+                    isOpen={isAddPostModalOpen}
+                    onClose={() => setIsAddPostModalOpen(false)}
+                    onCreated={handlePostCreated}
+                />
+                <Dialog open={!!editingPost} onOpenChange={(open) => { if (!open) closePostEditor(); }}>
+                    <DialogContent className="sm:max-w-xl">
+                        <form onSubmit={updatePost} className="space-y-5">
+                            <DialogHeader>
+                                <DialogTitle className="text-2xl text-primary">Редактировать запись</DialogTitle>
+                                <DialogDescription>Измените заголовок или текст записи</DialogDescription>
+                            </DialogHeader>
+                            <Input
+                                label="Заголовок *"
+                                value={postTitle}
+                                onValueChange={(value) => { setPostTitle(value); setPostError(''); }}
+                                maxLength={200}
+                                isRequired
+                                autoFocus
+                            />
+                            <Textarea
+                                label="Текст"
+                                value={postBody}
+                                onChange={(event) => { setPostBody(event.target.value); setPostError(''); }}
+                                maxLength={5000}
+                                minRows={4}
+                            />
+                            {postError && <p role="alert" className="rounded-lg border border-danger-200 bg-danger-50 px-4 py-3 text-sm text-danger-700">{postError}</p>}
+                            <DialogFooter>
+                                <Button color="default" variant="flat" type="button" onClick={closePostEditor}>Отмена</Button>
+                                <Button color="primary" type="submit" isLoading={isPostSaving}>
+                                    {isPostSaving ? 'Сохраняем...' : 'Сохранить'}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
                 <ViewPhotoModal
                     cat={cat}
                     isOpen={isPhotoOpen}

@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Eye, EyeOff } from 'lucide-react';
+import { toast } from 'sonner';
 import { auth } from '../../lib/auth';
 
 interface LoginModalProps {
@@ -47,6 +48,7 @@ const LoginModal = ({
             await auth.login(login, password);
             onLoginSuccess(auth.getUser() || '');
             onOpenChange(false);
+            toast.success('Вы вошли в аккаунт', { description: `Рады видеть, ${login}!` });
             setLogin('');
             setPassword('');
         } catch {

@@ -24,6 +24,7 @@ export {
 } from './select';
 export { Separator } from './separator';
 export { Slider } from './slider';
+export { default as Toaster } from './sonner';
 export { Switch } from './switch';
 export { Textarea } from './textarea';
 export {

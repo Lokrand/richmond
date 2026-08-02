@@ -16,7 +16,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { catApi, getS3Path } from '../../config';
+import {
+    catApi,
+    fileApi,
+    getS3Path,
+    updateCatImages,
+    updateCatTitlePhoto,
+} from '../../config';
 import { auth } from '../../lib/auth';
 import { TyCat } from '../../types';
 
@@ -24,7 +30,7 @@ interface EditCatModalProps {
     cat: TyCat;
     isOpen: boolean;
     onClose: () => void;
-    onUpdate: () => void;
+    onUpdate: () => Promise<void>;
 }
 
 const INITIAL_FORM_DATA = {
@@ -227,14 +233,6 @@ const EditCatModal = ({
                 return d.toISOString().split('T')[0];
             };
 
-            const files: Blob[] = [];
-            if (titlePhoto) {
-                files.push(titlePhoto.file);
-            }
-            galleryPhotos.forEach((photo) => {
-                files.push(photo.file);
-            });
-
             await catApi.apiV1CatIdPut({
                 id: cat.id,
                 authorization: authHeader.Authorization,
@@ -248,7 +246,20 @@ const EditCatModal = ({
                 },
             });
 
-            onUpdate();
+            const galleryChanged = galleryPhotos.length > 0 || removedGalleryPhotos.length > 0;
+            if (galleryChanged) {
+                const fetchPhoto = (url: string) => fileApi.apiV1FileKeyGet({
+                    key: new URL(url).pathname.replace(/^\/main\//, ''),
+                });
+                const files: Blob[] = [titlePhoto?.file ?? await fetchPhoto(existingTitlePhoto)];
+                files.push(...await Promise.all(existingGalleryPhotos.map(fetchPhoto)));
+                files.push(...galleryPhotos.map((photo) => photo.file));
+                await updateCatImages(cat.id, authHeader.Authorization, files);
+            } else if (titlePhoto) {
+                await updateCatTitlePhoto(cat.id, authHeader.Authorization, titlePhoto.file);
+            }
+
+            await onUpdate();
             onClose();
         } catch (error) {
             console.error('Update error:', error);
@@ -265,7 +276,7 @@ const EditCatModal = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-            <DialogContent className="sm:max-w-3xl bg-white/95 dark:bg-default-50 custom-scrollbar max-h-[90vh] overflow-hidden p-0">
+            <DialogContent className="sm:max-w-3xl bg-white/95 dark:bg-default-50 custom-scrollbar max-h-[90vh] overflow-y-auto p-0">
                 <div className="flex flex-col items-center gap-2 py-4 text-center border-b border-default-200 dark:border-default-100">
                     <div className="flex items-center gap-3">
                         <img

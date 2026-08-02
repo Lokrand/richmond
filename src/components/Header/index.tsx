@@ -8,6 +8,7 @@ import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import { auth } from '../../lib/auth';
 import usePageTitle from '../../hooks/usePageTitle';
 import LoginModal from '../LoginModal';
@@ -51,6 +52,7 @@ const Header = () => {
         setIsLoggedIn(false);
         setUserLogin('');
         setIsMenuOpen(false);
+        toast.success('Вы вышли из аккаунта');
     };
 
     const switchToRegister = () => {

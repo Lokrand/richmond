@@ -19,6 +19,7 @@ type Props = {
     cat: TyCat;
     selectedImageIndex: number;
     setSelectedImageIndex: (value: React.SetStateAction<number>) => void;
+    images?: Array<{ src: string; alt: string; label: string }>;
 }
 
 const ViewPhotoModal: FC<Props> = (props) => {
@@ -29,14 +30,21 @@ const ViewPhotoModal: FC<Props> = (props) => {
         cat,
         selectedImageIndex,
         setSelectedImageIndex,
+        images,
     } = props;
 
     const [rotation, setRotation] = useState(0);
+    const hasPreviewImages = Boolean(images?.length);
 
     const navigateImage = (direction: 'prev' | 'next') => {
         if (!cat) return;
 
-        if (direction === 'prev') {
+        if (hasPreviewImages) {
+            const imageCount = images?.length ?? 0;
+            setSelectedImageIndex((prev) => (direction === 'prev'
+                ? (prev === 0 ? imageCount - 1 : prev - 1)
+                : (prev === imageCount - 1 ? 0 : prev + 1)));
+        } else if (direction === 'prev') {
             setSelectedImageIndex((prev) => (prev === 0 ? cat.gallery.length - 1 : prev - 1));
         } else {
             setSelectedImageIndex((prev) => (prev === cat.gallery.length - 1 ? 0 : prev + 1));
@@ -62,7 +70,7 @@ const ViewPhotoModal: FC<Props> = (props) => {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, cat, selectedImageIndex]);
+    }, [isOpen, cat, selectedImageIndex, images]);
 
     const handleRotateLeft = () => {
         setRotation((prev) => (prev - 90) % 360);
@@ -92,7 +100,11 @@ const ViewPhotoModal: FC<Props> = (props) => {
                     </button>
 
                     <div className="absolute top-4 left-4 z-50 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-                        {selectedImageIndex === -1 ? 'Главное фото' : `${selectedImageIndex + 1} / ${cat.gallery.length}`}
+                        {hasPreviewImages
+                            ? images?.[selectedImageIndex]?.label
+                            : selectedImageIndex === -1
+                                ? 'Главное фото'
+                                : `${selectedImageIndex + 1} / ${cat.gallery.length}`}
                     </div>
 
                     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex gap-3 bg-black/50 rounded-full px-4 py-2">
@@ -110,10 +122,12 @@ const ViewPhotoModal: FC<Props> = (props) => {
                         </button>
                     </div>
 
-                    {cat.gallery.length > 0 && (
+                    {(hasPreviewImages || cat.gallery.length > 0 || cat.logo_path) && (
                         <img
-                            src={getS3Path(selectedImageIndex === -1 ? cat.logo_path : cat.gallery[selectedImageIndex])}
-                            alt={`${cat.name}`}
+                            src={hasPreviewImages
+                                ? images?.[selectedImageIndex]?.src
+                                : getS3Path(selectedImageIndex === -1 ? cat.logo_path : cat.gallery[selectedImageIndex])}
+                            alt={hasPreviewImages ? images?.[selectedImageIndex]?.alt : cat.name}
                             className="max-w-full max-h-[90vh] object-contain transition-transform duration-200"
                             style={{ transform: `rotate(${rotation}deg)` }}
                             onDoubleClick={resetTransform}

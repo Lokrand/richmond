@@ -62,6 +62,22 @@ interface CatPageProps {
     params: { id: string };
 }
 
+type PreviewImage = {
+    src: string;
+    alt: string;
+    label: string;
+};
+
+const getPostPreviewImages = (post: InternalApiPostPostResponse): PreviewImage[] => {
+    const photoUrls = (post.photos ?? []).flatMap((photo) => (photo.url ? [photo.url] : []));
+
+    return photoUrls.map((url, index) => ({
+        src: getS3Path(url),
+        alt: `${post.title} — фото ${index + 1}`,
+        label: `${index + 1} / ${photoUrls.length}`,
+    }));
+};
+
 const CatPage = ({ params }: CatPageProps) => {
     // @ts-expect-error
     const { id } = use(params);
@@ -77,6 +93,7 @@ const CatPage = ({ params }: CatPageProps) => {
     const [isPostSaving, setIsPostSaving] = useState(false);
     const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
     const [isPhotoOpen, setIsPhotoOpen] = useState(false);
+    const [postPreviewImages, setPostPreviewImages] = useState<PreviewImage[]>([]);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
     useEffect(() => {
@@ -114,6 +131,13 @@ const CatPage = ({ params }: CatPageProps) => {
     }, [cat]);
 
     const openImageModal = (index: number) => {
+        setPostPreviewImages([]);
+        setSelectedImageIndex(index);
+        setIsPhotoOpen(true);
+    };
+
+    const openPostImageModal = (images: PreviewImage[], index: number) => {
+        setPostPreviewImages(images);
         setSelectedImageIndex(index);
         setIsPhotoOpen(true);
     };
@@ -478,18 +502,27 @@ const CatPage = ({ params }: CatPageProps) => {
                                         </div>
                                     </div>
                                     {post.body && <p className="mt-2 whitespace-pre-wrap text-foreground/75">{post.body}</p>}
-                                    {!!post.photos?.length && (
-                                        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-                                            {post.photos.map((photo, index) => photo.url && (
-                                                <img
-                                                    key={photo.key ?? `${post.postId}-${index}`}
-                                                    src={getS3Path(photo.url)}
-                                                    alt={`${post.title} — фото ${index + 1}`}
-                                                    className="aspect-square w-full rounded-lg object-cover"
-                                                />
-                                            ))}
-                                        </div>
-                                    )}
+                                    {post.photos?.length ? (() => {
+                                        const postImages = getPostPreviewImages(post);
+                                        return postImages.length > 0 && (
+                                            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+                                                {postImages.map((photo, index) => (
+                                                    <button
+                                                        key={`${photo.src}-${index}`}
+                                                        type="button"
+                                                        className="aspect-square w-full"
+                                                        onClick={() => openPostImageModal(postImages, index)}
+                                                    >
+                                                        <img
+                                                            src={photo.src}
+                                                            alt={photo.alt}
+                                                            className="size-full rounded-lg object-cover"
+                                                        />
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        );
+                                    })() : null}
                                 </Card>
                             ))}
                         </div>
@@ -544,6 +577,7 @@ const CatPage = ({ params }: CatPageProps) => {
                     onOpenChange={setIsPhotoOpen}
                     selectedImageIndex={selectedImageIndex}
                     setSelectedImageIndex={setSelectedImageIndex}
+                    images={postPreviewImages}
                 />
                 <EditCatModal
                     cat={cat}

@@ -7,13 +7,12 @@ import { useRouter } from 'next/navigation';
 import {
     Card,
     CardHeader,
-    CardBody,
+    CardContent,
     CardFooter,
     Button,
-    Image,
     Input,
     Textarea,
-} from '@heroui/react';
+} from '@/components/ui';
 import { catApi } from '../../config';
 import { auth } from '../../lib/auth';
 import { InternalApiCatCreateCatRequest } from '../../client';
@@ -168,11 +167,11 @@ const NewCat = () => {
                 return;
             }
 
-            function parseBirthDate(age: string): string {
+            const parseBirthDate = (age: string): string => {
                 const d = new Date();
                 d.setFullYear(d.getFullYear() - parseInt(age, 10));
                 return d.toISOString().split('T')[0];
-            }
+            };
 
             const data: InternalApiCatCreateCatRequest = {
                 name: formData.name.trim(),
@@ -224,14 +223,14 @@ const NewCat = () => {
             <Card className="max-w-2xl w-full shadow-xl rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-default-200 dark:border-default-100">
                 <CardHeader className="flex flex-col items-center gap-2 py-6">
                     <div className="flex items-center gap-3">
-                        <Image src="/lapka.svg" width={16} height={16} alt="Лапка" />
+                        <img src="/lapka.svg" width={16} height={16} alt="Лапка" />
                         <h1 className="text-3xl font-bold text-primary">Добавить нового пушистика</h1>
-                        <Image src="/lapka.svg" width={16} height={16} alt="Лапка" />
+                        <img src="/lapka.svg" width={16} height={16} alt="Лапка" />
                     </div>
                     <p className="text-foreground/70 text-center">Заполните информацию о вашем любимце</p>
                 </CardHeader>
 
-                <CardBody>
+                <CardContent>
                     <form id="new-cat-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Input
@@ -240,7 +239,6 @@ const NewCat = () => {
                                 value={formData.name}
                                 onChange={handleInputChange}
                                 required
-                                variant="bordered"
                                 isInvalid={!!fieldErrors.name}
                                 errorMessage={fieldErrors.name}
                             />
@@ -253,7 +251,6 @@ const NewCat = () => {
                                 required
                                 min="0"
                                 max="30"
-                                variant="bordered"
                                 isInvalid={!!fieldErrors.age}
                                 errorMessage={fieldErrors.age}
                             />
@@ -267,7 +264,6 @@ const NewCat = () => {
                                 required
                                 min="0"
                                 max="20"
-                                variant="bordered"
                                 isInvalid={!!fieldErrors.weight}
                                 errorMessage={fieldErrors.weight}
                             />
@@ -278,7 +274,6 @@ const NewCat = () => {
                                 onChange={handleInputChange}
                                 required
                                 placeholder="Например: Британская, Сиамская..."
-                                variant="bordered"
                                 isInvalid={!!fieldErrors.breed}
                                 errorMessage={fieldErrors.breed}
                             />
@@ -291,7 +286,6 @@ const NewCat = () => {
                             onChange={handleInputChange}
                             required
                             placeholder="Расскажите о характере и особенностях вашего пушистика..."
-                            variant="bordered"
                             minRows={3}
                             isInvalid={!!fieldErrors.description}
                             errorMessage={fieldErrors.description}
@@ -304,7 +298,6 @@ const NewCat = () => {
                             onChange={handleInputChange}
                             required
                             placeholder="Перечислите привычки через запятую (например: Мурлыкать, Играть, Спать...)"
-                            variant="bordered"
                             minRows={2}
                             isInvalid={!!fieldErrors.habits}
                             errorMessage={fieldErrors.habits}
@@ -342,7 +335,7 @@ const NewCat = () => {
                                         Это фото будет отображаться на главной странице
                                     </div>
                                     <div className="relative inline-block">
-                                        <Image
+                                        <img
                                             src={titlePhoto.preview}
                                             className="object-cover rounded-lg shadow-lg ring-4 ring-primary ring-opacity-50"
                                             width={300}
@@ -357,7 +350,7 @@ const NewCat = () => {
                                             onClick={removeTitlePhoto}
                                             type="button"
                                         >
-                                            <Image
+                                            <img
                                                 src="/lapka.svg"
                                                 width={16}
                                                 height={16}
@@ -399,7 +392,7 @@ const NewCat = () => {
                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                                     {galleryPhotos.map((photo, index) => (
                                         <div key={index} className="relative group">
-                                            <Image
+                                            <img
                                                 src={photo.preview}
                                                 className="object-cover rounded-lg shadow-md"
                                                 width={170}
@@ -414,7 +407,7 @@ const NewCat = () => {
                                                 onClick={() => removeGalleryPhoto(index)}
                                                 type="button"
                                             >
-                                                <Image
+                                                <img
                                                     src="/lapka.svg"
                                                     width={16}
                                                     height={16}
@@ -433,7 +426,7 @@ const NewCat = () => {
                             </div>
                         )}
                     </form>
-                </CardBody>
+                </CardContent>
 
                 <CardFooter className="flex justify-center gap-4 px-6 pb-6">
                     <Button
@@ -443,7 +436,7 @@ const NewCat = () => {
                         type="submit"
                         form="new-cat-form"
                         className="min-w-32"
-                        startContent={!isLoading && <Image src="/lapka.svg" width={16} height={16} alt="Лапка" />}
+                        startContent={!isLoading && <img src="/lapka.svg" width={16} height={16} alt="Лапка" />}
                         isLoading={isLoading}
                         onPress={() => {
                             const form = document.getElementById('new-cat-form') as HTMLFormElement;

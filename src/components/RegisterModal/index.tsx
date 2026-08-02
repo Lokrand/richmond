@@ -2,14 +2,16 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-    Button,
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    Input,
-} from '@heroui/react';
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Eye, EyeOff } from 'lucide-react';
 import { userApi } from '../../config';
 
@@ -85,137 +87,114 @@ const RegisterModal = ({ isOpen, onOpenChange, onSwitchToLogin }: RegisterModalP
     };
 
     return (
-        <Modal
-            isOpen={isOpen}
-            onOpenChange={onOpenChange}
-            backdrop="blur"
-        >
-            <ModalContent>
-                {(onClose) => (
-                    <form onSubmit={handleRegister}>
-                        <ModalHeader className="flex flex-col gap-1">
-                            <h2 className="text-2xl font-bold text-primary">
-                                Регистрация в пушистом сообществе 🐱
-                            </h2>
-                            <p className="text-sm text-foreground/60">
-                                Создайте аккаунт, чтобы сохранять любимых котиков
-                            </p>
-                        </ModalHeader>
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-md">
+                <form onSubmit={handleRegister}>
+                    <DialogHeader>
+                        <DialogTitle className="text-2xl font-bold text-primary">
+                            Регистрация в пушистом сообществе 🐱
+                        </DialogTitle>
+                        <DialogDescription>
+                            Создайте аккаунт, чтобы сохранять любимых котиков
+                        </DialogDescription>
+                    </DialogHeader>
 
-                        <ModalBody className="gap-4">
-                            {regError && (
-                                <p className="text-danger text-sm text-center">{regError}</p>
-                            )}
-                            {regSuccess && (
-                                <p className="text-success text-sm text-center font-medium">{regSuccess}</p>
-                            )}
+                    <div className="flex flex-col gap-4 py-4">
+                        {regError && (
+                            <p className="text-danger text-sm text-center">{regError}</p>
+                        )}
+                        {regSuccess && (
+                            <p className="text-success text-sm text-center font-medium">{regSuccess}</p>
+                        )}
 
-                            <Input
-                                autoFocus
-                                label="Придумайте логин"
-                                placeholder="Минимум 3 символа"
-                                variant="bordered"
-                                value={regLogin}
-                                onValueChange={setRegLogin}
-                                isRequired
-                                minLength={3}
-                                classNames={{
-                                    label: 'text-foreground/70',
-                                    input: 'text-foreground',
-                                    inputWrapper: 'border-default-200 dark:border-default-100 hover:border-primary/50 transition-colors',
-                                }}
-                            />
+                        <Input
+                            autoFocus
+                            label="Придумайте логин"
+                            placeholder="Минимум 3 символа"
+                            value={regLogin}
+                            onValueChange={setRegLogin}
+                            isRequired
+                            minLength={3}
+                        />
 
-                            <Input
-                                label="Придумайте пароль"
-                                placeholder="Минимум 6 символов"
-                                variant="bordered"
-                                type={regShowPassword ? 'text' : 'password'}
-                                value={regPassword}
-                                onValueChange={setRegPassword}
-                                isRequired
-                                minLength={6}
-                                endContent={(
-                                    <button
-                                        type="button"
-                                        onClick={() => setRegShowPassword(!regShowPassword)}
-                                        className="focus:outline-none"
-                                    >
-                                        {regShowPassword ? (
-                                            <EyeOff className="w-4 h-4 text-foreground/40 hover:text-primary transition-colors" />
-                                        ) : (
-                                            <Eye className="w-4 h-4 text-foreground/40 hover:text-primary transition-colors" />
-                                        )}
-                                    </button>
-                                )}
-                                classNames={{
-                                    label: 'text-foreground/70',
-                                    input: 'text-foreground',
-                                    inputWrapper: 'border-default-200 dark:border-default-100 hover:border-primary/50 transition-colors',
-                                }}
-                            />
-
-                            <Input
-                                label="Повторите пароль"
-                                placeholder="Введите пароль ещё раз"
-                                variant="bordered"
-                                type={regShowConfirmPassword ? 'text' : 'password'}
-                                value={regConfirmPassword}
-                                onValueChange={setRegConfirmPassword}
-                                isRequired
-                                endContent={(
-                                    <button
-                                        type="button"
-                                        onClick={() => setRegShowConfirmPassword(!regShowConfirmPassword)}
-                                        className="focus:outline-none"
-                                    >
-                                        {regShowConfirmPassword ? (
-                                            <EyeOff className="w-4 h-4 text-foreground/40 hover:text-primary transition-colors" />
-                                        ) : (
-                                            <Eye className="w-4 h-4 text-foreground/40 hover:text-primary transition-colors" />
-                                        )}
-                                    </button>
-                                )}
-                                classNames={{
-                                    label: 'text-foreground/70',
-                                    input: 'text-foreground',
-                                    inputWrapper: 'border-default-200 dark:border-default-100 hover:border-primary/50 transition-colors',
-                                }}
-                            />
-
-                            <div className="flex justify-start">
+                        <Input
+                            label="Придумайте пароль"
+                            placeholder="Минимум 6 символов"
+                            type={regShowPassword ? 'text' : 'password'}
+                            value={regPassword}
+                            onValueChange={setRegPassword}
+                            isRequired
+                            minLength={6}
+                            endContent={(
                                 <button
                                     type="button"
-                                    onClick={onSwitchToLogin}
-                                    className="text-sm text-primary/70 hover:text-primary transition-colors"
+                                    onClick={() => setRegShowPassword(!regShowPassword)}
+                                    className="focus:outline-none"
                                 >
-                                    Уже есть аккаунт? Войти 🐾
+                                    {regShowPassword ? (
+                                        <EyeOff className="w-4 h-4 text-foreground/40 hover:text-primary transition-colors" />
+                                    ) : (
+                                        <Eye className="w-4 h-4 text-foreground/40 hover:text-primary transition-colors" />
+                                    )}
                                 </button>
-                            </div>
-                        </ModalBody>
+                            )}
+                        />
 
-                        <ModalFooter className="gap-3">
+                        <Input
+                            label="Повторите пароль"
+                            placeholder="Введите пароль ещё раз"
+                            type={regShowConfirmPassword ? 'text' : 'password'}
+                            value={regConfirmPassword}
+                            onValueChange={setRegConfirmPassword}
+                            isRequired
+                            endContent={(
+                                <button
+                                    type="button"
+                                    onClick={() => setRegShowConfirmPassword(!regShowConfirmPassword)}
+                                    className="focus:outline-none"
+                                >
+                                    {regShowConfirmPassword ? (
+                                        <EyeOff className="w-4 h-4 text-foreground/40 hover:text-primary transition-colors" />
+                                    ) : (
+                                        <Eye className="w-4 h-4 text-foreground/40 hover:text-primary transition-colors" />
+                                    )}
+                                </button>
+                            )}
+                        />
+
+                        <div className="flex justify-start">
+                            <button
+                                type="button"
+                                onClick={onSwitchToLogin}
+                                className="text-sm text-primary/70 hover:text-primary transition-colors"
+                            >
+                                Уже есть аккаунт? Войти 🐾
+                            </button>
+                        </div>
+                    </div>
+
+                    <DialogFooter className="gap-3">
+                        <DialogClose asChild>
                             <Button
                                 color="danger"
                                 variant="light"
-                                onPress={onClose}
                                 className="hover:bg-danger/10"
                             >
                                 Отмена
                             </Button>
-                            <Button
-                                color="success"
-                                type="submit"
-                                isLoading={regIsLoading}
-                                className="shadow-md hover:shadow-lg transition-shadow"
-                            >
-                                {regIsLoading ? 'Регистрируем...' : 'Зарегистрироваться 🐾'}
-                            </Button>
-                        </ModalFooter>
-                    </form>
-                )}
-            </ModalContent>
-        </Modal>
+                        </DialogClose>
+                        <Button
+                            color="success"
+                            type="submit"
+                            isLoading={regIsLoading}
+                            className="shadow-md hover:shadow-lg transition-shadow"
+                        >
+                            {regIsLoading ? 'Регистрируем...' : 'Зарегистрироваться 🐾'}
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
     );
 };
 

@@ -10,17 +10,19 @@ import React, {
     useMemo,
 } from 'react';
 import {
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    Button,
-    Image,
-    Input,
-    Textarea,
-} from '@heroui/react';
-import { catApi, getS3Path } from '../../config';
+    Dialog,
+    DialogContent,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+    catApi,
+    fileApi,
+    getS3Path,
+    updateCatImages,
+    updateCatTitlePhoto,
+} from '../../config';
 import { auth } from '../../lib/auth';
 import { TyCat } from '../../types';
 
@@ -28,7 +30,7 @@ interface EditCatModalProps {
     cat: TyCat;
     isOpen: boolean;
     onClose: () => void;
-    onUpdate: () => void;
+    onUpdate: () => Promise<void>;
 }
 
 const INITIAL_FORM_DATA = {
@@ -231,14 +233,6 @@ const EditCatModal = ({
                 return d.toISOString().split('T')[0];
             };
 
-            const files: Blob[] = [];
-            if (titlePhoto) {
-                files.push(titlePhoto.file);
-            }
-            galleryPhotos.forEach((photo) => {
-                files.push(photo.file);
-            });
-
             await catApi.apiV1CatIdPut({
                 id: cat.id,
                 authorization: authHeader.Authorization,
@@ -252,7 +246,20 @@ const EditCatModal = ({
                 },
             });
 
-            onUpdate();
+            const galleryChanged = galleryPhotos.length > 0 || removedGalleryPhotos.length > 0;
+            if (galleryChanged) {
+                const fetchPhoto = (url: string) => fileApi.apiV1FileKeyGet({
+                    key: new URL(url).pathname.replace(/^\/main\//, ''),
+                });
+                const files: Blob[] = [titlePhoto?.file ?? await fetchPhoto(existingTitlePhoto)];
+                files.push(...await Promise.all(existingGalleryPhotos.map(fetchPhoto)));
+                files.push(...galleryPhotos.map((photo) => photo.file));
+                await updateCatImages(cat.id, authHeader.Authorization, files);
+            } else if (titlePhoto) {
+                await updateCatTitlePhoto(cat.id, authHeader.Authorization, titlePhoto.file);
+            }
+
+            await onUpdate();
             onClose();
         } catch (error) {
             console.error('Update error:', error);
@@ -268,337 +275,270 @@ const EditCatModal = ({
     );
 
     return (
-        <Modal
-            isOpen={isOpen}
-            onClose={onClose}
-            size="3xl"
-            scrollBehavior="inside"
-            motionProps={{
-                variants: {
-                    enter: {
-                        opacity: 1,
-                        scale: 1,
-                        transition: {
-                            duration: 0.2,
-                            ease: 'easeOut',
-                        },
-                    },
-                    exit: {
-                        opacity: 0,
-                        scale: 0.95,
-                        transition: {
-                            duration: 0.15,
-                            ease: 'easeIn',
-                        },
-                    },
-                },
-            }}
-            classNames={{
-                base: 'bg-white/95 dark:bg-default-50 custom-scrollbar',
-                header: 'border-b border-default-200 dark:border-default-100',
-                footer: 'border-t border-default-200 dark:border-default-100',
-                body: 'py-6',
-                closeButton: 'hover:bg-default-100 active:bg-default-200',
-            }}
-            portalContainer={document.getElementById('modal-portal') || undefined}
-        >
-            <ModalContent>
-                {(onModalClose) => (
-                    <>
-                        <ModalHeader className="flex flex-col items-center gap-2 py-4">
-                            <div className="flex items-center gap-3">
-                                <Image
-                                    src="/lapka.svg"
-                                    width={16}
-                                    height={16}
-                                    alt="Лапка"
-                                    loading="eager"
-                                    className="w-4 h-4"
-                                />
-                                <h2 className="text-2xl font-bold text-primary">
-                                    Редактировать пушистика
-                                </h2>
-                                <Image
-                                    src="/lapka.svg"
-                                    width={16}
-                                    height={16}
-                                    alt="Лапка"
-                                    loading="eager"
-                                    className="w-4 h-4"
+        <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+            <DialogContent className="sm:max-w-3xl bg-white/95 dark:bg-default-50 custom-scrollbar max-h-[90vh] overflow-y-auto p-0">
+                <div className="flex flex-col items-center gap-2 py-4 text-center border-b border-default-200 dark:border-default-100">
+                    <div className="flex items-center gap-3">
+                        <img
+                            src="/lapka.svg"
+                            width={16}
+                            height={16}
+                            alt="Лапка"
+                            loading="eager"
+                            className="w-4 h-4"
+                        />
+                        <h2 className="text-2xl font-bold text-primary">
+                            Редактировать пушистика
+                        </h2>
+                        <img
+                            src="/lapka.svg"
+                            width={16}
+                            height={16}
+                            alt="Лапка"
+                            loading="eager"
+                            className="w-4 h-4"
+                        />
+                    </div>
+                    <p className="text-foreground/70 text-center text-sm">
+                        Измените информацию о
+                        {' '}
+                        {cat.name}
+                    </p>
+                </div>
+
+                <div className="overflow-y-auto p-6">
+                    <div className="flex flex-col gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Input
+                                label="Имя пушистика"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleInputChange}
+                                required
+                                isInvalid={!!error && !formData.name.trim()}
+                            />
+                            <Input
+                                label="Возраст (лет)"
+                                name="age"
+                                type="number"
+                                value={formData.age}
+                                onChange={handleInputChange}
+                                min="0"
+                                max="30"
+                            />
+                            <Input
+                                label="Вес (кг)"
+                                name="weight"
+                                type="number"
+                                step="0.1"
+                                value={formData.weight}
+                                onChange={handleInputChange}
+                                min="0"
+                                max="20"
+                            />
+                            <Input
+                                label="Порода"
+                                name="breed"
+                                value={formData.breed}
+                                onChange={handleInputChange}
+                                placeholder="Например: Британская, Сиамская..."
+                            />
+                        </div>
+
+                        <Textarea
+                            label="Описание"
+                            name="description"
+                            value={formData.description}
+                            onChange={handleInputChange}
+                            placeholder="Расскажите о характере и особенностях вашего пушистика..."
+                            minRows={3}
+                        />
+
+                        <Textarea
+                            label="Привычки"
+                            name="habits"
+                            value={formData.habits}
+                            onChange={handleInputChange}
+                            placeholder="Перечислите привычки через запятую (например: Мурлыкать, Играть, Спать...)"
+                            minRows={2}
+                        />
+
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <label className="text-sm font-medium text-foreground">
+                                    Главное фото *
+                                </label>
+                                <Button
+                                    color="primary"
+                                    variant="flat"
+                                    size="sm"
+                                    onClick={() => titlePhotoInputRef.current?.click()}
+                                    type="button"
+                                    className="text-xs"
+                                >
+                                    🏷️
+                                    {' '}
+                                    {existingTitlePhoto || titlePhoto ? 'Заменить' : 'Выбрать'}
+                                </Button>
+                                <input
+                                    ref={titlePhotoInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleTitlePhotoUpload}
+                                    className="hidden"
                                 />
                             </div>
-                            <p className="text-foreground/70 text-center text-sm">
-                                Измените информацию о
-                                {' '}
-                                {cat.name}
-                            </p>
-                        </ModalHeader>
 
-                        <ModalBody>
-                            <div className="flex flex-col gap-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <Input
-                                        label="Имя пушистика"
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={handleInputChange}
-                                        required
-                                        variant="bordered"
-                                        isInvalid={!!error && !formData.name.trim()}
-                                        classNames={{
-                                            input: 'text-sm',
-                                            label: 'text-sm',
-                                        }}
-                                    />
-                                    <Input
-                                        label="Возраст (лет)"
-                                        name="age"
-                                        type="number"
-                                        value={formData.age}
-                                        onChange={handleInputChange}
-                                        min="0"
-                                        max="30"
-                                        variant="bordered"
-                                        classNames={{
-                                            input: 'text-sm',
-                                            label: 'text-sm',
-                                        }}
-                                    />
-                                    <Input
-                                        label="Вес (кг)"
-                                        name="weight"
-                                        type="number"
-                                        step="0.1"
-                                        value={formData.weight}
-                                        onChange={handleInputChange}
-                                        min="0"
-                                        max="20"
-                                        variant="bordered"
-                                        classNames={{
-                                            input: 'text-sm',
-                                            label: 'text-sm',
-                                        }}
-                                    />
-                                    <Input
-                                        label="Порода"
-                                        name="breed"
-                                        value={formData.breed}
-                                        onChange={handleInputChange}
-                                        placeholder="Например: Британская, Сиамская..."
-                                        variant="bordered"
-                                        classNames={{
-                                            input: 'text-sm',
-                                            label: 'text-sm',
-                                        }}
-                                    />
-                                </div>
-
-                                <Textarea
-                                    label="Описание"
-                                    name="description"
-                                    value={formData.description}
-                                    onChange={handleInputChange}
-                                    placeholder="Расскажите о характере и особенностях вашего пушистика..."
-                                    variant="bordered"
-                                    minRows={3}
-                                    classNames={{
-                                        input: 'text-sm',
-                                        label: 'text-sm',
-                                    }}
-                                />
-
-                                <Textarea
-                                    label="Привычки"
-                                    name="habits"
-                                    value={formData.habits}
-                                    onChange={handleInputChange}
-                                    placeholder="Перечислите привычки через запятую (например: Мурлыкать, Играть, Спать...)"
-                                    variant="bordered"
-                                    minRows={2}
-                                    classNames={{
-                                        input: 'text-sm',
-                                        label: 'text-sm',
-                                    }}
-                                />
-
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <label className="text-sm font-medium text-foreground">
-                                            Главное фото *
-                                        </label>
+                            {titlePhoto && (
+                                <div className="relative group">
+                                    <div className="text-xs text-foreground/70 mb-2">
+                                        Новое главное фото
+                                    </div>
+                                    <div className="relative inline-block">
+                                        <img
+                                            src={titlePhoto.preview}
+                                            className="object-cover rounded-lg shadow-lg ring-2 ring-primary w-52 h-52"
+                                            width={200}
+                                            height={200}
+                                            alt="Новое главное фото"
+                                            loading="lazy"
+                                        />
                                         <Button
-                                            color="primary"
-                                            variant="flat"
+                                            color="danger"
                                             size="sm"
-                                            onClick={() => titlePhotoInputRef.current?.click()}
+                                            isIconOnly
+                                            className="absolute -top-2 -right-2 z-10 w-6 h-6 min-w-0"
+                                            onClick={removeTitlePhoto}
                                             type="button"
-                                            className="text-xs"
                                         >
-                                            🏷️
-                                            {' '}
-                                            {existingTitlePhoto || titlePhoto ? 'Заменить' : 'Выбрать'}
+                                            ✕
                                         </Button>
-                                        <input
-                                            ref={titlePhotoInputRef}
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleTitlePhotoUpload}
-                                            className="hidden"
+                                    </div>
+                                </div>
+                            )}
+
+                            {!titlePhoto && existingTitlePhoto && (
+                                <div className="relative group">
+                                    <div className="text-xs text-foreground/70 mb-2">
+                                        Текущее главное фото
+                                    </div>
+                                    <div className="relative inline-block">
+                                        <img
+                                            src={getS3Path(existingTitlePhoto)}
+                                            className="object-cover rounded-lg shadow-lg ring-2 ring-primary/50 w-52 h-52"
+                                            width={200}
+                                            height={200}
+                                            alt="Текущее главное фото"
+                                            loading="lazy"
                                         />
                                     </div>
-
-                                    {titlePhoto && (
-                                        <div className="relative group">
-                                            <div className="text-xs text-foreground/70 mb-2">
-                                                Новое главное фото
-                                            </div>
-                                            <div className="relative inline-block">
-                                                <Image
-                                                    src={titlePhoto.preview}
-                                                    className="object-cover rounded-lg shadow-lg ring-2 ring-primary"
-                                                    width={200}
-                                                    height={200}
-                                                    alt="Новое главное фото"
-                                                    loading="lazy"
-                                                />
-                                                <Button
-                                                    color="danger"
-                                                    size="sm"
-                                                    isIconOnly
-                                                    className="absolute -top-2 -right-2 z-10 w-6 h-6 min-w-0"
-                                                    onClick={removeTitlePhoto}
-                                                    type="button"
-                                                >
-                                                    ✕
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {!titlePhoto && existingTitlePhoto && (
-                                        <div className="relative group">
-                                            <div className="text-xs text-foreground/70 mb-2">
-                                                Текущее главное фото
-                                            </div>
-                                            <div className="relative inline-block">
-                                                <Image
-                                                    src={getS3Path(existingTitlePhoto)}
-                                                    className="object-cover rounded-lg shadow-lg ring-2 ring-primary/50"
-                                                    width={200}
-                                                    height={200}
-                                                    alt="Текущее главное фото"
-                                                    loading="lazy"
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
+                            )}
+                        </div>
 
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <label className="text-sm font-medium text-foreground">
-                                            Фото галереи
-                                            {totalGalleryCount > 0 && ` (${totalGalleryCount})`}
-                                        </label>
-                                        <Button
-                                            color="secondary"
-                                            variant="flat"
-                                            size="sm"
-                                            onClick={() => galleryPhotosInputRef.current?.click()}
-                                            type="button"
-                                            className="text-xs"
-                                        >
-                                            📷 Добавить
-                                        </Button>
-                                        <input
-                                            ref={galleryPhotosInputRef}
-                                            type="file"
-                                            multiple
-                                            accept="image/*"
-                                            onChange={handleGalleryPhotosUpload}
-                                            className="hidden"
-                                        />
-                                    </div>
-
-                                    {(existingGalleryPhotos.length > 0 || galleryPhotos.length > 0) && (
-                                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                                            {existingGalleryPhotos.map((photo, index) => (
-                                                <div key={`existing-${index}`} className="relative group aspect-square">
-                                                    <Image
-                                                        src={getS3Path(photo)}
-                                                        className="w-full h-full object-cover rounded-lg shadow-md"
-                                                        alt={`Фото ${index + 1}`}
-                                                        loading="lazy"
-                                                    />
-                                                    <Button
-                                                        color="danger"
-                                                        size="sm"
-                                                        isIconOnly
-                                                        className="absolute -top-1 -right-1 z-10 w-5 h-5 min-w-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                        onClick={() => removeExistingGalleryPhoto(photo)}
-                                                        type="button"
-                                                    >
-                                                        ✕
-                                                    </Button>
-                                                </div>
-                                            ))}
-                                            {galleryPhotos.map((photo, index) => (
-                                                <div key={`new-${index}`} className="relative group aspect-square">
-                                                    <Image
-                                                        src={photo.preview}
-                                                        className="w-full h-full object-cover rounded-lg shadow-md ring-2 ring-secondary"
-                                                        alt={`Новое фото ${index + 1}`}
-                                                        loading="lazy"
-                                                    />
-                                                    <Button
-                                                        color="danger"
-                                                        size="sm"
-                                                        isIconOnly
-                                                        className="absolute -top-1 -right-1 z-10 w-5 h-5 min-w-0"
-                                                        onClick={() => removeNewGalleryPhoto(index)}
-                                                        type="button"
-                                                    >
-                                                        ✕
-                                                    </Button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-
-                                {error && (
-                                    <div className="bg-danger-50 border border-danger-200 text-danger-700 px-4 py-2 rounded-lg text-sm">
-                                        {error}
-                                    </div>
-                                )}
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <label className="text-sm font-medium text-foreground">
+                                    Фото галереи
+                                    {totalGalleryCount > 0 && ` (${totalGalleryCount})`}
+                                </label>
+                                <Button
+                                    color="secondary"
+                                    variant="flat"
+                                    size="sm"
+                                    onClick={() => galleryPhotosInputRef.current?.click()}
+                                    type="button"
+                                    className="text-xs"
+                                >
+                                    📷 Добавить
+                                </Button>
+                                <input
+                                    ref={galleryPhotosInputRef}
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={handleGalleryPhotosUpload}
+                                    className="hidden"
+                                />
                             </div>
-                        </ModalBody>
 
-                        <ModalFooter className="flex justify-center gap-4 py-4">
-                            <Button
-                                color="primary"
-                                variant="shadow"
-                                size="lg"
-                                onClick={handleSubmit}
-                                className="min-w-32"
-                                isLoading={isLoading}
-                            >
-                                {isLoading ? 'Сохранение...' : 'Сохранить'}
-                            </Button>
-                            <Button
-                                color="default"
-                                variant="flat"
-                                size="lg"
-                                onClick={onModalClose}
-                                type="button"
-                            >
-                                Отмена
-                            </Button>
-                        </ModalFooter>
-                    </>
-                )}
-            </ModalContent>
-        </Modal>
+                            {(existingGalleryPhotos.length > 0 || galleryPhotos.length > 0) && (
+                                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                                    {existingGalleryPhotos.map((photo, index) => (
+                                        <div key={`existing-${index}`} className="relative group aspect-square">
+                                            <img
+                                                src={getS3Path(photo)}
+                                                className="w-full h-full object-cover rounded-lg shadow-md"
+                                                alt={`Фото ${index + 1}`}
+                                                loading="lazy"
+                                            />
+                                            <Button
+                                                color="danger"
+                                                size="sm"
+                                                isIconOnly
+                                                className="absolute -top-1 -right-1 z-10 w-5 h-5 min-w-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                onClick={() => removeExistingGalleryPhoto(photo)}
+                                                type="button"
+                                            >
+                                                ✕
+                                            </Button>
+                                        </div>
+                                    ))}
+                                    {galleryPhotos.map((photo, index) => (
+                                        <div key={`new-${index}`} className="relative group aspect-square">
+                                            <img
+                                                src={photo.preview}
+                                                className="w-full h-full object-cover rounded-lg shadow-md ring-2 ring-secondary"
+                                                alt={`Новое фото ${index + 1}`}
+                                                loading="lazy"
+                                            />
+                                            <Button
+                                                color="danger"
+                                                size="sm"
+                                                isIconOnly
+                                                className="absolute -top-1 -right-1 z-10 w-5 h-5 min-w-0"
+                                                onClick={() => removeNewGalleryPhoto(index)}
+                                                type="button"
+                                            >
+                                                ✕
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {error && (
+                            <div className="bg-danger-50 border border-danger-200 text-danger-700 px-4 py-2 rounded-lg text-sm">
+                                {error}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex justify-center gap-4 py-4 border-t border-default-200 dark:border-default-100">
+                    <Button
+                        color="primary"
+                        variant="shadow"
+                        size="lg"
+                        onClick={handleSubmit}
+                        className="min-w-32"
+                        isLoading={isLoading}
+                    >
+                        {isLoading ? 'Сохранение...' : 'Сохранить'}
+                    </Button>
+                    <Button
+                        color="default"
+                        variant="flat"
+                        size="lg"
+                        onClick={onClose}
+                        type="button"
+                    >
+                        Отмена
+                    </Button>
+                </div>
+            </DialogContent>
+        </Dialog>
     );
 };
 

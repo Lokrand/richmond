@@ -2,8 +2,8 @@
 
 import React from 'react';
 import {
-    Card, CardHeader, CardBody, Image, Chip,
-} from '@heroui/react';
+    Card, CardHeader, CardContent, Chip,
+} from '@/components/ui';
 import getCatYearNote from '../utils/getCatAgeNote';
 
 const catOfTheDay = {
@@ -20,10 +20,11 @@ const HomePage = () => (
     <div className="flex justify-center mt-8 px-4">
         <Card className="max-w-xl w-full shadow-xl rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-default-200 dark:border-default-100">
             <CardHeader className="flex flex-col items-center gap-4">
-                <Image
+                <img
                     src={catOfTheDay.image}
-                    className="shadow-lg"
+                    alt={catOfTheDay.name}
                     height={400}
+                    className="w-full h-100 object-contain"
                 />
 
                 <h1 className="text-3xl font-bold text-primary">{catOfTheDay.name}</h1>
@@ -54,7 +55,7 @@ const HomePage = () => (
                 <p className="text-foreground/70 text-center">{catOfTheDay.description}</p>
             </CardHeader>
 
-            <CardBody className="flex flex-col gap-2 mt-2 pb-4">
+            <CardContent className="flex flex-col gap-2 mt-2 pb-4">
                 <div className="space-y-3">
                     <p className="font-semibold text-foreground flex items-center justify-center gap-2">
                         <span>🌟</span>
@@ -74,7 +75,7 @@ const HomePage = () => (
                         ))}
                     </div>
                 </div>
-            </CardBody>
+            </CardContent>
         </Card>
     </div>
 );

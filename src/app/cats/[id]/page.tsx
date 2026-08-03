@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useEffect, useState, use } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import {
     Card,
     Button,
@@ -59,7 +59,7 @@ const mapToTyCat = (cat: InternalApiCatCatResponse): TyCat => {
 };
 
 interface CatPageProps {
-    params: { id: string };
+    params: Promise<{ id: string }>;
 }
 
 type PreviewImage = {
@@ -79,7 +79,6 @@ const getPostPreviewImages = (post: InternalApiPostPostResponse): PreviewImage[]
 };
 
 const CatPage = ({ params }: CatPageProps) => {
-    // @ts-expect-error
     const { id } = use(params);
     const [cat, setCat] = useState<TyCat | null>(null);
     const [loading, setLoading] = useState(true);

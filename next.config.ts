@@ -6,14 +6,6 @@ const nextConfig: NextConfig = {
             bodySizeLimit: '50mb',
         },
     },
-    eslint: {
-        ignoreDuringBuilds: true,
-    },
-    // api: {
-    //     bodyParser: {
-    //         sizeLimit: '50mb',
-    //     },
-    // },
 };
 
 export default nextConfig;

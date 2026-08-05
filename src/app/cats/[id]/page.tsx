@@ -163,7 +163,7 @@ const CatPage = ({ params }: CatPageProps) => {
             return;
         }
         await catApi.apiV1CatIdDelete({
-            id,
+            id: parseInt(id, 10),
             authorization: authHeader.Authorization,
         });
     };

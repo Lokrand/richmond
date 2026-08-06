@@ -114,20 +114,20 @@ const Gallery = () => {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {cats.map((cat) => (
-                            <Link key={cat.id} href={`/cats/${cat.id}`}>
-                                <Card className="flex flex-row w-full p-2 shadow-lg rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-default-200 dark:border-default-100 hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer">
+                            <Link key={cat.id} href={`/cats/${cat.id}`} className="block min-w-0">
+                                <Card className="flex w-full flex-col p-2 shadow-lg rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-default-200 dark:border-default-100 hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer sm:flex-row">
                                     <img
                                         src={cat.logo_path || '/default-cat.jpg'}
-                                        className="shadow-md rounded-xl object-cover w-48 h-48 shrink-0"
+                                        className="shadow-md rounded-xl object-cover w-full h-48 shrink-0 sm:w-48"
                                         width={200}
                                         height={200}
                                         alt={cat.name}
                                         loading="lazy"
                                         decoding="async"
                                     />
-                                    <div className="flex flex-col gap-4 ml-4">
+                                    <div className="flex min-w-0 flex-1 flex-col gap-4 ml-0 sm:ml-4">
 
-                                        <h2 className="text-xl font-bold text-primary">{cat.name}</h2>
+                                        <h2 className="break-words text-xl font-bold text-primary">{cat.name}</h2>
                                         <div className="flex flex-wrap gap-2 text-xs text-foreground/60">
                                             <Chip color="primary">
                                                 {cat.age}
@@ -143,7 +143,7 @@ const Gallery = () => {
                                                 {cat.breed}
                                             </Chip>
                                         </div>
-                                        <p className="text-foreground/70 text-sm">{cat.description}</p>
+                                        <p className="break-words text-foreground/70 text-sm">{cat.description}</p>
                                     </div>
                                 </Card>
                             </Link>

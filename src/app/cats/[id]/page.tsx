@@ -100,6 +100,7 @@ const CatPage = ({ params }: CatPageProps) => {
     const [isPhotoOpen, setIsPhotoOpen] = useState(false);
     const [postPreviewImages, setPostPreviewImages] = useState<PreviewImage[]>([]);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+    const [activeTab, setActiveTab] = useState<'gallery' | 'posts'>('gallery');
 
     useEffect(() => {
         const fetchCat = async () => {
@@ -188,6 +189,7 @@ const CatPage = ({ params }: CatPageProps) => {
 
     const handlePostCreated = (post: InternalApiPostPostResponse) => {
         setPosts((currentPosts) => [post, ...currentPosts]);
+        setActiveTab('posts');
     };
 
     const openPostEditor = (post: InternalApiPostPostResponse) => {
@@ -395,7 +397,37 @@ const CatPage = ({ params }: CatPageProps) => {
                     </div>
                 </Card>
 
-                <div className="bg-white/70 dark:bg-default-50 backdrop-blur-md rounded-2xl py-6 px-1 shadow-xl border border-default-200 dark:border-default-100">
+                <div
+                    role="tablist"
+                    aria-label={`Разделы ${cat.name}`}
+                    className="mb-4 flex gap-1 rounded-xl border border-default-200 bg-white/70 p-1 shadow-sm backdrop-blur-md dark:border-default-100 dark:bg-default-50"
+                >
+                    <button
+                        id="gallery-tab"
+                        type="button"
+                        role="tab"
+                        aria-selected={activeTab === 'gallery'}
+                        aria-controls="gallery-panel"
+                        onClick={() => setActiveTab('gallery')}
+                        className={`flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activeTab === 'gallery' ? 'bg-primary text-primary-foreground shadow' : 'text-foreground/70 hover:bg-primary/10 hover:text-primary'}`}
+                    >
+                        Галерея
+                    </button>
+                    <button
+                        id="posts-tab"
+                        type="button"
+                        role="tab"
+                        aria-selected={activeTab === 'posts'}
+                        aria-controls="posts-panel"
+                        onClick={() => setActiveTab('posts')}
+                        className={`flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activeTab === 'posts' ? 'bg-primary text-primary-foreground shadow' : 'text-foreground/70 hover:bg-primary/10 hover:text-primary'}`}
+                    >
+                        Посты
+                    </button>
+                </div>
+
+                {activeTab === 'gallery' ? (
+                    <div id="gallery-panel" role="tabpanel" aria-labelledby="gallery-tab" className="bg-white/70 dark:bg-default-50 backdrop-blur-md rounded-2xl py-6 px-1 shadow-xl border border-default-200 dark:border-default-100">
                     <h2 className="text-2xl font-bold text-center mb-6 text-primary">
                         Галерея
                         {' '}
@@ -455,8 +487,9 @@ const CatPage = ({ params }: CatPageProps) => {
                             </div>
                         </div>
                     )}
-                </div>
-                <section className="mt-8 rounded-2xl border border-default-200 bg-white/70 p-4 shadow-xl backdrop-blur-md dark:border-default-100 dark:bg-default-50 sm:p-6">
+                    </div>
+                ) : (
+                <section id="posts-panel" role="tabpanel" aria-labelledby="posts-tab" className="rounded-2xl border border-default-200 bg-white/70 p-4 shadow-xl backdrop-blur-md dark:border-default-100 dark:bg-default-50 sm:p-6">
                     <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                         <h2 className="text-2xl font-bold text-primary">
                             Записи о
@@ -545,6 +578,7 @@ const CatPage = ({ params }: CatPageProps) => {
                         <p className="py-8 text-center text-foreground/60">Записей пока нет. Добавьте первую фотографию!</p>
                     )}
                 </section>
+                )}
 
                 <AddPostModal
                     catId={cat.id}

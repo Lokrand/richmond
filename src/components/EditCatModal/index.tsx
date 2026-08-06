@@ -23,6 +23,7 @@ import {
     updateCatImages,
     updateCatTitlePhoto,
 } from '../../config';
+import { ApiV1FileKeyGetQualityEnum } from '../../client';
 import { auth } from '../../lib/auth';
 import { TyCat } from '../../types';
 
@@ -84,8 +85,8 @@ const EditCatModal = ({
                     habits: cat.habits?.join(', ') || '',
                     description: cat.description || '',
                 });
-                setExistingTitlePhoto(cat.logo_path || '');
-                setExistingGalleryPhotos(cat.gallery || []);
+                setExistingTitlePhoto(cat.logo_original_path || cat.logo_path || '');
+                setExistingGalleryPhotos(cat.gallery_original || cat.gallery || []);
                 setTitlePhoto(null);
                 setGalleryPhotos([]);
                 setRemovedGalleryPhotos([]);
@@ -250,6 +251,7 @@ const EditCatModal = ({
             if (galleryChanged) {
                 const fetchPhoto = (url: string) => fileApi.apiV1FileKeyGet({
                     key: new URL(url).pathname.replace(/^\/main\//, ''),
+                    quality: ApiV1FileKeyGetQualityEnum.Original,
                 });
                 const files: Blob[] = [titlePhoto?.file ?? await fetchPhoto(existingTitlePhoto)];
                 files.push(...await Promise.all(existingGalleryPhotos.map(fetchPhoto)));

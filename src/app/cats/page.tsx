@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Button, Chip } from '@/components/ui';
 import Link from 'next/link';
 import getCatYearNote from '../../utils/getCatAgeNote';
-import { catApi, getS3Path } from '../../config';
+import { catApi, getImagePath } from '../../config';
 import { InternalApiCatCatResponse } from '../../client/models';
 import { TyCat } from '../../types';
 
@@ -23,8 +23,8 @@ const mapToTyCat = (cat: InternalApiCatCatResponse): TyCat => {
         breed: cat.breed ?? '',
         habits: cat.habits ? cat.habits.split(',').map((h) => h.trim()) : [],
         description: '',
-        logo_path: cat.titlePhoto?.url ?? '',
-        gallery: cat.galleryPhotos?.map((p) => p?.url ?? '').filter(Boolean) ?? [],
+        logo_path: getImagePath(cat.titlePhoto, 'thumbnail'),
+        gallery: cat.galleryPhotos?.map((photo) => getImagePath(photo, 'thumbnail')).filter(Boolean) ?? [],
     };
 };
 
@@ -117,12 +117,13 @@ const Gallery = () => {
                             <Link key={cat.id} href={`/cats/${cat.id}`}>
                                 <Card className="flex flex-row w-full p-2 shadow-lg rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-default-200 dark:border-default-100 hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer">
                                     <img
-                                        // @ts-expect-error
-                                        src={cat.logo || getS3Path(cat.logo_path) || '/default-cat.jpg'}
+                                        src={cat.logo_path || '/default-cat.jpg'}
                                         className="shadow-md rounded-xl object-cover w-48 h-48 shrink-0"
                                         width={200}
                                         height={200}
                                         alt={cat.name}
+                                        loading="lazy"
+                                        decoding="async"
                                     />
                                     <div className="flex flex-col gap-4 ml-4">
 

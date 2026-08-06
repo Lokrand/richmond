@@ -10,7 +10,6 @@ import {
     ChevronRight,
 } from 'lucide-react';
 import { TyCat } from '@/types';
-import { getS3Path } from '@/config';
 
 type Props = {
     isOpen: boolean;
@@ -44,10 +43,16 @@ const ViewPhotoModal: FC<Props> = (props) => {
             setSelectedImageIndex((prev) => (direction === 'prev'
                 ? (prev === 0 ? imageCount - 1 : prev - 1)
                 : (prev === imageCount - 1 ? 0 : prev + 1)));
-        } else if (direction === 'prev') {
-            setSelectedImageIndex((prev) => (prev === 0 ? cat.gallery.length - 1 : prev - 1));
         } else {
-            setSelectedImageIndex((prev) => (prev === cat.gallery.length - 1 ? 0 : prev + 1));
+            const galleryCount = cat.gallery.length;
+            if (galleryCount === 0) return;
+
+            setSelectedImageIndex((prev) => {
+                if (prev === -1) return direction === 'prev' ? galleryCount - 1 : 0;
+                return direction === 'prev'
+                    ? (prev === 0 ? galleryCount - 1 : prev - 1)
+                    : (prev === galleryCount - 1 ? 0 : prev + 1);
+            });
         }
         setRotation(0);
     };
@@ -126,10 +131,14 @@ const ViewPhotoModal: FC<Props> = (props) => {
                         <img
                             src={hasPreviewImages
                                 ? images?.[selectedImageIndex]?.src
-                                : getS3Path(selectedImageIndex === -1 ? cat.logo_path : cat.gallery[selectedImageIndex])}
+                                : selectedImageIndex === -1
+                                    ? cat.logo_original_path || cat.logo_path
+                                    : cat.gallery_original?.[selectedImageIndex] || cat.gallery[selectedImageIndex]}
                             alt={hasPreviewImages ? images?.[selectedImageIndex]?.alt : cat.name}
                             className="max-w-full max-h-[90vh] object-contain transition-transform duration-200"
                             style={{ transform: `rotate(${rotation}deg)` }}
+                            loading="eager"
+                            decoding="async"
                             onDoubleClick={resetTransform}
                         />
                     )}

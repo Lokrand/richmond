@@ -32,11 +32,29 @@ export interface RichmondApiInternalApiFileutilFileMetadata {
      */
     key?: string;
     /**
+     *
+     * @type {string}
+     * @memberof RichmondApiInternalApiFileutilFileMetadata
+     */
+    originalUrl?: string;
+    /**
+     *
+     * @type {string}
+     * @memberof RichmondApiInternalApiFileutilFileMetadata
+     */
+    previewUrl?: string;
+    /**
      * 
      * @type {number}
      * @memberof RichmondApiInternalApiFileutilFileMetadata
      */
     size?: number;
+    /**
+     *
+     * @type {string}
+     * @memberof RichmondApiInternalApiFileutilFileMetadata
+     */
+    thumbnailUrl?: string;
     /**
      * 
      * @type {string}
@@ -76,7 +94,10 @@ export function RichmondApiInternalApiFileutilFileMetadataFromJSONTyped(json: an
         
         'height': json['height'] == null ? undefined : json['height'],
         'key': json['key'] == null ? undefined : json['key'],
+        'originalUrl': json['originalUrl'] == null ? undefined : json['originalUrl'],
+        'previewUrl': json['previewUrl'] == null ? undefined : json['previewUrl'],
         'size': json['size'] == null ? undefined : json['size'],
+        'thumbnailUrl': json['thumbnailUrl'] == null ? undefined : json['thumbnailUrl'],
         'type': json['type'] == null ? undefined : json['type'],
         'url': json['url'] == null ? undefined : json['url'],
         'width': json['width'] == null ? undefined : json['width'],
@@ -96,7 +117,10 @@ export function RichmondApiInternalApiFileutilFileMetadataToJSONTyped(value?: Ri
         
         'height': value['height'],
         'key': value['key'],
+        'originalUrl': value['originalUrl'],
+        'previewUrl': value['previewUrl'],
         'size': value['size'],
+        'thumbnailUrl': value['thumbnailUrl'],
         'type': value['type'],
         'url': value['url'],
         'width': value['width'],

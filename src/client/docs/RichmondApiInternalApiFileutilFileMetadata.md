@@ -8,7 +8,10 @@ Name | Type
 ------------ | -------------
 `height` | number
 `key` | string
+`originalUrl` | string
+`previewUrl` | string
 `size` | number
+`thumbnailUrl` | string
 `type` | string
 `url` | string
 `width` | number
@@ -22,7 +25,10 @@ import type { RichmondApiInternalApiFileutilFileMetadata } from ''
 const example = {
   "height": null,
   "key": null,
+  "originalUrl": null,
+  "previewUrl": null,
   "size": null,
+  "thumbnailUrl": null,
   "type": null,
   "url": null,
   "width": null,

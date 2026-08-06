@@ -31,7 +31,7 @@ import makeFirstCharUppercase from '@/utils/makeFirstCharUppercase';
 import groupHabitTags from '@/utils/groupHabitTags';
 import getCatYearNote from '../../../utils/getCatAgeNote';
 import { auth } from '../../../lib/auth';
-import { catApi, getS3Path, postApi } from '../../../config';
+import { catApi, getImagePath, postApi } from '../../../config';
 import {
     InternalApiCatCatResponse,
     InternalApiPostPostResponse,
@@ -53,8 +53,10 @@ const mapToTyCat = (cat: InternalApiCatCatResponse): TyCat => {
         habits: cat.habits ? cat.habits.split(',').map((h: string) => h.trim()) : [],
         // @ts-expect-error
         description: cat.description,
-        logo_path: cat.titlePhoto?.url ?? '',
-        gallery: cat.galleryPhotos?.map((p) => p?.url ?? '').filter(Boolean) ?? [],
+        logo_path: getImagePath(cat.titlePhoto, 'preview'),
+        logo_original_path: getImagePath(cat.titlePhoto, 'original'),
+        gallery: cat.galleryPhotos?.map((photo) => getImagePath(photo, 'thumbnail')).filter(Boolean) ?? [],
+        gallery_original: cat.galleryPhotos?.map((photo) => getImagePath(photo, 'original')).filter(Boolean) ?? [],
     };
 };
 
@@ -64,15 +66,19 @@ interface CatPageProps {
 
 type PreviewImage = {
     src: string;
+    thumbnailSrc: string;
     alt: string;
     label: string;
 };
 
 const getPostPreviewImages = (post: InternalApiPostPostResponse): PreviewImage[] => {
-    const photoUrls = (post.photos ?? []).flatMap((photo) => (photo.url ? [photo.url] : []));
+    const photoUrls = (post.photos ?? []).map((photo) => ({
+        src: getImagePath(photo, 'preview'),
+        thumbnailSrc: getImagePath(photo, 'thumbnail'),
+    })).filter((photo) => photo.src);
 
-    return photoUrls.map((url, index) => ({
-        src: getS3Path(url),
+    return photoUrls.map((photo, index) => ({
+        ...photo,
         alt: `${post.title} — фото ${index + 1}`,
         label: `${index + 1} / ${photoUrls.length}`,
     }));
@@ -278,10 +284,14 @@ const CatPage = ({ params }: CatPageProps) => {
                             className="shrink-0 cursor-pointer"
                         >
                             <img
-                                src={getS3Path(cat.logo_path)}
+                                src={cat.logo_path}
                                 className="shadow-lg rounded-xl object-cover w-100 h-100 hover:opacity-90 transition-opacity"
+                                width={400}
                                 height={400}
                                 alt={cat.name}
+                                loading="eager"
+                                fetchPriority="high"
+                                decoding="async"
                             />
                         </button>
                     ) : (
@@ -405,8 +415,10 @@ const CatPage = ({ params }: CatPageProps) => {
                                     >
                                         <img
                                             alt={`${cat.name} фото ${index + 1}`}
-                                            src={getS3Path(image)}
-                                            width={400}
+                                            src={image}
+                                            width={480}
+                                            loading="lazy"
+                                            decoding="async"
                                             className="w-full rounded-xl hover:scale-[1.02] transition-transform duration-200"
                                         />
                                     </button>
@@ -513,8 +525,12 @@ const CatPage = ({ params }: CatPageProps) => {
                                                         onClick={() => openPostImageModal(postImages, index)}
                                                     >
                                                         <img
-                                                            src={photo.src}
+                                                            src={photo.thumbnailSrc || photo.src}
                                                             alt={photo.alt}
+                                                            width={480}
+                                                            height={480}
+                                                            loading="lazy"
+                                                            decoding="async"
                                                             className="size-full rounded-lg object-cover"
                                                         />
                                                     </button>

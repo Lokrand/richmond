@@ -32,11 +32,29 @@ export interface InternalApiCatFileMetadata {
      */
     key?: string;
     /**
+     *
+     * @type {string}
+     * @memberof InternalApiCatFileMetadata
+     */
+    originalUrl?: string;
+    /**
+     *
+     * @type {string}
+     * @memberof InternalApiCatFileMetadata
+     */
+    previewUrl?: string;
+    /**
      * 
      * @type {number}
      * @memberof InternalApiCatFileMetadata
      */
     size?: number;
+    /**
+     *
+     * @type {string}
+     * @memberof InternalApiCatFileMetadata
+     */
+    thumbnailUrl?: string;
     /**
      * 
      * @type {string}
@@ -76,7 +94,10 @@ export function InternalApiCatFileMetadataFromJSONTyped(json: any, ignoreDiscrim
         
         'height': json['height'] == null ? undefined : json['height'],
         'key': json['key'] == null ? undefined : json['key'],
+        'originalUrl': json['originalUrl'] == null ? undefined : json['originalUrl'],
+        'previewUrl': json['previewUrl'] == null ? undefined : json['previewUrl'],
         'size': json['size'] == null ? undefined : json['size'],
+        'thumbnailUrl': json['thumbnailUrl'] == null ? undefined : json['thumbnailUrl'],
         'type': json['type'] == null ? undefined : json['type'],
         'url': json['url'] == null ? undefined : json['url'],
         'width': json['width'] == null ? undefined : json['width'],
@@ -96,7 +117,10 @@ export function InternalApiCatFileMetadataToJSONTyped(value?: InternalApiCatFile
         
         'height': value['height'],
         'key': value['key'],
+        'originalUrl': value['originalUrl'],
+        'previewUrl': value['previewUrl'],
         'size': value['size'],
+        'thumbnailUrl': value['thumbnailUrl'],
         'type': value['type'],
         'url': value['url'],
         'width': value['width'],

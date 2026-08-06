@@ -7,7 +7,9 @@ export interface TyCat {
   habits: string[];
   description: string;
   logo_path: string;
+  logo_original_path?: string;
   gallery: string[];
+  gallery_original?: string[];
   created_at?: string;
   updated_at?: string;
 }

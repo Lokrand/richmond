@@ -18,6 +18,27 @@ export const healthApi = new HealthApi(apiConfig);
 export const postApi = new PostApi(apiConfig);
 export const userApi = new UserApi(apiConfig);
 
+type ImageMetadata = {
+    url?: string;
+    originalUrl?: string;
+    previewUrl?: string;
+    thumbnailUrl?: string;
+};
+
+export type ImageQuality = 'original' | 'preview' | 'thumbnail';
+
+export function getImagePath(image: ImageMetadata | null | undefined, quality: ImageQuality = 'preview') {
+    if (!image) return '';
+
+    const url = quality === 'original'
+        ? image.originalUrl ?? image.previewUrl ?? image.url
+        : quality === 'thumbnail'
+            ? image.thumbnailUrl ?? image.previewUrl ?? image.url
+            : image.previewUrl ?? image.url;
+
+    return getS3Path(url ?? '');
+}
+
 const updateCatPhotos = async (
     id: number,
     authorization: string,

@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, Button, Chip } from '@/components/ui';
 import Link from 'next/link';
 import getCatYearNote from '../../utils/getCatAgeNote';
-import { catApi, getImagePath } from '../../config';
+import { getImagePath } from '../../config';
 import { InternalApiCatCatResponse } from '../../client/models';
 import { TyCat } from '../../types';
+import { useCats } from '../../hooks/useCatData';
 
 const mapToTyCat = (cat: InternalApiCatCatResponse): TyCat => {
     const birthDate = cat.birthDate ? new Date(cat.birthDate) : new Date();
@@ -29,28 +30,10 @@ const mapToTyCat = (cat: InternalApiCatCatResponse): TyCat => {
 };
 
 const Gallery = () => {
-    const [cats, setCats] = useState<TyCat[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const { data, isPending, isError, refetch } = useCats();
+    const cats = (data?.cats ?? []).map(mapToTyCat);
 
-    useEffect(() => {
-        const fetchCats = async () => {
-            try {
-                setIsLoading(true);
-                const response = await catApi.apiV1CatAllGet();
-                const cats = (response.cats ?? []).map(mapToTyCat);
-                setCats(cats);
-            } catch {
-                setError('Не удалось загрузить пушистиков');
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchCats();
-    }, []);
-
-    if (isLoading) {
+    if (isPending) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-pink-50 to-blue-50 dark:from-default-100 dark:to-default-200 py-8 px-4">
                 <div className="max-w-6xl mx-auto text-center">
@@ -63,17 +46,17 @@ const Gallery = () => {
         );
     }
 
-    if (error) {
+    if (isError && !data) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-pink-50 to-blue-50 dark:from-default-100 dark:to-default-200 py-8 px-4">
                 <div className="max-w-6xl mx-auto text-center">
                     <div className="bg-danger-50 border border-danger-200 text-danger-700 px-6 py-4 rounded-lg mb-4">
-                        {error}
+                        Не удалось загрузить пушистиков
                     </div>
                     <Button
                         color="primary"
                         variant="shadow"
-                        onClick={() => window.location.reload()}
+                        onClick={() => refetch()}
                     >
                         Попробовать снова
                     </Button>

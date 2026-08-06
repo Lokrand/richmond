@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
-import { auth } from '../../lib/auth';
+import { useLogin } from '../../hooks/useUser';
 
 interface LoginModalProps {
     isOpen: boolean;
@@ -30,8 +30,8 @@ const LoginModal = ({
     const [showPasswordReset, setShowPasswordReset] = useState(false);
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const loginMutation = useLogin();
 
     useEffect(() => {
         setLogin('');
@@ -41,20 +41,17 @@ const LoginModal = ({
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
         setError('');
 
         try {
-            await auth.login(login, password);
-            onLoginSuccess(auth.getUser() || '');
+            await loginMutation.mutateAsync({ login, password });
+            onLoginSuccess(login);
             onOpenChange(false);
             toast.success('Вы вошли в аккаунт', { description: `Рады видеть, ${login}!` });
             setLogin('');
             setPassword('');
         } catch {
             setError('Неверный логин или пароль');
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -146,10 +143,10 @@ const LoginModal = ({
                         <Button
                             color="success"
                             type="submit"
-                            isLoading={isLoading}
+                            isLoading={loginMutation.isPending}
                             className="shadow-md hover:shadow-lg transition-shadow"
                         >
-                            {isLoading ? 'Входим...' : 'Войти 🐾'}
+                            {loginMutation.isPending ? 'Входим...' : 'Войти 🐾'}
                         </Button>
                     </DialogFooter>
                 </form>

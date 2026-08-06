@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { auth } from '../lib/auth';
 import { userApi } from '../config';
 
-const USER_QUERY_KEY = ['user'] as const;
+export const USER_QUERY_KEY = ['user'] as const;
 
 export const useUser = () => useQuery({
     queryKey: USER_QUERY_KEY,
@@ -24,18 +24,10 @@ export const useLogin = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async ({ login, password }: { login: string; password: string }) => {
-            const response = await userApi.apiV1UserLoginPost({
-                request: {
-                    login,
-                    password,
-                },
-            });
-            return response;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
-        },
+        mutationFn: ({ login, password }: { login: string; password: string }) => (
+            auth.login(login, password)
+        ),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY }),
     });
 };
 
@@ -46,10 +38,6 @@ export const useLogout = () => {
         mutationFn: async () => {
             auth.logout();
         },
-        onSuccess: () => {
-            auth.logout();
-            queryClient.setQueryData(USER_QUERY_KEY, null);
-            queryClient.invalidateQueries({ queryKey: USER_QUERY_KEY });
-        },
+        onSuccess: () => queryClient.setQueryData(USER_QUERY_KEY, null),
     });
 };

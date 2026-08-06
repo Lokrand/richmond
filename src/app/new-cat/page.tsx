@@ -3,6 +3,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import {
     Card,
@@ -16,9 +17,11 @@ import {
 import { catApi } from '../../config';
 import { auth } from '../../lib/auth';
 import { InternalApiCatCreateCatRequest } from '../../client';
+import { catQueryKeys } from '../../hooks/useCatData';
 
 const NewCat = () => {
     const router = useRouter();
+    const queryClient = useQueryClient();
     const [formData, setFormData] = useState({
         name: '',
         age: '',
@@ -197,6 +200,7 @@ const NewCat = () => {
             if (result.catId) {
                 console.info('New cat created', result);
                 clearForm();
+                await queryClient.invalidateQueries({ queryKey: catQueryKeys.all });
                 router.push('/cats');
                 router.refresh();
             } else {

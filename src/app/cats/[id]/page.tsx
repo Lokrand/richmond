@@ -3,6 +3,7 @@
 'use client';
 
 import React, { use, useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
     Card,
     Button,
@@ -34,9 +35,16 @@ import { auth } from '../../../lib/auth';
 import { catApi, getImagePath, postApi } from '../../../config';
 import {
     InternalApiCatCatResponse,
+    InternalApiPostListPostsResponse,
     InternalApiPostPostResponse,
 } from '../../../client/models';
 import { TyCat } from '../../../types';
+import {
+    catQueryKeys,
+    postQueryKeys,
+    useCat,
+    useCatPosts,
+} from '../../../hooks/useCatData';
 
 const mapToTyCat = (cat: InternalApiCatCatResponse): TyCat => {
     const birthDate = cat.birthDate ? new Date(cat.birthDate) : new Date();
@@ -86,11 +94,15 @@ const getPostPreviewImages = (post: InternalApiPostPostResponse): PreviewImage[]
 
 const CatPage = ({ params }: CatPageProps) => {
     const { id } = use(params);
-    const [cat, setCat] = useState<TyCat | null>(null);
-    const [loading, setLoading] = useState(true);
+    const catId = parseInt(id, 10);
+    const catQuery = useCat(catId);
+    const postsQuery = useCatPosts(catId);
+    const queryClient = useQueryClient();
+    const cat = catQuery.data ? mapToTyCat(catQuery.data) : null;
+    const loading = catQuery.isPending;
+    const posts = postsQuery.data ?? [];
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddPostModalOpen, setIsAddPostModalOpen] = useState(false);
-    const [posts, setPosts] = useState<InternalApiPostPostResponse[]>([]);
     const [editingPost, setEditingPost] = useState<InternalApiPostPostResponse | null>(null);
     const [postTitle, setPostTitle] = useState('');
     const [postBody, setPostBody] = useState('');
@@ -101,34 +113,6 @@ const CatPage = ({ params }: CatPageProps) => {
     const [postPreviewImages, setPostPreviewImages] = useState<PreviewImage[]>([]);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const [activeTab, setActiveTab] = useState<'gallery' | 'posts'>('gallery');
-
-    useEffect(() => {
-        const fetchCat = async () => {
-            try {
-                const response = await catApi.apiV1CatIdGet({ id: parseInt(id, 10) });
-                setCat(mapToTyCat(response));
-            } catch {
-                notFound();
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchCat();
-    }, [id]);
-
-    useEffect(() => {
-        const fetchPosts = async () => {
-            try {
-                const response = await postApi.apiV1PostAllGet({ limit: 100 });
-                setPosts((response.posts ?? []).filter((post) => post.catId === id));
-            } catch {
-                setPosts([]);
-            }
-        };
-
-        fetchPosts();
-    }, [id]);
 
     useEffect(() => {
         if (cat) {
@@ -147,6 +131,10 @@ const CatPage = ({ params }: CatPageProps) => {
         setSelectedImageIndex(index);
         setIsPhotoOpen(true);
     };
+
+    if (!Number.isInteger(catId)) {
+        notFound();
+    }
 
     if (loading) {
         return (
@@ -170,25 +158,21 @@ const CatPage = ({ params }: CatPageProps) => {
             return;
         }
         await catApi.apiV1CatIdDelete({
-            id: parseInt(id, 10),
+            id: catId,
             authorization: authHeader.Authorization,
         });
+        await queryClient.invalidateQueries({ queryKey: catQueryKeys.all });
     };
 
     const handleCatUpdate = async () => {
-        try {
-            const response = await catApi.apiV1CatIdGet(
-                { id: parseInt(id, 10) },
-                { cache: 'no-store' },
-            );
-            setCat(mapToTyCat(response));
-        } catch {
-            notFound();
-        }
+        await catQuery.refetch();
     };
 
     const handlePostCreated = (post: InternalApiPostPostResponse) => {
-        setPosts((currentPosts) => [post, ...currentPosts]);
+        queryClient.setQueryData<InternalApiPostListPostsResponse>(postQueryKeys.all, (current) => ({
+            ...current,
+            posts: [post, ...(current?.posts ?? [])],
+        }));
         setActiveTab('posts');
     };
 
@@ -230,11 +214,14 @@ const CatPage = ({ params }: CatPageProps) => {
                 authorization: authorization.Authorization,
                 data: { title: postTitle.trim(), body: postBody.trim() },
             });
-            setPosts((currentPosts) => currentPosts.map((post) => (
-                post.postId === editingPost?.postId
-                    ? { ...post, title: postTitle.trim(), body: postBody.trim() }
-                    : post
-            )));
+            queryClient.setQueryData<InternalApiPostListPostsResponse>(postQueryKeys.all, (current) => current && ({
+                ...current,
+                posts: current.posts?.map((post) => (
+                    post.postId === editingPost?.postId
+                        ? { ...post, title: postTitle.trim(), body: postBody.trim() }
+                        : post
+                )),
+            }));
             closePostEditor();
         } catch (error) {
             console.error('Update post error:', error);
@@ -260,7 +247,10 @@ const CatPage = ({ params }: CatPageProps) => {
             }
 
             await postApi.apiV1PostIdDelete({ id: postId, authorization: authorization.Authorization });
-            setPosts((currentPosts) => currentPosts.filter((currentPost) => currentPost.postId !== post.postId));
+            queryClient.setQueryData<InternalApiPostListPostsResponse>(postQueryKeys.all, (current) => current && ({
+                ...current,
+                posts: current.posts?.filter((currentPost) => currentPost.postId !== post.postId),
+            }));
         } catch (error) {
             console.error('Delete post error:', error);
             toast.error('Не удалось удалить запись. Попробуйте ещё раз');
@@ -506,7 +496,11 @@ const CatPage = ({ params }: CatPageProps) => {
                         </Button>
                     </div>
 
-                    {posts.length ? (
+                    {postsQuery.isPending ? (
+                        <p className="py-8 text-center text-foreground/60">Загружаем записи...</p>
+                    ) : postsQuery.isError && !postsQuery.data ? (
+                        <p role="alert" className="py-8 text-center text-danger">Не удалось загрузить записи</p>
+                    ) : posts.length ? (
                         <div className="space-y-4">
                             {posts.map((post) => (
                                 <Card key={post.postId} className="bg-background/80 p-4">

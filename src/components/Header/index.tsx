@@ -2,15 +2,15 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { auth } from '../../lib/auth';
 import usePageTitle from '../../hooks/usePageTitle';
+import { useLogout, useUser } from '../../hooks/useUser';
 import LoginModal from '../LoginModal';
 import RegisterModal from '../RegisterModal';
 
@@ -19,8 +19,10 @@ const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [isRegisterOpen, setIsRegisterOpen] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userLogin, setUserLogin] = useState('');
+    const { data: user } = useUser();
+    const logoutMutation = useLogout();
+    const isLoggedIn = Boolean(user);
+    const userLogin = user?.login ?? '';
 
     const links = [
         { href: '/', label: 'Пушистик дня' },
@@ -34,23 +36,8 @@ const Header = () => {
 
     usePageTitle();
 
-    useEffect(() => {
-        let isMounted = true;
-        auth.getAuthorizationHeader().then((header) => {
-            if (isMounted) {
-                setIsLoggedIn(!!header);
-                setUserLogin(header ? auth.getUser() || '' : '');
-            }
-        });
-        return () => {
-            isMounted = false;
-        };
-    }, []);
-
     const handleLogout = () => {
-        auth.logout();
-        setIsLoggedIn(false);
-        setUserLogin('');
+        logoutMutation.mutate();
         setIsMenuOpen(false);
         toast.success('Вы вышли из аккаунта');
     };
@@ -70,9 +57,8 @@ const Header = () => {
         setTimeout(() => setIsLoginOpen(true), 300);
     };
 
-    const handleLoginSuccess = (login: string) => {
-        setIsLoggedIn(true);
-        setUserLogin(login);
+    const handleLoginSuccess = () => {
+        setIsLoginOpen(false);
     };
 
     const isActiveLink = (href: string) => (

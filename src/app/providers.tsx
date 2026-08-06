@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -17,6 +17,12 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
             },
         }),
     );
+
+    useEffect(() => {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => undefined);
+        }
+    }, []);
 
     return (
         <QueryClientProvider client={queryClient}>

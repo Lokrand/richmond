@@ -27,8 +27,8 @@ interface AddPostModalProps {
 
 type Photo = { file: File; preview: string };
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
-const MAX_UPLOAD_SIZE = 32 * 1024 * 1024;
+export const MAX_FILE_SIZE = 10 * 1024 * 1024;
+export const MAX_UPLOAD_SIZE = 32 * 1024 * 1024;
 
 const AddPostModal = ({
     catId, catName, isOpen, onClose, onCreated,

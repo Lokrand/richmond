@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { use, useEffect, useState } from 'react';
+import React, { use, useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
     Card,
@@ -13,9 +13,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { toast } from 'sonner';
 import {
-    Camera, Trash2, Pencil, ImagePlus,
+    Camera, Trash2, Pencil, ImagePlus, X,
 } from 'lucide-react';
-import AddPostModal from '@/components/AddPostModal';
+import AddPostModal, { MAX_FILE_SIZE, MAX_UPLOAD_SIZE } from '@/components/AddPostModal';
 import EditCatModal from '@/components/EditCatModal';
 import {
     Dialog,
@@ -32,11 +32,14 @@ import makeFirstCharUppercase from '@/utils/makeFirstCharUppercase';
 import groupHabitTags from '@/utils/groupHabitTags';
 import getCatYearNote from '../../../utils/getCatAgeNote';
 import { auth } from '../../../lib/auth';
-import { catApi, getImagePath, postApi } from '../../../config';
+import {
+    catApi, getImagePath, postApi, updatePostImages,
+} from '../../../config';
 import {
     InternalApiCatCatResponse,
     InternalApiPostListPostsResponse,
     InternalApiPostPostResponse,
+    RichmondApiInternalApiFileutilFileMetadata,
 } from '../../../client/models';
 import { TyCat } from '../../../types';
 import {
@@ -79,6 +82,36 @@ type PreviewImage = {
     label: string;
 };
 
+type EditablePostPhoto =
+    | {
+        kind: 'existing';
+        photo: RichmondApiInternalApiFileutilFileMetadata;
+        preview: string;
+        source: string;
+    }
+    | {
+        kind: 'new';
+        file: File;
+        preview: string;
+    };
+
+const revokePostPhotoPreviews = (photos: EditablePostPhoto[]) => {
+    photos.forEach((photo) => {
+        if (photo.kind === 'new') URL.revokeObjectURL(photo.preview);
+    });
+};
+
+const getPostPhotoFile = async (photo: Extract<EditablePostPhoto, { kind: 'existing' }>, index: number) => {
+    if (!photo.source) throw new Error('Post photo URL is missing');
+
+    const response = await fetch(`/api/post-image?url=${encodeURIComponent(photo.source)}`);
+    if (!response.ok) throw new Error(`Post photo download failed: ${response.status}`);
+
+    const blob = await response.blob();
+    const filename = photo.photo.key?.split('/').pop() || `post-photo-${index + 1}.jpg`;
+    return new File([blob], filename, { type: blob.type || photo.photo.type || 'image/jpeg' });
+};
+
 const getPostPreviewImages = (post: InternalApiPostPostResponse): PreviewImage[] => {
     const photoUrls = (post.photos ?? []).map((photo) => ({
         src: getImagePath(photo, 'preview'),
@@ -106,13 +139,24 @@ const CatPage = ({ params }: CatPageProps) => {
     const [editingPost, setEditingPost] = useState<InternalApiPostPostResponse | null>(null);
     const [postTitle, setPostTitle] = useState('');
     const [postBody, setPostBody] = useState('');
+    const [postPhotos, setPostPhotos] = useState<EditablePostPhoto[]>([]);
+    const [postPhotosChanged, setPostPhotosChanged] = useState(false);
     const [postError, setPostError] = useState('');
     const [isPostSaving, setIsPostSaving] = useState(false);
     const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
+    const postCameraInputRef = useRef<HTMLInputElement>(null);
+    const postPhotoInputRef = useRef<HTMLInputElement>(null);
+    const postPhotosRef = useRef<EditablePostPhoto[]>([]);
     const [isPhotoOpen, setIsPhotoOpen] = useState(false);
     const [postPreviewImages, setPostPreviewImages] = useState<PreviewImage[]>([]);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const [activeTab, setActiveTab] = useState<'gallery' | 'posts'>('gallery');
+
+    useEffect(() => {
+        postPhotosRef.current = postPhotos;
+    }, [postPhotos]);
+
+    useEffect(() => () => revokePostPhotoPreviews(postPhotosRef.current), []);
 
     useEffect(() => {
         if (cat) {
@@ -176,7 +220,56 @@ const CatPage = ({ params }: CatPageProps) => {
         setActiveTab('posts');
     };
 
+    const addPostPhotos = (files: File[]) => {
+        const invalidFile = files.find((file) => !file.type.startsWith('image/') || file.size > MAX_FILE_SIZE);
+        if (invalidFile) {
+            setPostError(`Файл ${invalidFile.name} должен быть изображением до 10 МБ`);
+            return;
+        }
+
+        const totalSize = postPhotos.reduce((total, photo) => total + (
+            photo.kind === 'new' ? photo.file.size : photo.photo.size ?? 0
+        ), 0) + files.reduce((total, file) => total + file.size, 0);
+        if (totalSize > MAX_UPLOAD_SIZE) {
+            setPostError('Общий размер фотографий не должен превышать 32 МБ');
+            return;
+        }
+
+        setPostPhotos((currentPhotos) => [
+            ...currentPhotos,
+            ...files.map((file) => ({ kind: 'new' as const, file, preview: URL.createObjectURL(file) })),
+        ]);
+        setPostPhotosChanged(true);
+        setPostError('');
+    };
+
+    const handlePostPhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const input = event.currentTarget;
+        addPostPhotos(Array.from(input.files ?? []));
+        input.value = '';
+    };
+
+    const removePostPhoto = (index: number) => {
+        setPostPhotos((currentPhotos) => {
+            const photo = currentPhotos[index];
+            if (photo?.kind === 'new') URL.revokeObjectURL(photo.preview);
+            return currentPhotos.filter((_, photoIndex) => photoIndex !== index);
+        });
+        setPostPhotosChanged(true);
+        setPostError('');
+    };
+
     const openPostEditor = (post: InternalApiPostPostResponse) => {
+        setPostPhotos((currentPhotos) => {
+            revokePostPhotoPreviews(currentPhotos);
+            return (post.photos ?? []).map((photo) => ({
+                kind: 'existing' as const,
+                photo,
+                preview: getImagePath(photo, 'thumbnail') || getImagePath(photo, 'preview') || getImagePath(photo, 'original'),
+                source: getImagePath(photo, 'original') || getImagePath(photo, 'preview') || getImagePath(photo, 'thumbnail'),
+            }));
+        });
+        setPostPhotosChanged(false);
         setEditingPost(post);
         setPostTitle(post.title ?? '');
         setPostBody(post.body ?? '');
@@ -184,19 +277,35 @@ const CatPage = ({ params }: CatPageProps) => {
     };
 
     const closePostEditor = () => {
+        setPostPhotos((currentPhotos) => {
+            revokePostPhotoPreviews(currentPhotos);
+            return [];
+        });
+        setPostPhotosChanged(false);
         setEditingPost(null);
         setPostError('');
     };
 
     const updatePost = async (event: React.FormEvent) => {
         event.preventDefault();
-        const postId = Number(editingPost?.postId);
+        if (!editingPost) {
+            setPostError('Не удалось определить запись');
+            return;
+        }
+        const postId = Number(editingPost.postId);
         if (!postTitle.trim()) {
             setPostError('Добавьте заголовок записи');
             return;
         }
         if (!Number.isInteger(postId)) {
             setPostError('Не удалось определить запись');
+            return;
+        }
+
+        const textChanged = postTitle.trim() !== (editingPost?.title ?? '')
+            || postBody.trim() !== (editingPost?.body ?? '');
+        if (!textChanged && !postPhotosChanged) {
+            closePostEditor();
             return;
         }
 
@@ -209,16 +318,45 @@ const CatPage = ({ params }: CatPageProps) => {
                 return;
             }
 
-            await postApi.apiV1PostIdPut({
-                id: postId,
-                authorization: authorization.Authorization,
-                data: { title: postTitle.trim(), body: postBody.trim() },
-            });
+            const files = postPhotosChanged
+                ? await Promise.all(postPhotos.map((photo, index) => (
+                    photo.kind === 'new' ? photo.file : getPostPhotoFile(photo, index)
+                )))
+                : null;
+            if (files) {
+                const totalSize = files.reduce((total, file) => total + file.size, 0);
+                if (files.some((file) => file.size > MAX_FILE_SIZE)) {
+                    setPostError('Каждая фотография должна быть размером до 10 МБ');
+                    return;
+                }
+                if (totalSize > MAX_UPLOAD_SIZE) {
+                    setPostError('Общий размер фотографий не должен превышать 32 МБ');
+                    return;
+                }
+            }
+
+            let updatedPost = editingPost;
+            if (textChanged) {
+                updatedPost = await postApi.apiV1PostIdPut({
+                    id: postId,
+                    authorization: authorization.Authorization,
+                    data: { title: postTitle.trim(), body: postBody.trim() },
+                });
+            }
+            if (files) {
+                updatedPost = await updatePostImages(postId, authorization.Authorization, files);
+            }
+
             queryClient.setQueryData<InternalApiPostListPostsResponse>(postQueryKeys.all, (current) => current && ({
                 ...current,
                 posts: current.posts?.map((post) => (
                     post.postId === editingPost?.postId
-                        ? { ...post, title: postTitle.trim(), body: postBody.trim() }
+                        ? {
+                            ...post,
+                            title: updatedPost.title ?? postTitle.trim(),
+                            body: updatedPost.body ?? postBody.trim(),
+                            photos: updatedPost.photos ?? post.photos,
+                        }
                         : post
                 )),
             }));
@@ -582,7 +720,7 @@ const CatPage = ({ params }: CatPageProps) => {
                     onCreated={handlePostCreated}
                 />
                 <Dialog open={!!editingPost} onOpenChange={(open) => { if (!open) closePostEditor(); }}>
-                    <DialogContent className="sm:max-w-xl">
+                    <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
                         <form onSubmit={updatePost} className="space-y-5">
                             <DialogHeader>
                                 <DialogTitle className="text-2xl text-primary">Редактировать запись</DialogTitle>
@@ -603,6 +741,75 @@ const CatPage = ({ params }: CatPageProps) => {
                                 maxLength={5000}
                                 minRows={4}
                             />
+                            <div className="space-y-3">
+                                <p className="text-sm font-medium text-foreground/80">Фотографии</p>
+                                <div className="flex flex-wrap gap-2">
+                                    <Button
+                                        color="primary"
+                                        variant="flat"
+                                        type="button"
+                                        startContent={<Camera size={18} />}
+                                        onClick={() => postCameraInputRef.current?.click()}
+                                        isDisabled={isPostSaving}
+                                    >
+                                        Снять фото
+                                    </Button>
+                                    <Button
+                                        color="secondary"
+                                        variant="flat"
+                                        type="button"
+                                        startContent={<ImagePlus size={18} />}
+                                        onClick={() => postPhotoInputRef.current?.click()}
+                                        isDisabled={isPostSaving}
+                                    >
+                                        Добавить фото
+                                    </Button>
+                                </div>
+                                <input
+                                    ref={postCameraInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    capture="environment"
+                                    onChange={handlePostPhotoChange}
+                                    className="hidden"
+                                />
+                                <input
+                                    ref={postPhotoInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={handlePostPhotoChange}
+                                    className="hidden"
+                                />
+                                <p className="text-xs text-foreground/50">
+                                    Удалите ненужные фото или добавьте новые. Можно удалить все фотографии.
+                                </p>
+                                {postPhotos.length > 0 && (
+                                    <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                                        {postPhotos.map((photo, index) => (
+                                            <div
+                                                key={`${photo.kind === 'new' ? photo.preview : photo.photo.key || photo.source}-${index}`}
+                                                className="relative aspect-square"
+                                            >
+                                                <img
+                                                    src={photo.preview}
+                                                    alt={`Фото записи ${index + 1}`}
+                                                    className="size-full rounded-lg object-cover shadow"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    aria-label={`Удалить фото ${index + 1}`}
+                                                    onClick={() => removePostPhoto(index)}
+                                                    disabled={isPostSaving}
+                                                    className="absolute -right-2 -top-2 rounded-full bg-danger p-1 text-white shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                             {postError && <p role="alert" className="rounded-lg border border-danger-200 bg-danger-50 px-4 py-3 text-sm text-danger-700">{postError}</p>}
                             <DialogFooter>
                                 <Button color="default" variant="flat" type="button" onClick={closePostEditor}>Отмена</Button>

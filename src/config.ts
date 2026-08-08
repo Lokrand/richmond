@@ -6,6 +6,8 @@ import {
     PostApi,
     UserApi,
 } from './client';
+import type { InternalApiPostPostResponse } from './client/models';
+import { InternalApiPostPostResponseFromJSON } from './client/models';
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8099';
 export const BASE_S3_URL = process.env.NEXT_PUBLIC_BASE_S3_URL ?? 'http://localhost:9900';
@@ -62,6 +64,24 @@ export const updateCatImages = (id: number, authorization: string, files: Blob[]
 export const updateCatTitlePhoto = (id: number, authorization: string, file: Blob) => (
     updateCatPhotos(id, authorization, 'title-photo', [file])
 );
+
+export const updatePostImages = async (
+    id: number,
+    authorization: string,
+    files: File[],
+): Promise<InternalApiPostPostResponse> => {
+    const formData = new FormData();
+    files.forEach((file) => formData.append('file', file, file.name));
+
+    const response = await fetch(`${API_URL}/api/v1/post/${id}/images`, {
+        method: 'PUT',
+        headers: { Authorization: authorization },
+        body: formData,
+    });
+    if (!response.ok) throw new Error(`Post photo update failed: ${response.status}`);
+
+    return InternalApiPostPostResponseFromJSON(await response.json());
+};
 
 export function getS3Path(filename: string) {
     return filename.replace('http://rustfs:9000', BASE_S3_URL);

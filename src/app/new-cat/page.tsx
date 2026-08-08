@@ -442,10 +442,7 @@ const NewCat = () => {
                         className="min-w-32"
                         startContent={!isLoading && <img src="/lapka.svg" width={16} height={16} alt="Лапка" />}
                         isLoading={isLoading}
-                        onPress={() => {
-                            const form = document.getElementById('new-cat-form') as HTMLFormElement;
-                            form?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-                        }}
+                        isDisabled={isLoading}
                     >
                         {isLoading ? 'Сохранение...' : 'Сохранить'}
                     </Button>

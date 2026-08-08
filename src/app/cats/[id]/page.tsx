@@ -10,7 +10,7 @@ import {
     Chip,
 } from '@/components/ui';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
     Camera, Trash2, Pencil, ImagePlus, X,
@@ -196,16 +196,23 @@ const CatPage = ({ params }: CatPageProps) => {
     const hasLogo = cat.logo_path !== '';
     const habitTags = groupHabitTags(cat.habits);
 
+    const router = useRouter();
+
     const removeCat = async () => {
         const authHeader = await auth.getAuthorizationHeader();
         if (!authHeader) {
             return;
         }
-        await catApi.apiV1CatIdDelete({
-            id: catId,
-            authorization: authHeader.Authorization,
-        });
-        await queryClient.invalidateQueries({ queryKey: catQueryKeys.all });
+        try {
+            await catApi.apiV1CatIdDelete({
+                id: catId,
+                authorization: authHeader.Authorization,
+            });
+            await queryClient.invalidateQueries({ queryKey: catQueryKeys.all });
+            router.replace('/cats');
+        } catch {
+            toast.error('Не удалось удалить кота');
+        }
     };
 
     const handleCatUpdate = async () => {

@@ -624,18 +624,17 @@ const CatPage = ({ params }: CatPageProps) => {
                     ) : posts.length ? (
                         <div className="space-y-4">
                             {posts.map((post) => (
-                                <Card key={post.postId} className="bg-background/80 p-4">
+                                <Card key={post.postId} className="bg-background/80">
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="flex flex-nowrap gap-4 items-center">
                                             {post.createdAt && (
-                                                <p className="text-sm font-semibold mt-1">
+                                                <p className="text-sm font-semibold p-2 border-r-1 border-b-1">
                                                     {new Date(post.createdAt).toLocaleDateString('ru-RU')}
                                                 </p>
                                             )}
-                                            <div className="border-l-1 w-1 h-5"></div>
                                             <h3 className="text-lg font-semibold">{post.title}</h3>
                                         </div>
-                                        <div className="flex shrink-0 items-center gap-2">
+                                        <div className="flex shrink-0 items-center gap-2 p-2 pb-0">
                                             <Button
                                                 color="primary"
                                                 variant="shadow"
@@ -661,32 +660,34 @@ const CatPage = ({ params }: CatPageProps) => {
                                             </Button>
                                         </div>
                                     </div>
-                                    {post.body && <p className="mt-2 whitespace-pre-wrap text-foreground/75">{post.body}</p>}
-                                    {post.photos?.length ? (() => {
-                                        const postImages = getPostPreviewImages(post);
-                                        return postImages.length > 0 && (
-                                            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-                                                {postImages.map((photo, index) => (
-                                                    <button
-                                                        key={`${photo.src}-${index}`}
-                                                        type="button"
-                                                        className="aspect-square w-full"
-                                                        onClick={() => openPostImageModal(postImages, index)}
-                                                    >
-                                                        <img
-                                                            src={photo.thumbnailSrc || photo.src}
-                                                            alt={photo.alt}
-                                                            width={480}
-                                                            height={480}
-                                                            loading="lazy"
-                                                            decoding="async"
-                                                            className="size-full rounded-lg object-cover"
-                                                        />
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        );
-                                    })() : null}
+                                    <div className="p-2 pt-0">
+                                        {post.body && <p className="mt-2 whitespace-pre-wrap text-foreground/75">{post.body}</p>}
+                                        {post.photos?.length ? (() => {
+                                            const postImages = getPostPreviewImages(post);
+                                            return postImages.length > 0 && (
+                                                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+                                                    {postImages.map((photo, index) => (
+                                                        <button
+                                                            key={`${photo.src}-${index}`}
+                                                            type="button"
+                                                            className="aspect-square w-full"
+                                                            onClick={() => openPostImageModal(postImages, index)}
+                                                        >
+                                                            <img
+                                                                src={photo.thumbnailSrc || photo.src}
+                                                                alt={photo.alt}
+                                                                width={480}
+                                                                height={480}
+                                                                loading="lazy"
+                                                                decoding="async"
+                                                                className="size-full rounded-lg object-cover"
+                                                                />
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            );
+                                        })() : null}
+                                    </div>
                                 </Card>
                             ))}
                         </div>

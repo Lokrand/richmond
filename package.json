@@ -29,6 +29,7 @@
     "@tailwindcss/postcss": "^4.3.3",
     "@tanstack/react-query": "^5.101.4",
     "@tanstack/react-query-devtools": "^5.101.4",
+    "@use-gesture/react": "^10.3.1",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -38,6 +39,7 @@
     "postcss": "^8.5.25",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "react-spring": "^10.0.4",
     "sharp": "^0.34.5",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.6.0",
@@ -56,7 +58,9 @@
   },
   "knip": {
     "$schema": "https://unpkg.com/knip@6/schema.json",
-    "ignore": ["src/client/**"]
+    "ignore": [
+      "src/client/**"
+    ]
   },
   "packageManager": "pnpm@10.33.0",
   "engines": {

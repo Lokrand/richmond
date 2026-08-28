@@ -29,7 +29,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import ViewPhotoModal from '@/components/ViewPhotoModal';
 import makeFirstCharUppercase from '@/utils/makeFirstCharUppercase';
-import groupHabitTags from '@/utils/groupHabitTags';
 import getCatYearNote from '../../../utils/getCatAgeNote';
 import { auth } from '../../../lib/auth';
 import {
@@ -194,8 +193,6 @@ const CatPage = ({ params }: CatPageProps) => {
 
     const hasGallery = cat.gallery.length > 0;
     const hasLogo = cat.logo_path !== '';
-    const habitTags = groupHabitTags(cat.habits);
-
     const router = useRouter();
 
     const removeCat = async () => {
@@ -477,52 +474,31 @@ const CatPage = ({ params }: CatPageProps) => {
                         </div>
                         <div className="flex items-center justify-start flex-wrap gap-1 sm:gap-4 text-foreground/70">
                             <span className="flex items-center gap-1.5">
-                                <span className="text-primary">🎂</span>
-                                <span>
-                                    {cat.age}
-                                    {' '}
-                                    {getCatYearNote(cat.age)}
-                                </span>
+                                {`🎂 ${cat.age} ${getCatYearNote(cat.age)}`}
                             </span>
                             <span className="w-1 h-1 rounded-full bg-default-300 hidden sm:block" />
                             <span className="flex items-center gap-1.5">
-                                <span className="text-success">⚖️</span>
-                                <span>
-                                    {cat.weight}
-                                    {' '}
-                                    кг
-                                </span>
+                                {`⚖️ ${cat.weight} кг`}
                             </span>
                             <span className="w-1 h-1 rounded-full bg-default-300 hidden sm:block" />
                             <span className="flex items-center gap-1.5">
-                                <span className="text-secondary">🐱</span>
-                                <span>{cat.breed}</span>
+                                <span>{`🐱 ${cat.breed}`}</span>
                             </span>
                         </div>
                         <p className="text-foreground/70 mt-4 mb-4">{cat.description || `Пушистик ${cat.name} пока не добавил описание, может быть ему дать вкусняшку, чтобы он рассказал о себе?`}</p>
                         <div className="space-y-3">
                             <p className="font-semibold text-foreground flex items-center justify-start gap-2">
-                                <span>🌟</span>
-                                {' '}
-                                Любимые привычки
+                                🌟 Любимые привычки
                             </p>
-                            <div className="flex flex-wrap justify-start gap-2 rounded-xl border border-primary/10 bg-primary/5 p-3">
-                                {habitTags.length ? habitTags.map((habit) => (
+                            <div className="flex flex-wrap gap-2">
+                                {cat.habits.length ? cat.habits.map((habit) => (
                                     <Chip
-                                        key={habit.label.toLocaleLowerCase('ru-RU')}
+                                        key={habit.toLocaleLowerCase('ru-RU')}
                                         variant="flat"
                                         color="primary"
                                         size="sm"
-                                        startContent={<span aria-hidden="true">🐾</span>}
-                                        className="h-auto max-w-full whitespace-normal break-words px-3 py-1.5 text-left leading-5"
-                                    >
-                                        <span>{makeFirstCharUppercase(habit.label)}</span>
-                                        {habit.occurrences > 1 && (
-                                            <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-bold leading-none">
-                                                ×
-                                                {habit.occurrences}
-                                            </span>
-                                        )}
+                                    >   
+                                        {`${makeFirstCharUppercase(habit)}`}
                                     </Chip>
                                 )) : (
                                     <p className="text-sm text-foreground/60">Пока нет привычек</p>
@@ -544,7 +520,7 @@ const CatPage = ({ params }: CatPageProps) => {
                         aria-selected={activeTab === 'gallery'}
                         aria-controls="gallery-panel"
                         onClick={() => setActiveTab('gallery')}
-                        className={`flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activeTab === 'gallery' ? 'bg-primary text-primary-foreground shadow' : 'text-foreground/70 hover:bg-primary/10 hover:text-primary'}`}
+                        className={`flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activeTab === 'gallery' ? 'bg-primary text-primary-foreground shadow' : 'text-foreground/70 hover:bg-primary/10 hover:text-primary'}`}
                     >
                         Галерея
                     </button>
@@ -555,7 +531,7 @@ const CatPage = ({ params }: CatPageProps) => {
                         aria-selected={activeTab === 'posts'}
                         aria-controls="posts-panel"
                         onClick={() => setActiveTab('posts')}
-                        className={`flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activeTab === 'posts' ? 'bg-primary text-primary-foreground shadow' : 'text-foreground/70 hover:bg-primary/10 hover:text-primary'}`}
+                        className={`flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activeTab === 'posts' ? 'bg-primary text-primary-foreground shadow' : 'text-foreground/70 hover:bg-primary/10 hover:text-primary'}`}
                     >
                         Посты
                     </button>
@@ -637,32 +613,34 @@ const CatPage = ({ params }: CatPageProps) => {
                             startContent={<ImagePlus size={18} />}
                             onClick={() => setIsAddPostModalOpen(true)}
                         >
-                            Добавить запись
+                            Создать новый пост
                         </Button>
                     </div>
 
                     {postsQuery.isPending ? (
                         <p className="py-8 text-center text-foreground/60">Загружаем записи...</p>
                     ) : postsQuery.isError && !postsQuery.data ? (
-                        <p role="alert" className="py-8 text-center text-danger">Не удалось загрузить записи</p>
+                        <p role="alert" className="py-8 text-center text-danger">Не удалось загрузить посты</p>
                     ) : posts.length ? (
                         <div className="space-y-4">
                             {posts.map((post) => (
                                 <Card key={post.postId} className="bg-background/80 p-4">
                                     <div className="flex items-start justify-between gap-4">
-                                        <h3 className="text-lg font-semibold">{post.title}</h3>
-                                        <div className="flex shrink-0 items-center gap-2">
+                                        <div className="flex flex-nowrap gap-4 items-center">
                                             {post.createdAt && (
-                                                <time dateTime={post.createdAt} className="text-sm text-foreground/50">
+                                                <p className="text-sm font-semibold mt-1">
                                                     {new Date(post.createdAt).toLocaleDateString('ru-RU')}
-                                                </time>
+                                                </p>
                                             )}
+                                            <div className="border-l-1 w-1 h-5"></div>
+                                            <h3 className="text-lg font-semibold">{post.title}</h3>
+                                        </div>
+                                        <div className="flex shrink-0 items-center gap-2">
                                             <Button
-                                                type="button"
                                                 color="primary"
-                                                variant="flat"
+                                                variant="shadow"
                                                 size="sm"
-                                                isIconOnly
+                                                className="p-2 min-w-10"
                                                 aria-label="Редактировать запись"
                                                 onClick={() => openPostEditor(post)}
                                                 isDisabled={deletingPostId !== null}
@@ -670,11 +648,10 @@ const CatPage = ({ params }: CatPageProps) => {
                                                 <Pencil size={16} />
                                             </Button>
                                             <Button
-                                                type="button"
                                                 color="danger"
-                                                variant="flat"
+                                                variant="shadow"
                                                 size="sm"
-                                                isIconOnly
+                                                className="p-2 min-w-10"
                                                 aria-label="Удалить запись"
                                                 onClick={() => deletePost(post)}
                                                 isLoading={deletingPostId === Number(post.postId)}
@@ -714,7 +691,7 @@ const CatPage = ({ params }: CatPageProps) => {
                             ))}
                         </div>
                     ) : (
-                        <p className="py-8 text-center text-foreground/60">Записей пока нет. Добавьте первую фотографию!</p>
+                        <p className="py-8 text-center text-foreground/60">Пока что тут пусто...</p>
                     )}
                 </section>
                 )}

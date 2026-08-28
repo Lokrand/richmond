@@ -146,11 +146,9 @@ const AddPostModal = ({
             <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <DialogHeader>
-                        <DialogTitle className="text-2xl text-primary">Новая запись</DialogTitle>
+                        <DialogTitle className="text-2xl text-primary">Новый пост для {catName}</DialogTitle>
                         <DialogDescription>
-                            Поделитесь новостями о
-                            {' '}
-                            {catName}
+                            Поделитесь новостями о вашем пушистике!
                         </DialogDescription>
                     </DialogHeader>
 
@@ -167,7 +165,7 @@ const AddPostModal = ({
                         label="Текст"
                         value={body}
                         onChange={(event) => setBody(event.target.value)}
-                        placeholder="Расскажите, что произошло..."
+                        placeholder={`Например: Сегодня ${catName} гулял во дворе и ему на нос сел мистер шмель!`}
                         maxLength={5000}
                         minRows={3}
                     />

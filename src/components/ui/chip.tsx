@@ -50,8 +50,31 @@ const dotColor: Record<ChipColor, string> = {
     danger: 'bg-danger',
 };
 
+const compoundVariants = [
+    ...Object.entries(flat).map(([color, classes]) => ({
+        color: color as ChipColor,
+        variant: 'flat' as const,
+        class: classes,
+    })),
+    ...Object.entries(solid).map(([color, classes]) => ({
+        color: color as ChipColor,
+        variant: 'solid' as const,
+        class: classes,
+    })),
+    ...Object.entries(bordered).map(([color, classes]) => ({
+        color: color as ChipColor,
+        variant: 'bordered' as const,
+        class: classes,
+    })),
+    ...Object.entries(light).map(([color, classes]) => ({
+        color: color as ChipColor,
+        variant: 'light' as const,
+        class: classes,
+    })),
+];
+
 const chipVariants = cva(
-    'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium transition-colors',
+    'inline-flex items-center justify-center gap-1.5 rounded-full font-medium transition-colors text-center',
     {
         variants: {
             color: {
@@ -63,18 +86,19 @@ const chipVariants = cva(
                 danger: '',
             },
             variant: {
-                flat,
-                solid,
-                bordered,
-                light,
+                flat: '',
+                solid: '',
+                bordered: '',
+                light: '',
                 dot: 'bg-default-100 text-foreground',
             },
             size: {
-                sm: 'h-6 px-2 text-xs',
-                md: 'h-7 px-3 text-sm',
-                lg: 'h-9 px-4 text-sm',
+                sm: 'h-auto min-h-6 px-2 py-0.5 text-xs',
+                md: 'h-auto min-h-7 px-3 py-1 text-sm',
+                lg: 'h-auto min-h-9 px-4 py-1.5 text-sm',
             },
         },
+        compoundVariants,
         defaultVariants: {
             color: 'default',
             variant: 'flat',

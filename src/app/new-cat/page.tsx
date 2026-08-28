@@ -240,6 +240,7 @@ const NewCat = () => {
                             <Input
                                 label="Имя пушистика *"
                                 name="name"
+                                placeholder="Введите имя пушистика"
                                 value={formData.name}
                                 onChange={handleInputChange}
                                 required
@@ -249,6 +250,7 @@ const NewCat = () => {
                             <Input
                                 label="Возраст (лет) *"
                                 name="age"
+                                placeholder="Введите возраст"
                                 type="number"
                                 value={formData.age}
                                 onChange={handleInputChange}
@@ -261,6 +263,7 @@ const NewCat = () => {
                             <Input
                                 label="Вес (кг) *"
                                 name="weight"
+                                placeholder="Введите вес"
                                 type="number"
                                 step="0.1"
                                 value={formData.weight}

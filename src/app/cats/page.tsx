@@ -31,7 +31,7 @@ const mapToTyCat = (cat: InternalApiCatCatResponse): TyCat => {
 
 const Gallery = () => {
     const { data, isPending, isError, refetch } = useCats();
-    const cats = (data?.cats ?? []).map(mapToTyCat);
+    const cats: TyCat[] = (data?.cats ?? []).map(mapToTyCat);
 
     if (isPending) {
         return (
@@ -109,18 +109,13 @@ const Gallery = () => {
                                         decoding="async"
                                     />
                                     <div className="flex min-w-0 flex-1 flex-col gap-4 ml-0 sm:ml-4">
-
                                         <h2 className="break-words text-xl font-bold text-primary">{cat.name}</h2>
                                         <div className="flex flex-wrap gap-2 text-xs text-foreground/60">
                                             <Chip color="primary">
-                                                {cat.age}
-                                                {' '}
-                                                {getCatYearNote(cat.age)}
+                                                {`${cat.age} ${getCatYearNote(cat.age)}`}
                                             </Chip>
                                             <Chip color="success">
-                                                {cat.weight}
-                                                {' '}
-                                                кг
+                                                {`${cat.weight} кг`}
                                             </Chip>
                                             <Chip color="secondary">
                                                 {cat.breed}

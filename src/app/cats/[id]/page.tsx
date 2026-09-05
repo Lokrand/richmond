@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { notFound, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
-    Camera, Trash2, Pencil, ImagePlus, X,
+    Camera, Trash2, Pencil, ImagePlus, Share2, X,
 } from 'lucide-react';
 import AddPostModal, { MAX_FILE_SIZE, MAX_UPLOAD_SIZE } from '@/components/AddPostModal';
 import EditCatModal from '@/components/EditCatModal';
@@ -29,6 +29,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import ViewPhotoModal from '@/components/ViewPhotoModal';
 import makeFirstCharUppercase from '@/utils/makeFirstCharUppercase';
+import { getCatShareData } from '@/utils/shareCat';
 import getCatYearNote from '../../../utils/getCatAgeNote';
 import { auth } from '../../../lib/auth';
 import {
@@ -130,6 +131,7 @@ const CatPage = ({ params }: CatPageProps) => {
     const catQuery = useCat(catId);
     const postsQuery = useCatPosts(catId);
     const queryClient = useQueryClient();
+    const router = useRouter();
     const cat = catQuery.data ? mapToTyCat(catQuery.data) : null;
     const loading = catQuery.isPending;
     const posts = postsQuery.data ?? [];
@@ -193,7 +195,6 @@ const CatPage = ({ params }: CatPageProps) => {
 
     const hasGallery = cat.gallery.length > 0;
     const hasLogo = cat.logo_path !== '';
-    const router = useRouter();
 
     const removeCat = async () => {
         const authHeader = await auth.getAuthorizationHeader();
@@ -214,6 +215,22 @@ const CatPage = ({ params }: CatPageProps) => {
 
     const handleCatUpdate = async () => {
         await catQuery.refetch();
+    };
+
+    const handleShareCat = async () => {
+        try {
+            const shareData = getCatShareData(cat.name, window.location.href);
+            if (navigator.share) {
+                await navigator.share(shareData);
+                return;
+            }
+
+            await navigator.clipboard.writeText(shareData.url ?? window.location.href);
+            toast.success('Ссылка на пушистика скопирована');
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') return;
+            toast.error('Не удалось поделиться пушистиком');
+        }
     };
 
     const handlePostCreated = (post: InternalApiPostPostResponse) => {
@@ -445,6 +462,15 @@ const CatPage = ({ params }: CatPageProps) => {
                                 {cat.name}
                             </h1>
                             <div className="flex flex-nowrap gap-2">
+                                <Button
+                                    color="secondary"
+                                    variant="shadow"
+                                    className="p-2 min-w-10"
+                                    onClick={handleShareCat}
+                                    aria-label={`Поделиться пушистиком ${cat.name}`}
+                                >
+                                    <Share2 size={20} />
+                                </Button>
                                 <Button
                                     color="success"
                                     variant="shadow"

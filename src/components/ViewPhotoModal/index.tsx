@@ -119,7 +119,7 @@ const ViewPhotoModal: FC<Props> = (props) => {
             onDrag: ({ offset: [ox, oy], down, movement: [mx, my], velocity, first, last, cancel }) => {
                 const isHorizontal = Math.abs(mx) > Math.abs(my);
                 const isVertical = Math.abs(my) > Math.abs(mx);
-                const isFastSwipe = velocity > 0.5;
+                const isFastSwipe = Math.hypot(...velocity) > 0.5;
 
                 if (first) {
                     isSwiping.current = false;

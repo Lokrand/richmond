@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 
 'use client';
 
@@ -230,7 +229,6 @@ const QuizPage = () => {
             });
         }, 1000);
 
-        // eslint-disable-next-line consistent-return
         return () => clearInterval(timer);
     }, [isAnswered, quizCompleted]);
 

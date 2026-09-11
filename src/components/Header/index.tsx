@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
 
 'use client';
 
@@ -137,54 +136,63 @@ const Header = () => {
                 </nav>
 
                 <div
-                    className={`sm:hidden overflow-hidden bg-white/70 dark:bg-default-50 backdrop-blur-md border-default-200 dark:border-default-100
-                        transition-[max-height,opacity,transform] duration-500 linear
-                        ${isMenuOpen
-                            ? 'max-h-[500px] opacity-100 border-t'
-                            : 'max-h-0 opacity-0 pointer-events-none border-t'
-                        }`}
+                    className={`sm:hidden absolute left-0 right-0 top-full overflow-hidden
+                        grid transition-[grid-template-rows] duration-300 ease-out
+                        ${isMenuOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}
+                    `}
                 >
-                    <div className="flex flex-col gap-1 px-4 py-4">
-                        {links.map(({ href, label }) => (
-                            <Link
-                                key={href}
-                                href={href}
-                                onClick={() => setIsMenuOpen(false)}
-                                className={`w-full text-lg py-2 px-4 rounded-lg transition-all duration-300 ${
-                                    isActiveLink(href)
-                                        ? 'text-primary font-semibold bg-primary/10'
-                                        : 'text-foreground hover:text-primary hover:bg-default-100'
-                                }`}
-                            >
-                                {label}
-                            </Link>
-                        ))}
-
-                        {isLoggedIn ? (
-                            <div className="flex flex-nowrap justify-between border-t border-t-gray-500 pt-4">
-                                <div className="px-4 py-2 text-foreground/70">
-                                    {`Привет, ${userLogin}!`}
-                                </div>
-                                <Button
-                                    color="danger"
-                                    size="sm"
-                                    variant="bordered"
-                                    onClick={handleLogout}
-                                    className="mx-4 w-20"
+                    <div className="overflow-hidden">
+                        <div
+                            className={`bg-white dark:bg-default-50 backdrop-blur-md
+                                border-b border-default-200 dark:border-default-100
+                                shadow-xl rounded-b-2xl
+                                transition-[transform,opacity] duration-300 ease-out
+                                ${isMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}
+                            `}
+                        >
+                        <div className="flex flex-col gap-1 px-4 py-4">
+                            {links.map(({ href, label }) => (
+                                <Link
+                                    key={href}
+                                    href={href}
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className={`w-full text-lg py-2 px-4 rounded-lg transition-all duration-300 ${
+                                        isActiveLink(href)
+                                            ? 'text-primary font-semibold bg-primary/10'
+                                            : 'text-foreground hover:text-primary hover:bg-default-100'
+                                    }`}
                                 >
-                                    Выйти
+                                    {label}
+                                </Link>
+                            ))}
+
+                            {isLoggedIn ? (
+                                <div className="flex flex-nowrap justify-between border-t border-t-gray-500 pt-4">
+                                    <div className="px-4 py-2 text-foreground/70">
+                                        {`Привет, ${userLogin}!`}
+                                    </div>
+                                    <Button
+                                        color="danger"
+                                        size="sm"
+                                        variant="bordered"
+                                        onClick={handleLogout}
+                                        className="mx-4 w-20"
+                                    >
+                                        Выйти
+                                    </Button>
+                                </div>
+                            ) : (
+                                <Button
+                                    color="primary"
+                                    variant="bordered"
+                                    onClick={handleMobileLogin}
+                                    className="w-full"
+                                >
+                                    Войти 🐾
                                 </Button>
-                            </div>
-                        ) : (
-                            <Button
-                                color="primary"
-                                variant="ghost"
-                                onClick={handleMobileLogin}
-                                className="w-full"
-                            >
-                                Войти 🐾
-                            </Button>
-                        )}
+                            )}
+                        </div>
+                    </div>
                     </div>
                 </div>
             </header>

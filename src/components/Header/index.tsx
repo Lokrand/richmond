@@ -136,54 +136,57 @@ const Header = () => {
                     </div>
                 </nav>
 
-                {isMenuOpen && (
-                    <div className="sm:hidden border-t border-default-200 dark:border-default-100 bg-white/70 dark:bg-default-50 backdrop-blur-md">
-                        <div className="flex flex-col gap-1 px-4 py-4">
-                            {links.map(({ href, label }) => (
-                                <Link
-                                    key={href}
-                                    href={href}
-                                    onClick={() => setIsMenuOpen(false)}
-                                    className={`w-full text-lg py-2 px-4 rounded-lg transition-all duration-300 ${
-                                        isActiveLink(href)
-                                            ? 'text-primary font-semibold bg-primary/10'
-                                            : 'text-foreground hover:text-primary hover:bg-default-100'
-                                    }`}
-                                >
-                                    {label}
-                                </Link>
-                            ))}
+                <div
+                    className={`sm:hidden overflow-hidden bg-white/70 dark:bg-default-50 backdrop-blur-md border-default-200 dark:border-default-100
+                        transition-[max-height,opacity,transform] duration-500 linear
+                        ${isMenuOpen
+                            ? 'max-h-[500px] opacity-100 border-t'
+                            : 'max-h-0 opacity-0 pointer-events-none border-t'
+                        }`}
+                >
+                    <div className="flex flex-col gap-1 px-4 py-4">
+                        {links.map(({ href, label }) => (
+                            <Link
+                                key={href}
+                                href={href}
+                                onClick={() => setIsMenuOpen(false)}
+                                className={`w-full text-lg py-2 px-4 rounded-lg transition-all duration-300 ${
+                                    isActiveLink(href)
+                                        ? 'text-primary font-semibold bg-primary/10'
+                                        : 'text-foreground hover:text-primary hover:bg-default-100'
+                                }`}
+                            >
+                                {label}
+                            </Link>
+                        ))}
 
-                            {isLoggedIn ? (
-                                <>
-                                    <div className="px-4 py-2 text-foreground/70 text-sm">
-                                        Привет,
-                                        {' '}
-                                        {userLogin}
-                                        !
-                                    </div>
-                                    <Button
-                                        color="danger"
-                                        variant="bordered"
-                                        onClick={handleLogout}
-                                        className="w-full"
-                                    >
-                                        Выйти
-                                    </Button>
-                                </>
-                            ) : (
+                        {isLoggedIn ? (
+                            <div className="flex flex-nowrap justify-between border-t border-t-gray-500 pt-4">
+                                <div className="px-4 py-2 text-foreground/70">
+                                    {`Привет, ${userLogin}!`}
+                                </div>
                                 <Button
-                                    color="primary"
-                                    variant="ghost"
-                                    onClick={handleMobileLogin}
-                                    className="w-full"
+                                    color="danger"
+                                    size="sm"
+                                    variant="bordered"
+                                    onClick={handleLogout}
+                                    className="mx-4 w-20"
                                 >
-                                    Войти 🐾
+                                    Выйти
                                 </Button>
-                            )}
-                        </div>
+                            </div>
+                        ) : (
+                            <Button
+                                color="primary"
+                                variant="ghost"
+                                onClick={handleMobileLogin}
+                                className="w-full"
+                            >
+                                Войти 🐾
+                            </Button>
+                        )}
                     </div>
-                )}
+                </div>
             </header>
 
             <LoginModal

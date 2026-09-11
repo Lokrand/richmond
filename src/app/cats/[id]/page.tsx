@@ -592,7 +592,7 @@ const CatPage = ({ params }: CatPageProps) => {
                                 <div key={image} className="break-inside-avoid mb-1">
                                     <button
                                         type="button"
-                                        onClick={() => openImageModal(index)}
+                                        onClick={() => openImageModal(index + 1)}
                                         className="w-full cursor-pointer"
                                     >
                                         <img

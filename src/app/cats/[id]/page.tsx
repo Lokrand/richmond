@@ -427,7 +427,7 @@ const CatPage = ({ params }: CatPageProps) => {
             <div className="max-w-6xl mx-auto">
                 <Link href="/cats">
                     <Button color="primary" variant="shadow" className="mb-4 ml-4">
-                        ← Назад к всем пушистикам
+                        ← Назад ко всем пушистикам
                     </Button>
                 </Link>
 

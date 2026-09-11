@@ -63,6 +63,7 @@ const mapToTyCat = (cat: InternalApiCatCatResponse): TyCat => {
         : 0;
     return {
         id: cat.catId ?? 0,
+        ownerId: cat.ownerId ?? null,
         name: cat.name ?? '',
         age,
         weight: cat.weight ?? 0,
@@ -139,8 +140,9 @@ const CatPage = ({ params }: CatPageProps) => {
     const queryClient = useQueryClient();
     const router = useRouter();
     const user = useUser();
-    const isCatOwner = !!user.data?.login; // TODO переделать, в коте должен быть id овнера
     const cat = catQuery.data ? mapToTyCat(catQuery.data) : null;
+    const isAdmin = user.data?.userRoles?.includes('ADMIN');
+    const isCatOwner = (cat && user.data && user.data.id === cat.ownerId) || isAdmin;
     const loading = catQuery.isPending;
     const posts = postsQuery.data ?? [];
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);

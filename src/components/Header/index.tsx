@@ -26,7 +26,7 @@ const Header = () => {
     const links = [
         { href: '/', label: 'Пушистик дня' },
         { href: '/cats', label: 'Галерея' },
-        // { href: '/facts', label: 'Факты' },
+        { href: '/facts', label: 'Факты' },
         // { href: '/quiz', label: 'Викторина' },
         // { href: '/generator', label: 'Придумать имя' },
         // { href: '/calendar', label: 'Календарь' },

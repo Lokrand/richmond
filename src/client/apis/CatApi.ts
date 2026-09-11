@@ -51,10 +51,22 @@ export interface ApiV1CatIdGetRequest {
     id: number;
 }
 
+export interface ApiV1CatIdImagesPutRequest {
+    id: number;
+    authorization: string;
+    file: Array<Blob>;
+}
+
 export interface ApiV1CatIdPutRequest {
     id: number;
     authorization: string;
     data: InternalApiCatUpdateCatRequest;
+}
+
+export interface ApiV1CatIdTitlePhotoPutRequest {
+    id: number;
+    authorization: string;
+    file: Blob;
 }
 
 export interface ApiV1CatNewPostRequest {
@@ -154,7 +166,7 @@ export class CatApi extends runtime.BaseAPI {
     }
 
     /**
-     * Deletes a cat by ID (auth required, must be owner)
+     * Deletes a cat by ID (auth required, must be owner or admin)
      * Delete a cat
      */
     async apiV1CatIdDeleteRaw(requestParameters: ApiV1CatIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
@@ -165,7 +177,7 @@ export class CatApi extends runtime.BaseAPI {
     }
 
     /**
-     * Deletes a cat by ID (auth required, must be owner)
+     * Deletes a cat by ID (auth required, must be owner or admin)
      * Delete a cat
      */
     async apiV1CatIdDelete(requestParameters: ApiV1CatIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
@@ -220,6 +232,94 @@ export class CatApi extends runtime.BaseAPI {
     }
 
     /**
+     * Creates request options for apiV1CatIdImagesPut without sending the request
+     */
+    async apiV1CatIdImagesPutRequestOpts(requestParameters: ApiV1CatIdImagesPutRequest): Promise<runtime.RequestOpts> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling apiV1CatIdImagesPut().'
+            );
+        }
+
+        if (requestParameters['authorization'] == null) {
+            throw new runtime.RequiredError(
+                'authorization',
+                'Required parameter "authorization" was null or undefined when calling apiV1CatIdImagesPut().'
+            );
+        }
+
+        if (requestParameters['file'] == null) {
+            throw new runtime.RequiredError(
+                'file',
+                'Required parameter "file" was null or undefined when calling apiV1CatIdImagesPut().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (requestParameters['authorization'] != null) {
+            headerParameters['Authorization'] = String(requestParameters['authorization']);
+        }
+
+        const consumes: runtime.Consume[] = [
+            { contentType: 'multipart/form-data' },
+        ];
+        // @ts-ignore: canConsumeForm may be unused
+        const canConsumeForm = runtime.canConsumeForm(consumes);
+
+        let formParams: { append(param: string, value: any): any };
+        let useForm = false;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        useForm = canConsumeForm;
+        if (useForm) {
+            formParams = new FormData();
+        } else {
+            formParams = new URLSearchParams();
+        }
+
+        if (requestParameters['file'] != null) {
+            requestParameters['file'].forEach((element) => {
+                formParams.append('file', element as any);
+            })
+        }
+
+
+        let urlPath = `/api/v1/cat/{id}/images`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        return {
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: formParams,
+        };
+    }
+
+    /**
+     * Replaces all cat photos; the first file is the title photo.
+     * Replace a cat\'s photos
+     */
+    async apiV1CatIdImagesPutRaw(requestParameters: ApiV1CatIdImagesPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<InternalApiCatCatResponse>> {
+        const requestOptions = await this.apiV1CatIdImagesPutRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => InternalApiCatCatResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Replaces all cat photos; the first file is the title photo.
+     * Replace a cat\'s photos
+     */
+    async apiV1CatIdImagesPut(requestParameters: ApiV1CatIdImagesPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<InternalApiCatCatResponse> {
+        const response = await this.apiV1CatIdImagesPutRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
      * Creates request options for apiV1CatIdPut without sending the request
      */
     async apiV1CatIdPutRequestOpts(requestParameters: ApiV1CatIdPutRequest): Promise<runtime.RequestOpts> {
@@ -268,7 +368,7 @@ export class CatApi extends runtime.BaseAPI {
     }
 
     /**
-     * Updates a cat by ID (auth required, must be owner)
+     * Updates a cat by ID (auth required, must be owner or admin)
      * Update a cat
      */
     async apiV1CatIdPutRaw(requestParameters: ApiV1CatIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<InternalApiCatCatResponse>> {
@@ -279,11 +379,97 @@ export class CatApi extends runtime.BaseAPI {
     }
 
     /**
-     * Updates a cat by ID (auth required, must be owner)
+     * Updates a cat by ID (auth required, must be owner or admin)
      * Update a cat
      */
     async apiV1CatIdPut(requestParameters: ApiV1CatIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<InternalApiCatCatResponse> {
         const response = await this.apiV1CatIdPutRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Creates request options for apiV1CatIdTitlePhotoPut without sending the request
+     */
+    async apiV1CatIdTitlePhotoPutRequestOpts(requestParameters: ApiV1CatIdTitlePhotoPutRequest): Promise<runtime.RequestOpts> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling apiV1CatIdTitlePhotoPut().'
+            );
+        }
+
+        if (requestParameters['authorization'] == null) {
+            throw new runtime.RequiredError(
+                'authorization',
+                'Required parameter "authorization" was null or undefined when calling apiV1CatIdTitlePhotoPut().'
+            );
+        }
+
+        if (requestParameters['file'] == null) {
+            throw new runtime.RequiredError(
+                'file',
+                'Required parameter "file" was null or undefined when calling apiV1CatIdTitlePhotoPut().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (requestParameters['authorization'] != null) {
+            headerParameters['Authorization'] = String(requestParameters['authorization']);
+        }
+
+        const consumes: runtime.Consume[] = [
+            { contentType: 'multipart/form-data' },
+        ];
+        // @ts-ignore: canConsumeForm may be unused
+        const canConsumeForm = runtime.canConsumeForm(consumes);
+
+        let formParams: { append(param: string, value: any): any };
+        let useForm = false;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        useForm = canConsumeForm;
+        if (useForm) {
+            formParams = new FormData();
+        } else {
+            formParams = new URLSearchParams();
+        }
+
+        if (requestParameters['file'] != null) {
+            formParams.append('file', requestParameters['file'] as any);
+        }
+
+
+        let urlPath = `/api/v1/cat/{id}/title-photo`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        return {
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: formParams,
+        };
+    }
+
+    /**
+     * Replaces only the title photo and keeps the gallery unchanged.
+     * Replace a cat\'s title photo
+     */
+    async apiV1CatIdTitlePhotoPutRaw(requestParameters: ApiV1CatIdTitlePhotoPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<InternalApiCatCatResponse>> {
+        const requestOptions = await this.apiV1CatIdTitlePhotoPutRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => InternalApiCatCatResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Replaces only the title photo and keeps the gallery unchanged.
+     * Replace a cat\'s title photo
+     */
+    async apiV1CatIdTitlePhotoPut(requestParameters: ApiV1CatIdTitlePhotoPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<InternalApiCatCatResponse> {
+        const response = await this.apiV1CatIdTitlePhotoPutRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

@@ -21,10 +21,22 @@ import { mapValues } from '../runtime';
 export interface InternalApiUserUserResponse {
     /**
      * 
+     * @type {number}
+     * @memberof InternalApiUserUserResponse
+     */
+    id?: number;
+    /**
+     * 
      * @type {string}
      * @memberof InternalApiUserUserResponse
      */
     login?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof InternalApiUserUserResponse
+     */
+    userRoles?: Array<string>;
 }
 
 /**
@@ -44,7 +56,9 @@ export function InternalApiUserUserResponseFromJSONTyped(json: any, ignoreDiscri
     }
     return {
         
+        'id': json['id'] == null ? undefined : json['id'],
         'login': json['login'] == null ? undefined : json['login'],
+        'userRoles': json['userRoles'] == null ? undefined : json['userRoles'],
     };
 }
 
@@ -59,7 +73,9 @@ export function InternalApiUserUserResponseToJSONTyped(value?: InternalApiUserUs
 
     return {
         
+        'id': value['id'],
         'login': value['login'],
+        'userRoles': value['userRoles'],
     };
 }
 

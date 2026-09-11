@@ -7,7 +7,9 @@ All URIs are relative to *http://localhost*
 | [**apiV1CatAllGet**](CatApi.md#apiv1catallget) | **GET** /api/v1/cat/all | List all cats |
 | [**apiV1CatIdDelete**](CatApi.md#apiv1catiddelete) | **DELETE** /api/v1/cat/{id} | Delete a cat |
 | [**apiV1CatIdGet**](CatApi.md#apiv1catidget) | **GET** /api/v1/cat/{id} | Get a cat by ID |
+| [**apiV1CatIdImagesPut**](CatApi.md#apiv1catidimagesput) | **PUT** /api/v1/cat/{id}/images | Replace a cat\&#39;s photos |
 | [**apiV1CatIdPut**](CatApi.md#apiv1catidput) | **PUT** /api/v1/cat/{id} | Update a cat |
+| [**apiV1CatIdTitlePhotoPut**](CatApi.md#apiv1catidtitlephotoput) | **PUT** /api/v1/cat/{id}/title-photo | Replace a cat\&#39;s title photo |
 | [**apiV1CatNewPost**](CatApi.md#apiv1catnewpost) | **POST** /api/v1/cat/new | Create a new cat |
 
 
@@ -88,7 +90,7 @@ No authorization required
 
 Delete a cat
 
-Deletes a cat by ID (auth required, must be owner)
+Deletes a cat by ID (auth required, must be owner or admin)
 
 ### Example
 
@@ -224,13 +226,90 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
 
+## apiV1CatIdImagesPut
+
+> InternalApiCatCatResponse apiV1CatIdImagesPut(id, authorization, file)
+
+Replace a cat\&#39;s photos
+
+Replaces all cat photos; the first file is the title photo.
+
+### Example
+
+```ts
+import {
+  Configuration,
+  CatApi,
+} from '';
+import type { ApiV1CatIdImagesPutRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new CatApi();
+
+  const body = {
+    // number | Cat ID
+    id: 56,
+    // string | Insert your access token
+    authorization: authorization_example,
+    // Array<Blob> | Photo files (first is title photo)
+    file: /path/to/file.txt,
+  } satisfies ApiV1CatIdImagesPutRequest;
+
+  try {
+    const data = await api.apiV1CatIdImagesPut(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **id** | `number` | Cat ID | [Defaults to `undefined`] |
+| **authorization** | `string` | Insert your access token | [Defaults to `&#39;Bearer &lt;Add access token here&gt;&#39;`] |
+| **file** | `Array<Blob>` | Photo files (first is title photo) | |
+
+### Return type
+
+[**InternalApiCatCatResponse**](InternalApiCatCatResponse.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: `multipart/form-data`
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | OK |  -  |
+| **400** | Bad Request |  -  |
+| **401** | Unauthorized |  -  |
+| **403** | Forbidden |  -  |
+| **404** | Not Found |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
 ## apiV1CatIdPut
 
 > InternalApiCatCatResponse apiV1CatIdPut(id, authorization, data)
 
 Update a cat
 
-Updates a cat by ID (auth required, must be owner)
+Updates a cat by ID (auth required, must be owner or admin)
 
 ### Example
 
@@ -286,6 +365,83 @@ No authorization required
 ### HTTP request headers
 
 - **Content-Type**: `application/json`
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | OK |  -  |
+| **400** | Bad Request |  -  |
+| **401** | Unauthorized |  -  |
+| **403** | Forbidden |  -  |
+| **404** | Not Found |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## apiV1CatIdTitlePhotoPut
+
+> InternalApiCatCatResponse apiV1CatIdTitlePhotoPut(id, authorization, file)
+
+Replace a cat\&#39;s title photo
+
+Replaces only the title photo and keeps the gallery unchanged.
+
+### Example
+
+```ts
+import {
+  Configuration,
+  CatApi,
+} from '';
+import type { ApiV1CatIdTitlePhotoPutRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new CatApi();
+
+  const body = {
+    // number | Cat ID
+    id: 56,
+    // string | Insert your access token
+    authorization: authorization_example,
+    // Blob | Title photo
+    file: BINARY_DATA_HERE,
+  } satisfies ApiV1CatIdTitlePhotoPutRequest;
+
+  try {
+    const data = await api.apiV1CatIdTitlePhotoPut(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **id** | `number` | Cat ID | [Defaults to `undefined`] |
+| **authorization** | `string` | Insert your access token | [Defaults to `&#39;Bearer &lt;Add access token here&gt;&#39;`] |
+| **file** | `Blob` | Title photo | [Defaults to `undefined`] |
+
+### Return type
+
+[**InternalApiCatCatResponse**](InternalApiCatCatResponse.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: `multipart/form-data`
 - **Accept**: `application/json`
 
 

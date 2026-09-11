@@ -6,7 +6,9 @@
 
 Name | Type
 ------------ | -------------
+`id` | number
 `login` | string
+`userRoles` | Array&lt;string&gt;
 
 ## Example
 
@@ -15,7 +17,9 @@ import type { InternalApiUserUserResponse } from ''
 
 // TODO: Update the object below with actual values
 const example = {
+  "id": null,
   "login": null,
+  "userRoles": null,
 } satisfies InternalApiUserUserResponse
 
 console.log(example)

@@ -67,7 +67,7 @@ No authorization required
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: `application/octet-stream`
+- **Accept**: `image/jpeg`
 
 
 ### HTTP response details

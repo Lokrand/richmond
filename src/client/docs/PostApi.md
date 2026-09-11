@@ -7,6 +7,7 @@ All URIs are relative to *http://localhost*
 | [**apiV1PostAllGet**](PostApi.md#apiv1postallget) | **GET** /api/v1/post/all | List all posts |
 | [**apiV1PostIdDelete**](PostApi.md#apiv1postiddelete) | **DELETE** /api/v1/post/{id} | Delete a post |
 | [**apiV1PostIdGet**](PostApi.md#apiv1postidget) | **GET** /api/v1/post/{id} | Get a post by ID |
+| [**apiV1PostIdImagesPut**](PostApi.md#apiv1postidimagesput) | **PUT** /api/v1/post/{id}/images | Replace a post\&#39;s photos |
 | [**apiV1PostIdPut**](PostApi.md#apiv1postidput) | **PUT** /api/v1/post/{id} | Update a post |
 | [**apiV1PostNewPost**](PostApi.md#apiv1postnewpost) | **POST** /api/v1/post/new | Create a new post |
 
@@ -88,7 +89,7 @@ No authorization required
 
 Delete a post
 
-Deletes a post by ID (auth required, must be owner)
+Deletes a post by ID (auth required, must be owner or admin)
 
 ### Example
 
@@ -224,13 +225,90 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
 
+## apiV1PostIdImagesPut
+
+> InternalApiPostPostResponse apiV1PostIdImagesPut(id, authorization, file)
+
+Replace a post\&#39;s photos
+
+Replaces all photos attached to a post. Send no files to remove all photos.
+
+### Example
+
+```ts
+import {
+  Configuration,
+  PostApi,
+} from '';
+import type { ApiV1PostIdImagesPutRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new PostApi();
+
+  const body = {
+    // number | Post ID
+    id: 56,
+    // string | Insert your access token
+    authorization: authorization_example,
+    // Array<Blob> | Photo files (optional)
+    file: /path/to/file.txt,
+  } satisfies ApiV1PostIdImagesPutRequest;
+
+  try {
+    const data = await api.apiV1PostIdImagesPut(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **id** | `number` | Post ID | [Defaults to `undefined`] |
+| **authorization** | `string` | Insert your access token | [Defaults to `&#39;Bearer &lt;Add access token here&gt;&#39;`] |
+| **file** | `Array<Blob>` | Photo files | [Optional] |
+
+### Return type
+
+[**InternalApiPostPostResponse**](InternalApiPostPostResponse.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: `multipart/form-data`
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | OK |  -  |
+| **400** | Bad Request |  -  |
+| **401** | Unauthorized |  -  |
+| **403** | Forbidden |  -  |
+| **404** | Not Found |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
 ## apiV1PostIdPut
 
 > InternalApiPostPostResponse apiV1PostIdPut(id, authorization, data)
 
 Update a post
 
-Updates a post by ID (auth required, must be owner)
+Updates a post by ID (auth required, must be owner or admin)
 
 ### Example
 

@@ -1,5 +1,6 @@
 export interface TyCat {
   id: number;
+  ownerId: number | null;
   name: string;
   age: number;
   weight: number;

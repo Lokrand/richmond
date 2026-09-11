@@ -77,16 +77,16 @@ export interface InternalApiCatCatResponse {
     name?: string;
     /**
      * 
+     * @type {number}
+     * @memberof InternalApiCatCatResponse
+     */
+    ownerId?: number;
+    /**
+     * 
      * @type {InternalApiCatFileMetadata}
      * @memberof InternalApiCatCatResponse
      */
     titlePhoto?: InternalApiCatFileMetadata;
-    /**
-     * 
-     * @type {number}
-     * @memberof InternalApiCatCatResponse
-     */
-    userId?: number;
     /**
      * 
      * @type {number}
@@ -120,8 +120,8 @@ export function InternalApiCatCatResponseFromJSONTyped(json: any, ignoreDiscrimi
         'galleryPhotos': json['galleryPhotos'] == null ? undefined : ((json['galleryPhotos'] as Array<any>).map(InternalApiCatFileMetadataFromJSON)),
         'habits': json['habits'] == null ? undefined : json['habits'],
         'name': json['name'] == null ? undefined : json['name'],
+        'ownerId': json['ownerId'] == null ? undefined : json['ownerId'],
         'titlePhoto': json['titlePhoto'] == null ? undefined : InternalApiCatFileMetadataFromJSON(json['titlePhoto']),
-        'userId': json['userId'] == null ? undefined : json['userId'],
         'weight': json['weight'] == null ? undefined : json['weight'],
     };
 }
@@ -145,8 +145,8 @@ export function InternalApiCatCatResponseToJSONTyped(value?: InternalApiCatCatRe
         'galleryPhotos': value['galleryPhotos'] == null ? undefined : ((value['galleryPhotos'] as Array<any>).map(InternalApiCatFileMetadataToJSON)),
         'habits': value['habits'],
         'name': value['name'],
+        'ownerId': value['ownerId'],
         'titlePhoto': InternalApiCatFileMetadataToJSON(value['titlePhoto']),
-        'userId': value['userId'],
         'weight': value['weight'],
     };
 }

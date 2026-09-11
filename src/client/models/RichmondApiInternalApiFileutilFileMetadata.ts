@@ -32,13 +32,13 @@ export interface RichmondApiInternalApiFileutilFileMetadata {
      */
     key?: string;
     /**
-     *
+     * 
      * @type {string}
      * @memberof RichmondApiInternalApiFileutilFileMetadata
      */
     originalUrl?: string;
     /**
-     *
+     * 
      * @type {string}
      * @memberof RichmondApiInternalApiFileutilFileMetadata
      */
@@ -50,7 +50,7 @@ export interface RichmondApiInternalApiFileutilFileMetadata {
      */
     size?: number;
     /**
-     *
+     * 
      * @type {string}
      * @memberof RichmondApiInternalApiFileutilFileMetadata
      */

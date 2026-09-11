@@ -14,8 +14,8 @@ Name | Type
 `galleryPhotos` | [Array&lt;InternalApiCatFileMetadata&gt;](InternalApiCatFileMetadata.md)
 `habits` | string
 `name` | string
+`ownerId` | number
 `titlePhoto` | [InternalApiCatFileMetadata](InternalApiCatFileMetadata.md)
-`userId` | number
 `weight` | number
 
 ## Example
@@ -33,8 +33,8 @@ const example = {
   "galleryPhotos": null,
   "habits": null,
   "name": null,
+  "ownerId": null,
   "titlePhoto": null,
-  "userId": null,
   "weight": null,
 } satisfies InternalApiCatCatResponse
 

@@ -45,6 +45,12 @@ export interface ApiV1PostIdGetRequest {
     id: number;
 }
 
+export interface ApiV1PostIdImagesPutRequest {
+    id: number;
+    authorization: string;
+    file?: Array<Blob>;
+}
+
 export interface ApiV1PostIdPutRequest {
     id: number;
     authorization: string;
@@ -148,7 +154,7 @@ export class PostApi extends runtime.BaseAPI {
     }
 
     /**
-     * Deletes a post by ID (auth required, must be owner)
+     * Deletes a post by ID (auth required, must be owner or admin)
      * Delete a post
      */
     async apiV1PostIdDeleteRaw(requestParameters: ApiV1PostIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
@@ -159,7 +165,7 @@ export class PostApi extends runtime.BaseAPI {
     }
 
     /**
-     * Deletes a post by ID (auth required, must be owner)
+     * Deletes a post by ID (auth required, must be owner or admin)
      * Delete a post
      */
     async apiV1PostIdDelete(requestParameters: ApiV1PostIdDeleteRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
@@ -214,6 +220,87 @@ export class PostApi extends runtime.BaseAPI {
     }
 
     /**
+     * Creates request options for apiV1PostIdImagesPut without sending the request
+     */
+    async apiV1PostIdImagesPutRequestOpts(requestParameters: ApiV1PostIdImagesPutRequest): Promise<runtime.RequestOpts> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling apiV1PostIdImagesPut().'
+            );
+        }
+
+        if (requestParameters['authorization'] == null) {
+            throw new runtime.RequiredError(
+                'authorization',
+                'Required parameter "authorization" was null or undefined when calling apiV1PostIdImagesPut().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (requestParameters['authorization'] != null) {
+            headerParameters['Authorization'] = String(requestParameters['authorization']);
+        }
+
+        const consumes: runtime.Consume[] = [
+            { contentType: 'multipart/form-data' },
+        ];
+        // @ts-ignore: canConsumeForm may be unused
+        const canConsumeForm = runtime.canConsumeForm(consumes);
+
+        let formParams: { append(param: string, value: any): any };
+        let useForm = false;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        useForm = canConsumeForm;
+        if (useForm) {
+            formParams = new FormData();
+        } else {
+            formParams = new URLSearchParams();
+        }
+
+        if (requestParameters['file'] != null) {
+            requestParameters['file'].forEach((element) => {
+                formParams.append('file', element as any);
+            })
+        }
+
+
+        let urlPath = `/api/v1/post/{id}/images`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        return {
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: formParams,
+        };
+    }
+
+    /**
+     * Replaces all photos attached to a post. Send no files to remove all photos.
+     * Replace a post\'s photos
+     */
+    async apiV1PostIdImagesPutRaw(requestParameters: ApiV1PostIdImagesPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<InternalApiPostPostResponse>> {
+        const requestOptions = await this.apiV1PostIdImagesPutRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => InternalApiPostPostResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * Replaces all photos attached to a post. Send no files to remove all photos.
+     * Replace a post\'s photos
+     */
+    async apiV1PostIdImagesPut(requestParameters: ApiV1PostIdImagesPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<InternalApiPostPostResponse> {
+        const response = await this.apiV1PostIdImagesPutRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
      * Creates request options for apiV1PostIdPut without sending the request
      */
     async apiV1PostIdPutRequestOpts(requestParameters: ApiV1PostIdPutRequest): Promise<runtime.RequestOpts> {
@@ -262,7 +349,7 @@ export class PostApi extends runtime.BaseAPI {
     }
 
     /**
-     * Updates a post by ID (auth required, must be owner)
+     * Updates a post by ID (auth required, must be owner or admin)
      * Update a post
      */
     async apiV1PostIdPutRaw(requestParameters: ApiV1PostIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<InternalApiPostPostResponse>> {
@@ -273,7 +360,7 @@ export class PostApi extends runtime.BaseAPI {
     }
 
     /**
-     * Updates a post by ID (auth required, must be owner)
+     * Updates a post by ID (auth required, must be owner or admin)
      * Update a post
      */
     async apiV1PostIdPut(requestParameters: ApiV1PostIdPutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<InternalApiPostPostResponse> {

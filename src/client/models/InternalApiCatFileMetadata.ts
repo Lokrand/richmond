@@ -32,13 +32,13 @@ export interface InternalApiCatFileMetadata {
      */
     key?: string;
     /**
-     *
+     * 
      * @type {string}
      * @memberof InternalApiCatFileMetadata
      */
     originalUrl?: string;
     /**
-     *
+     * 
      * @type {string}
      * @memberof InternalApiCatFileMetadata
      */
@@ -50,7 +50,7 @@ export interface InternalApiCatFileMetadata {
      */
     size?: number;
     /**
-     *
+     * 
      * @type {string}
      * @memberof InternalApiCatFileMetadata
      */

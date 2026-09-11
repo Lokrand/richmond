@@ -17,6 +17,7 @@ const mapToTyCat = (cat: InternalApiCatCatResponse): TyCat => {
 
     return {
         id: cat.catId ?? 0,
+        ownerId: cat.ownerId ?? null,
         name: cat.name ?? '',
         age,
         weight: cat.weight ?? 0,

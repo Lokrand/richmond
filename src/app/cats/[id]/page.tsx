@@ -494,7 +494,7 @@ const CatPage = ({ params }: CatPageProps) => {
                                 >
                                     <Pencil size={20} />
                                 </Button>
-                                <Popover placement="bottom-end">
+                                <Popover>
                                     <PopoverTrigger>
                                         <Button color="danger" variant="solid" className="p-2 min-w-10" aria-label="Удалить запись">
                                             <Trash2 size={20} />
@@ -512,7 +512,7 @@ const CatPage = ({ params }: CatPageProps) => {
                                                 size="sm"
                                                 variant="bordered"
                                                 color="danger"
-                                                onClick={() => deletePost(post)}
+                                                onClick={removeCat}
                                             >
                                                 Да
                                             </Button>
@@ -695,7 +695,7 @@ const CatPage = ({ params }: CatPageProps) => {
                                             >
                                                 <Pencil size={16} />
                                             </Button>
-                                            <Popover placement="bottom-end" showArrow>
+                                            <Popover>
                                                 <PopoverTrigger>
                                                     <Button color="danger" variant="shadow" size="sm" className="p-2 min-w-10" aria-label="Удалить запись">
                                                         <Trash2 size={16} />

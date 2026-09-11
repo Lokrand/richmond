@@ -13,6 +13,7 @@ import {
     PopoverContent,
 } from '@/components/ui';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
@@ -397,11 +398,6 @@ const CatPage = ({ params }: CatPageProps) => {
 
     const deletePost = async (post: InternalApiPostPostResponse) => {
         const postId = Number(post.postId);
-        // eslint-disable-next-line no-alert
-        if (!Number.isInteger(postId) || !window.confirm(`Удалить запись «${post.title ?? ''}»?`)) {
-            return;
-        }
-
         setDeletingPostId(postId);
         try {
             const authorization = await auth.getAuthorizationHeader();
@@ -434,22 +430,17 @@ const CatPage = ({ params }: CatPageProps) => {
 
                 <Card className="flex flex-col items-center sm:items-start sm:flex-row gap-4 p-4 mb-8 shadow-xl rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-default-200 dark:border-default-100">
                     {hasLogo ? (
-                        <button
-                            type="button"
+                        <Image
+                            src={cat.logo_path}
+                            className="shadow-lg rounded-xl object-cover w-100 h-100 hover:opacity-90 transition-opacity"
+                            width={400}
+                            height={400}
+                            alt={cat.name}
+                            loading="eager"
+                            fetchPriority="high"
+                            decoding="async"
                             onClick={() => openImageModal(-1)}
-                            className="shrink-0 cursor-pointer"
-                        >
-                            <img
-                                src={cat.logo_path}
-                                className="shadow-lg rounded-xl object-cover w-100 h-100 hover:opacity-90 transition-opacity"
-                                width={400}
-                                height={400}
-                                alt={cat.name}
-                                loading="eager"
-                                fetchPriority="high"
-                                decoding="async"
-                            />
-                        </button>
+                        />
                     ) : (
                         <div className="shadow-lg rounded-xl w-full h-100 bg-default-100 dark:bg-default-200 flex flex-col items-center justify-center gap-4 border-2 border-dashed border-default-300 dark:border-default-100">
                             <Camera size={64} className="text-default-400" />
@@ -495,7 +486,7 @@ const CatPage = ({ params }: CatPageProps) => {
                                     <Pencil size={20} />
                                 </Button>
                                 <Popover>
-                                    <PopoverTrigger>
+                                    <PopoverTrigger asChild>
                                         <Button color="danger" variant="solid" className="p-2 min-w-10" aria-label="Удалить запись">
                                             <Trash2 size={20} />
                                         </Button>
@@ -695,7 +686,7 @@ const CatPage = ({ params }: CatPageProps) => {
                                                 <Pencil size={16} />
                                             </Button>
                                             <Popover>
-                                                <PopoverTrigger>
+                                                <PopoverTrigger asChild>
                                                     <Button color="danger" variant="shadow" size="sm" className="p-2 min-w-10" aria-label="Удалить запись">
                                                         <Trash2 size={16} />
                                                     </Button>
@@ -703,8 +694,8 @@ const CatPage = ({ params }: CatPageProps) => {
                                                 <PopoverContent className="p-4">
                                                     <p className="mb-3 text-sm text-foreground/80">Удалить эту запись?</p>
                                                     <div className="flex gap-2">
-                                                        <Button size="sm" variant="flat" color="default">Отмена</Button>
-                                                        <Button size="sm" color="danger" onClick={() => deletePost(post)}>Удалить</Button>
+                                                        <Button size="sm" variant="flat" color="default">Нет</Button>
+                                                        <Button size="sm" color="danger" onClick={() => deletePost(post)}>Да</Button>
                                                     </div>
                                                 </PopoverContent>
                                             </Popover>
@@ -717,13 +708,9 @@ const CatPage = ({ params }: CatPageProps) => {
                                             return postImages.length > 0 && (
                                                 <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
                                                     {postImages.map((photo, index) => (
-                                                        <button
+                                                        <Image
                                                             key={`${photo.src}-${index}`}
-                                                            type="button"
-                                                            className="aspect-square w-full"
                                                             onClick={() => openPostImageModal(postImages, index)}
-                                                        >
-                                                            <img
                                                                 src={photo.thumbnailSrc || photo.src}
                                                                 alt={photo.alt}
                                                                 width={480}
@@ -731,8 +718,7 @@ const CatPage = ({ params }: CatPageProps) => {
                                                                 loading="lazy"
                                                                 decoding="async"
                                                                 className="size-full rounded-lg object-cover"
-                                                                />
-                                                        </button>
+                                                        />
                                                     ))}
                                                 </div>
                                             );
@@ -826,7 +812,7 @@ const CatPage = ({ params }: CatPageProps) => {
                                                 key={`${photo.kind === 'new' ? photo.preview : photo.photo.key || photo.source}-${index}`}
                                                 className="relative aspect-square"
                                             >
-                                                <img
+                                                <Image
                                                     src={photo.preview}
                                                     alt={`Фото записи ${index + 1}`}
                                                     className="size-full rounded-lg object-cover shadow"

@@ -1,9 +1,8 @@
 'use client';
 
-import React from 'react';
-import { Card, Button, Chip } from '@/components/ui';
 import Link from 'next/link';
-import getCatYearNote from '../../utils/getCatAgeNote';
+import Image from 'next/image';
+import { Card, Button } from '@/components/ui';
 import { getImagePath } from '../../config';
 import { InternalApiCatCatResponse } from '../../client/models';
 import { TyCat } from '../../types';
@@ -98,31 +97,17 @@ const Gallery = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {cats.map((cat) => (
                             <Link key={cat.id} href={`/cats/${cat.id}`} className="block min-w-0">
-                                <Card className="flex w-full flex-col p-2 shadow-lg rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-default-200 dark:border-default-100 hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer sm:flex-row">
-                                    <img
+                                <Card className="flex w-full flex-col shadow-lg rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-default-200 dark:border-default-100 hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer">
+                                    <Image
                                         src={cat.logo_path || '/default-cat.jpg'}
-                                        className="shadow-md rounded-xl object-cover w-full h-48 shrink-0 sm:w-48"
+                                        className="shadow-md rounded-xl object-cover w-full h-48 shrink-0"
                                         width={200}
                                         height={200}
                                         alt={cat.name}
                                         loading="lazy"
                                         decoding="async"
                                     />
-                                    <div className="flex min-w-0 flex-1 flex-col gap-4 ml-0 sm:ml-4">
-                                        <h2 className="break-words text-xl font-bold text-primary">{cat.name}</h2>
-                                        <div className="flex flex-wrap gap-2 text-xs text-foreground/60">
-                                            <Chip color="primary">
-                                                {`${cat.age} ${getCatYearNote(cat.age)}`}
-                                            </Chip>
-                                            <Chip color="success">
-                                                {`${cat.weight} кг`}
-                                            </Chip>
-                                            <Chip color="secondary">
-                                                {cat.breed}
-                                            </Chip>
-                                        </div>
-                                        <p className="break-words text-foreground/70 text-sm">{cat.description}</p>
-                                    </div>
+                                    <h2 className="break-words text-xl font-bold text-primary text-center p-4 pb-2 ml-0 sm:ml-4">{cat.name}</h2>
                                 </Card>
                             </Link>
                         ))}

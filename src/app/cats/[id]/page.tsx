@@ -8,6 +8,9 @@ import {
     Card,
     Button,
     Chip,
+    Popover,
+    PopoverTrigger,
+    PopoverContent,
 } from '@/components/ui';
 import Link from 'next/link';
 import { notFound, useRouter } from 'next/navigation';
@@ -28,6 +31,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import ViewPhotoModal from '@/components/ViewPhotoModal';
+import StatField from '@/components/StatField';
+import { PopoverClose } from '@/components/ui/popover';
 import makeFirstCharUppercase from '@/utils/makeFirstCharUppercase';
 import { getCatShareData } from '@/utils/shareCat';
 import getCatYearNote from '../../../utils/getCatAgeNote';
@@ -464,7 +469,7 @@ const CatPage = ({ params }: CatPageProps) => {
                             <div className="flex flex-nowrap gap-2">
                                 <Button
                                     color="secondary"
-                                    variant="shadow"
+                                    variant="solid"
                                     className="p-2 min-w-10"
                                     onClick={handleShareCat}
                                     aria-label={`Поделиться пушистиком ${cat.name}`}
@@ -473,7 +478,7 @@ const CatPage = ({ params }: CatPageProps) => {
                                 </Button>
                                 <Button
                                     color="success"
-                                    variant="shadow"
+                                    variant="solid"
                                     className="p-2 min-w-10"
                                     onClick={() => setIsAddPostModalOpen(true)}
                                     aria-label="Добавить запись"
@@ -482,34 +487,52 @@ const CatPage = ({ params }: CatPageProps) => {
                                 </Button>
                                 <Button
                                     color="primary"
-                                    variant="shadow"
+                                    variant="solid"
                                     className="p-2 min-w-10"
                                     onClick={() => setIsEditModalOpen(true)}
                                     aria-label="Редактировать кота"
                                 >
                                     <Pencil size={20} />
                                 </Button>
-                                <Button
-                                    color="danger"
-                                    onClick={removeCat}
-                                    className="p-2 min-w-10"
-                                >
-                                    <Trash2 size={20} />
-                                </Button>
+                                <Popover placement="bottom-end">
+                                    <PopoverTrigger>
+                                        <Button color="danger" variant="solid" className="p-2 min-w-10" aria-label="Удалить запись">
+                                            <Trash2 size={20} />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="p-4 w-50">
+                                        <p className="mb-3 text-sm">Удалить пушистика?</p>
+                                       <div className="flex justify-end gap-2">
+                                            <PopoverClose asChild>
+                                                <Button size="sm" variant="bordered" color="primary">
+                                                    Нет
+                                                </Button>
+                                            </PopoverClose>
+                                            <Button
+                                                size="sm"
+                                                variant="bordered"
+                                                color="danger"
+                                                onClick={() => deletePost(post)}
+                                            >
+                                                Да
+                                            </Button>
+                                        </div>
+                                    </PopoverContent>
+                                </Popover>
                             </div>
                         </div>
-                        <div className="flex items-center justify-start flex-wrap gap-1 sm:gap-4 text-foreground/70">
-                            <span className="flex items-center gap-1.5">
-                                {`🎂 ${cat.age} ${getCatYearNote(cat.age)}`}
-                            </span>
-                            <span className="w-1 h-1 rounded-full bg-default-300 hidden sm:block" />
-                            <span className="flex items-center gap-1.5">
-                                {`⚖️ ${cat.weight} кг`}
-                            </span>
-                            <span className="w-1 h-1 rounded-full bg-default-300 hidden sm:block" />
-                            <span className="flex items-center gap-1.5">
-                                <span>{`🐱 ${cat.breed}`}</span>
-                            </span>
+                        <div className="flex flex-wrap items-stretch gap-3">
+                            <StatField label="Возраст" color="primary">
+                                <span>{cat.age} {getCatYearNote(cat.age)}</span>
+                            </StatField>
+
+                            <StatField label="Вес" color="danger">
+                                <span>{cat.weight} кг</span>
+                            </StatField>
+
+                            <StatField label="Порода" color="secondary">
+                                <span>{cat.breed}</span>
+                            </StatField>
                         </div>
                         <p className="text-foreground/70 mt-4 mb-4">{cat.description || `Пушистик ${cat.name} пока не добавил описание, может быть ему дать вкусняшку, чтобы он рассказал о себе?`}</p>
                         <div className="space-y-3">
@@ -517,9 +540,9 @@ const CatPage = ({ params }: CatPageProps) => {
                                 🌟 Любимые привычки
                             </p>
                             <div className="flex flex-wrap gap-2">
-                                {cat.habits.length ? cat.habits.map((habit) => (
+                                {cat.habits.length ? cat.habits.map((habit, i) => (
                                     <Chip
-                                        key={habit.toLocaleLowerCase('ru-RU')}
+                                        key={habit.toLocaleLowerCase('ru-RU') + i}
                                         variant="flat"
                                         color="primary"
                                         size="sm"
@@ -672,18 +695,20 @@ const CatPage = ({ params }: CatPageProps) => {
                                             >
                                                 <Pencil size={16} />
                                             </Button>
-                                            <Button
-                                                color="danger"
-                                                variant="shadow"
-                                                size="sm"
-                                                className="p-2 min-w-10"
-                                                aria-label="Удалить запись"
-                                                onClick={() => deletePost(post)}
-                                                isLoading={deletingPostId === Number(post.postId)}
-                                                isDisabled={deletingPostId !== null}
-                                            >
-                                                <Trash2 size={16} />
-                                            </Button>
+                                            <Popover placement="bottom-end" showArrow>
+                                                <PopoverTrigger>
+                                                    <Button color="danger" variant="shadow" size="sm" className="p-2 min-w-10" aria-label="Удалить запись">
+                                                        <Trash2 size={16} />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="p-4">
+                                                    <p className="mb-3 text-sm text-foreground/80">Удалить эту запись?</p>
+                                                    <div className="flex gap-2">
+                                                        <Button size="sm" variant="flat" color="default">Отмена</Button>
+                                                        <Button size="sm" color="danger" onClick={() => deletePost(post)}>Удалить</Button>
+                                                    </div>
+                                                </PopoverContent>
+                                            </Popover>
                                         </div>
                                     </div>
                                     <div className="p-2 pt-0">

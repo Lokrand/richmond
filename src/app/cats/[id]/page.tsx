@@ -54,6 +54,7 @@ import {
     useCat,
     useCatPosts,
 } from '../../../hooks/useCatData';
+import { useUser } from '@/hooks/useUser';
 
 const mapToTyCat = (cat: InternalApiCatCatResponse): TyCat => {
     const birthDate = cat.birthDate ? new Date(cat.birthDate) : new Date();
@@ -138,6 +139,8 @@ const CatPage = ({ params }: CatPageProps) => {
     const postsQuery = useCatPosts(catId);
     const queryClient = useQueryClient();
     const router = useRouter();
+    const user = useUser();
+    const isCatOwner = !!user.data?.login; // TODO переделать, в коте должен быть id овнера
     const cat = catQuery.data ? mapToTyCat(catQuery.data) : null;
     const loading = catQuery.isPending;
     const posts = postsQuery.data ?? [];
@@ -467,49 +470,54 @@ const CatPage = ({ params }: CatPageProps) => {
                                 >
                                     <Share2 size={20} />
                                 </Button>
-                                <Button
-                                    color="success"
-                                    variant="solid"
-                                    className="p-2 min-w-10"
-                                    onClick={() => setIsAddPostModalOpen(true)}
-                                    aria-label="Добавить запись"
-                                >
-                                    <ImagePlus size={20} />
-                                </Button>
-                                <Button
-                                    color="primary"
-                                    variant="solid"
-                                    className="p-2 min-w-10"
-                                    onClick={() => setIsEditModalOpen(true)}
-                                    aria-label="Редактировать кота"
-                                >
-                                    <Pencil size={20} />
-                                </Button>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button color="danger" variant="solid" className="p-2 min-w-10" aria-label="Удалить запись">
-                                            <Trash2 size={20} />
+                                {isCatOwner && (
+                                    <>
+                                        <Button
+                                            color="success"
+                                            variant="solid"
+                                            className="p-2 min-w-10"
+                                            onClick={() => setIsAddPostModalOpen(true)}
+                                            aria-label="Добавить запись"
+                                        >
+                                            <ImagePlus size={20} />
                                         </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="p-4 w-50">
-                                        <p className="mb-3 text-sm">Удалить пушистика?</p>
-                                       <div className="flex justify-end gap-2">
-                                            <PopoverClose asChild>
-                                                <Button size="sm" variant="bordered" color="primary">
-                                                    Нет
+                                        <Button
+                                            color="primary"
+                                            variant="solid"
+                                            className="p-2 min-w-10"
+                                            onClick={() => setIsEditModalOpen(true)}
+                                            aria-label="Редактировать кота"
+                                        >
+                                            <Pencil size={20} />
+                                        </Button>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button color="danger" variant="solid" className="p-2 min-w-10" aria-label="Удалить запись">
+                                                    <Trash2 size={20} />
                                                 </Button>
-                                            </PopoverClose>
-                                            <Button
-                                                size="sm"
-                                                variant="bordered"
-                                                color="danger"
-                                                onClick={removeCat}
-                                            >
-                                                Да
-                                            </Button>
-                                        </div>
-                                    </PopoverContent>
-                                </Popover>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="p-4 w-50">
+                                                <p className="mb-3 text-sm">Удалить пушистика?</p>
+                                            <div className="flex justify-end gap-2">
+                                                    <PopoverClose asChild>
+                                                        <Button size="sm" variant="bordered" color="primary">
+                                                            Нет
+                                                        </Button>
+                                                    </PopoverClose>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="bordered"
+                                                        color="danger"
+                                                        onClick={removeCat}
+                                                    >
+                                                        Да
+                                                    </Button>
+                                                </div>
+                                            </PopoverContent>
+                                        </Popover>
+                                    </>
+                                )
+                                }
                             </div>
                         </div>
                         <div className="flex flex-wrap items-stretch gap-3">

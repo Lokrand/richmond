@@ -545,7 +545,6 @@ const CatPage = ({ params }: CatPageProps) => {
                                         key={habit.toLocaleLowerCase('ru-RU') + i}
                                         variant="flat"
                                         color="primary"
-                                        size="sm"
                                     >   
                                         {`${makeFirstCharUppercase(habit)}`}
                                     </Chip>

@@ -94,20 +94,26 @@ const Gallery = () => {
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="columns-2 sm:columns-2 md:columns-3 lg:columns-4 gap-3">
                         {cats.map((cat) => (
-                            <Link key={cat.id} href={`/cats/${cat.id}`} className="block min-w-0">
-                                <Card className="flex w-full flex-col shadow-lg rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-default-200 dark:border-default-100 hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer">
+                            <Link
+                                key={cat.id}
+                                href={`/cats/${cat.id}`}
+                                className="block break-inside-avoid mb-3"
+                            >
+                                <Card className="flex flex-col shadow-lg rounded-2xl bg-white/70 dark:bg-default-50 backdrop-blur-md border border-default-200 dark:border-default-100 hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer">
                                     <Image
                                         src={cat.logo_path || '/default-cat.jpg'}
-                                        className="shadow-md rounded-xl object-cover w-full h-48 shrink-0"
-                                        width={200}
-                                        height={200}
+                                        className="shadow-md rounded-xl object-cover w-full h-auto shrink-0"
+                                        width={400}
+                                        height={400}
                                         alt={cat.name}
                                         loading="lazy"
                                         decoding="async"
                                     />
-                                    <h2 className="break-words text-xl font-bold text-primary text-center p-2 ml-0 sm:ml-4">{cat.name}</h2>
+                                    <h2 className="break-words text-xl font-bold text-primary text-center p-2">
+                                        {cat.name}
+                                    </h2>
                                 </Card>
                             </Link>
                         ))}

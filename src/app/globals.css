@@ -204,11 +204,6 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-html,
-body {
-  height: 100%;
-}
-
 * {
   box-sizing: border-box;
 }

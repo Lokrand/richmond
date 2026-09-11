@@ -107,7 +107,7 @@ const Gallery = () => {
                                         loading="lazy"
                                         decoding="async"
                                     />
-                                    <h2 className="break-words text-xl font-bold text-primary text-center p-4 pb-2 ml-0 sm:ml-4">{cat.name}</h2>
+                                    <h2 className="break-words text-xl font-bold text-primary text-center p-2 ml-0 sm:ml-4">{cat.name}</h2>
                                 </Card>
                             </Link>
                         ))}

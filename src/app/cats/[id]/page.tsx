@@ -827,7 +827,7 @@ const CatPage = ({ params }: CatPageProps) => {
                                                 key={`${photo.kind === 'new' ? photo.preview : photo.photo.key || photo.source}-${index}`}
                                                 className="relative aspect-square"
                                             >
-                                                <Image
+                                                <img
                                                     src={photo.preview}
                                                     alt={`Фото записи ${index + 1}`}
                                                     className="size-full rounded-lg object-cover shadow"

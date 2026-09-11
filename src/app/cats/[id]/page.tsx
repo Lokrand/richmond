@@ -655,14 +655,16 @@ const CatPage = ({ params }: CatPageProps) => {
                             {' '}
                             {cat.name}
                         </h2>
-                        <Button
-                            color="success"
-                            variant="shadow"
-                            startContent={<ImagePlus size={18} />}
-                            onClick={() => setIsAddPostModalOpen(true)}
-                        >
-                            Создать новый пост
-                        </Button>
+                        {isCatOwner && (
+                            <Button
+                                color="success"
+                                variant="shadow"
+                                startContent={<ImagePlus size={18} />}
+                                onClick={() => setIsAddPostModalOpen(true)}
+                            >
+                                Создать новый пост
+                            </Button>
+                        )}
                     </div>
 
                     {postsQuery.isPending ? (
@@ -682,33 +684,37 @@ const CatPage = ({ params }: CatPageProps) => {
                                             )}
                                             <h3 className="text-lg font-semibold">{post.title}</h3>
                                         </div>
-                                        <div className="flex shrink-0 items-center gap-2 p-2 pb-0">
-                                            <Button
-                                                color="primary"
-                                                variant="shadow"
-                                                size="sm"
-                                                className="p-2 min-w-10"
-                                                aria-label="Редактировать запись"
-                                                onClick={() => openPostEditor(post)}
-                                                isDisabled={deletingPostId !== null}
-                                            >
-                                                <Pencil size={16} />
-                                            </Button>
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <Button color="danger" variant="shadow" size="sm" className="p-2 min-w-10" aria-label="Удалить запись">
-                                                        <Trash2 size={16} />
-                                                    </Button>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="p-4">
-                                                    <p className="mb-3 text-sm text-foreground/80">Удалить эту запись?</p>
-                                                    <div className="flex gap-2">
-                                                        <Button size="sm" variant="flat" color="default">Нет</Button>
-                                                        <Button size="sm" color="danger" onClick={() => deletePost(post)}>Да</Button>
-                                                    </div>
-                                                </PopoverContent>
-                                            </Popover>
-                                        </div>
+                                        {isCatOwner && (
+                                            <div className="flex shrink-0 items-center gap-2 p-2 pb-0">
+                                                <Button
+                                                    color="primary"
+                                                    variant="shadow"
+                                                    size="sm"
+                                                    className="p-2 min-w-10"
+                                                    aria-label="Редактировать запись"
+                                                    onClick={() => openPostEditor(post)}
+                                                    isDisabled={deletingPostId !== null}
+                                                >
+                                                    <Pencil size={16} />
+                                                </Button>
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <Button color="danger" variant="shadow" size="sm" className="p-2 min-w-10" aria-label="Удалить запись">
+                                                            <Trash2 size={16} />
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="p-4 w-50">
+                                                        <p className="mb-3">Удалить эту запись?</p>
+                                                        <div className="flex gap-2 justify-end">
+                                                            <PopoverClose asChild>
+                                                                <Button size="sm" variant="bordered" color="primary">Нет</Button>
+                                                            </PopoverClose>
+                                                            <Button size="sm" variant="bordered" color="danger" onClick={() => deletePost(post)}>Да</Button>
+                                                        </div>
+                                                    </PopoverContent>
+                                                </Popover>
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="p-2 pt-0">
                                         {post.body && <p className="mt-2 whitespace-pre-wrap text-foreground/75">{post.body}</p>}

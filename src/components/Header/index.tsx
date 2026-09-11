@@ -135,19 +135,21 @@ const Header = () => {
                     </div>
                 </nav>
 
-                <div
-                    className={`sm:hidden absolute left-0 right-0 top-full overflow-hidden
+               <div
+                    className={`sm:hidden absolute left-0 right-0 top-full overflow-hidden rounded-b-2xl
                         grid transition-[grid-template-rows] duration-300 ease-out
                         ${isMenuOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}
                     `}
                 >
                     <div className="overflow-hidden">
                         <div
-                            className={`bg-white dark:bg-default-50 backdrop-blur-md
+                            className={`bg-white dark:bg-default-100
                                 border-b border-default-200 dark:border-default-100
-                                shadow-xl rounded-b-2xl
                                 transition-[transform,opacity] duration-300 ease-out
-                                ${isMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}
+                                ${isMenuOpen
+                                    ? 'translate-y-0 opacity-100'
+                                    : '-translate-y-full opacity-0'
+                                }
                             `}
                         >
                         <div className="flex flex-col gap-1 px-4 py-4">

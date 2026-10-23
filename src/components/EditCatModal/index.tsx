@@ -77,6 +77,19 @@ const getAgeDisplay = (birthDate: Date | undefined): string => {
     return remMonths > 0 ? `${years} г. ${remMonths} мес.` : `${years} г.`;
 };
 
+const resolveCatBirthDate = (cat: TyCat): Date | undefined => {
+    if (cat.birthDate) {
+        const date = new Date(cat.birthDate);
+        if (!Number.isNaN(date.getTime())) return date;
+    }
+    if (cat.age && cat.age > 0) {
+        const d = new Date();
+        d.setFullYear(d.getFullYear() - cat.age);
+        return d;
+    }
+    return undefined;
+};
+
 const EditCatModal = ({
     cat, isOpen, onClose, onUpdate,
 }: EditCatModalProps) => {
@@ -88,7 +101,6 @@ const EditCatModal = ({
     const [removedGalleryPhotos, setRemovedGalleryPhotos] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
-    const [calendarOpen, setCalendarOpen] = useState(false);
 
     const titlePhotoInputRef = useRef<HTMLInputElement>(null);
     const galleryPhotosInputRef = useRef<HTMLInputElement>(null);
@@ -96,17 +108,9 @@ const EditCatModal = ({
     useEffect(() => {
         if (isOpen && cat) {
             requestAnimationFrame(() => {
-                // Конвертируем age (в годах) в примерную дату рождения
-                let birthDate: Date | undefined;
-                if (cat.age && cat.age > 0) {
-                    const d = new Date();
-                    d.setFullYear(d.getFullYear() - cat.age);
-                    birthDate = d;
-                }
-
                 setFormData({
                     name: cat.name || '',
-                    birthDate,
+                    birthDate: resolveCatBirthDate(cat),
                     weight: cat.weight?.toString() || '',
                     breed: cat.breed || '',
                     habits: cat.habits?.join(', ') || '',
@@ -118,7 +122,6 @@ const EditCatModal = ({
                 setGalleryPhotos([]);
                 setRemovedGalleryPhotos([]);
                 setError('');
-                setCalendarOpen(false);
             });
         }
     }, [isOpen, cat.id]);
@@ -164,7 +167,6 @@ const EditCatModal = ({
 
     const handleBirthDateSelect = useCallback((date: Date | undefined) => {
         setFormData((prev) => ({ ...prev, birthDate: date }));
-        setCalendarOpen(false);
         setError('');
     }, []);
 

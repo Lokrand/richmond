@@ -75,8 +75,8 @@ const Header = () => {
                             {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
                         </button>
                         <Avatar className="size-9 shadow-md hover:scale-105 transition-transform">
-                            <AvatarImage src="/rich.jpg" alt="Ричик" />
-                            <AvatarFallback>Р</AvatarFallback>
+                            <AvatarImage src="/bubka-2.jpg" alt="Ричик" />
+                            <AvatarFallback>Кот</AvatarFallback>
                         </Avatar>
                         <Link
                             href="/"

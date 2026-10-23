@@ -27,8 +27,6 @@ const Header = () => {
         { href: '/', label: 'Пушистик дня' },
         { href: '/cats', label: 'Галерея' },
         { href: '/facts', label: 'Факты' },
-        // { href: '/quiz', label: 'Викторина' },
-        // { href: '/generator', label: 'Придумать имя' },
         { href: '/new-cat', label: 'Добавить пушистика' },
     ];
 

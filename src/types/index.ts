@@ -13,6 +13,7 @@ export interface TyCat {
   gallery_original?: string[];
   created_at?: string;
   updated_at?: string;
+  birthDate?: string; 
 }
 
 export interface CatFormData {

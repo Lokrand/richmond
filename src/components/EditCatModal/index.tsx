@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, {
@@ -8,6 +7,7 @@ import React, {
     useCallback,
     useMemo,
 } from 'react';
+import { format, differenceInMonths, differenceInYears } from 'date-fns';
 import {
     Dialog,
     DialogContent,
@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import BirthDatePicker from '../ui/BirthDatePicker';
 import {
     catApi,
     fileApi,
@@ -33,9 +34,18 @@ interface EditCatModalProps {
     onUpdate: () => Promise<void>;
 }
 
-const INITIAL_FORM_DATA = {
+interface FormData {
+    name: string;
+    birthDate: Date | undefined;
+    weight: string;
+    breed: string;
+    habits: string;
+    description: string;
+}
+
+const INITIAL_FORM_DATA: FormData = {
     name: '',
-    age: '',
+    birthDate: undefined,
     weight: '',
     breed: '',
     habits: '',
@@ -58,10 +68,19 @@ const customScrollbarStyles = `
     }
 `;
 
+const getAgeDisplay = (birthDate: Date | undefined): string => {
+    if (!birthDate) return '';
+    const months = differenceInMonths(new Date(), birthDate);
+    const years = differenceInYears(new Date(), birthDate);
+    const remMonths = months - years * 12;
+    if (years < 1) return `${months} мес.`;
+    return remMonths > 0 ? `${years} г. ${remMonths} мес.` : `${years} г.`;
+};
+
 const EditCatModal = ({
     cat, isOpen, onClose, onUpdate,
 }: EditCatModalProps) => {
-    const [formData, setFormData] = useState(INITIAL_FORM_DATA);
+    const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
     const [titlePhoto, setTitlePhoto] = useState<{ file: File; preview: string } | null>(null);
     const [existingTitlePhoto, setExistingTitlePhoto] = useState('');
     const [galleryPhotos, setGalleryPhotos] = useState<Array<{ file: File; preview: string }>>([]);
@@ -69,6 +88,7 @@ const EditCatModal = ({
     const [removedGalleryPhotos, setRemovedGalleryPhotos] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [calendarOpen, setCalendarOpen] = useState(false);
 
     const titlePhotoInputRef = useRef<HTMLInputElement>(null);
     const galleryPhotosInputRef = useRef<HTMLInputElement>(null);
@@ -76,9 +96,17 @@ const EditCatModal = ({
     useEffect(() => {
         if (isOpen && cat) {
             requestAnimationFrame(() => {
+                // Конвертируем age (в годах) в примерную дату рождения
+                let birthDate: Date | undefined;
+                if (cat.age && cat.age > 0) {
+                    const d = new Date();
+                    d.setFullYear(d.getFullYear() - cat.age);
+                    birthDate = d;
+                }
+
                 setFormData({
                     name: cat.name || '',
-                    age: cat.age?.toString() || '',
+                    birthDate,
                     weight: cat.weight?.toString() || '',
                     breed: cat.breed || '',
                     habits: cat.habits?.join(', ') || '',
@@ -90,6 +118,7 @@ const EditCatModal = ({
                 setGalleryPhotos([]);
                 setRemovedGalleryPhotos([]);
                 setError('');
+                setCalendarOpen(false);
             });
         }
     }, [isOpen, cat.id]);
@@ -130,6 +159,12 @@ const EditCatModal = ({
             ...prev,
             [name]: value,
         }));
+        setError('');
+    }, []);
+
+    const handleBirthDateSelect = useCallback((date: Date | undefined) => {
+        setFormData((prev) => ({ ...prev, birthDate: date }));
+        setCalendarOpen(false);
         setError('');
     }, []);
 
@@ -227,18 +262,14 @@ const EditCatModal = ({
                 return;
             }
 
-            const parseBirthDate = (age: string): string => {
-                const d = new Date();
-                d.setFullYear(d.getFullYear() - parseInt(age, 10));
-                return d.toISOString().split('T')[0];
-            };
-
             await catApi.apiV1CatIdPut({
                 id: cat.id,
                 authorization: authHeader.Authorization,
                 data: {
                     name: formData.name.trim(),
-                    birthDate: formData.age ? parseBirthDate(formData.age) : undefined,
+                    birthDate: formData.birthDate
+                        ? format(formData.birthDate, 'yyyy-MM-dd')
+                        : undefined,
                     weight: formData.weight ? parseFloat(formData.weight) : undefined,
                     breed: formData.breed.trim(),
                     habits: formData.habits,
@@ -275,6 +306,8 @@ const EditCatModal = ({
         [existingGalleryPhotos, galleryPhotos],
     );
 
+    const ageDisplay = useMemo(() => getAgeDisplay(formData.birthDate), [formData.birthDate]);
+
     return (
         <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
             <DialogContent className="sm:max-w-3xl bg-white/95 dark:bg-default-50 custom-scrollbar max-h-[90vh] overflow-y-auto p-0">
@@ -301,9 +334,7 @@ const EditCatModal = ({
                         />
                     </div>
                     <p className="text-foreground/70 text-center text-sm">
-                        Измените информацию о
-                        {' '}
-                        {cat.name}
+                        {`Измените информацию о ${cat.name}`}
                     </p>
                 </div>
 
@@ -318,15 +349,24 @@ const EditCatModal = ({
                                 required
                                 isInvalid={!!error && !formData.name.trim()}
                             />
-                            <Input
-                                label="Возраст (лет)"
-                                name="age"
-                                type="number"
-                                value={formData.age}
-                                onChange={handleInputChange}
-                                min="0"
-                                max="30"
-                            />
+
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-sm font-medium text-foreground">
+                                    Дата рождения
+                                </label>
+                                <BirthDatePicker
+                                    selected={formData.birthDate}
+                                    onSelect={handleBirthDateSelect}
+                                />
+                                {ageDisplay && (
+                                    <p className="text-xs text-foreground/60">
+                                        Возраст:
+                                        {' '}
+                                        {ageDisplay}
+                                    </p>
+                                )}
+                            </div>
+
                             <Input
                                 label="Вес (кг)"
                                 name="weight"

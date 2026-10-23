@@ -14,6 +14,7 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound, useRouter } from 'next/navigation';
+import { differenceInMonths, differenceInYears } from 'date-fns';
 import { toast } from 'sonner';
 import {
     Camera, Trash2, Pencil, ImagePlus, Share2, X,
@@ -35,7 +36,6 @@ import StatField from '@/components/StatField';
 import { PopoverClose } from '@/components/ui/popover';
 import makeFirstCharUppercase from '@/utils/makeFirstCharUppercase';
 import { getCatShareData } from '@/utils/shareCat';
-import getCatYearNote from '../../../utils/getCatAgeNote';
 import { auth } from '../../../lib/auth';
 import {
     catApi, getImagePath, postApi, updatePostImages,
@@ -66,6 +66,7 @@ const mapToTyCat = (cat: InternalApiCatCatResponse): TyCat => {
         ownerId: cat.ownerId ?? null,
         name: cat.name ?? '',
         age,
+        birthDate: cat.birthDate ?? undefined,
         weight: cat.weight ?? 0,
         breed: cat.breed ?? '',
         habits: cat.habits ? cat.habits.split(',').map((h: string) => h.trim()) : [],
@@ -130,6 +131,23 @@ const getPostPreviewImages = (post: InternalApiPostPostResponse): PreviewImage[]
         alt: `${post.title} — фото ${index + 1}`,
         label: `${index + 1} / ${photoUrls.length}`,
     }));
+};
+
+const getCatAgeDisplay = (birthDate?: string): string => {
+    if (!birthDate) {
+        return '—';
+    }
+    const date = new Date(birthDate);
+    const months = differenceInMonths(new Date(), date);
+    const years = differenceInYears(new Date(), date);
+    const remMonths = months - years * 12;
+
+    if (years < 1) {
+        return `${months} мес.`;
+    }
+    return remMonths > 0
+        ? `${years} г. ${remMonths} мес.`
+        : `${years} г.`;
 };
 
 const CatPage = ({ params }: CatPageProps) => {
@@ -523,7 +541,7 @@ const CatPage = ({ params }: CatPageProps) => {
                         </div>
                         <div className="flex flex-wrap items-stretch gap-3">
                             <StatField label="Возраст" color="primary">
-                                <span>{cat.age} {getCatYearNote(cat.age)}</span>
+                                <span>{getCatAgeDisplay(cat.birthDate)}</span>
                             </StatField>
 
                             <StatField label="Вес" color="danger">

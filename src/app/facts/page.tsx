@@ -10,9 +10,7 @@ import {
     CardContent,
 } from '@/components/ui';
 import {
-    Heart,
     Sparkles,
-    Zap,
     Coffee,
     RefreshCw,
     Share2,

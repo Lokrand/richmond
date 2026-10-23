@@ -1,14 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Card,
     Button,
     Chip,
-    Accordion,
-    AccordionItem,
-    AccordionTrigger,
-    AccordionContent,
     Badge,
     Tip,
     CardContent,
@@ -17,10 +13,7 @@ import {
     Heart,
     Sparkles,
     Zap,
-    Moon,
     Coffee,
-    Brain,
-    PawPrint,
     RefreshCw,
     Share2,
     BookOpen,
@@ -33,7 +26,6 @@ const catFacts = [
         id: 1,
         title: 'Сон и отдых',
         emoji: '😴',
-        icon: <Moon className="text-purple-500" />,
         facts: [
             'Кошки спят 12-16 часов в сутки — это почти 70% их жизни!',
             'Новорожденные котята спят до 22 часов в сутки.',
@@ -47,7 +39,6 @@ const catFacts = [
         id: 2,
         title: 'Суперспособности',
         emoji: '⚡',
-        icon: <Zap className="text-yellow-500" />,
         facts: [
             'Кошки могут прыгать на высоту в 5-6 раз больше своего роста!',
             'Усы (вибриссы) помогают определять расстояние и чувствовать малейшие движения воздуха.',
@@ -61,7 +52,6 @@ const catFacts = [
         id: 3,
         title: 'Общение и язык',
         emoji: '💬',
-        icon: <Brain className="text-blue-500" />,
         facts: [
             'Мурлыканье — не только от удовольствия, но и от боли или стресса (самолечение).',
             'Кошки мяукают в основном для общения с людьми, а не друг с другом.',
@@ -75,7 +65,6 @@ const catFacts = [
         id: 4,
         title: 'Здоровье и уход',
         emoji: '❤️',
-        icon: <Heart className="text-red-500" />,
         facts: [
             'Нос кошки уникален, как отпечатки пальцев у человека.',
             'Температура тела кошек — 38-39°C, поэтому они любят тепло.',
@@ -89,7 +78,6 @@ const catFacts = [
         id: 5,
         title: 'Интересные особенности',
         emoji: '🐾',
-        icon: <PawPrint className="text-green-500" />,
         facts: [
             'У кошек 230 костей (у человека 206), а позвоночник очень гибкий.',
             'Передние лапы имеют 5 пальцев, задние — 4, но бывают и многопалые!',
@@ -113,31 +101,33 @@ const funCatFacts = [
 ];
 
 const CatFactsPage = () => {
-    const [likedFacts, setLikedFacts] = useState<number[]>([]);
     const [dailyFact, setDailyFact] = useState<string>('');
     const [funFactIndex, setFunFactIndex] = useState(0);
-    const [showConfetti, setShowConfetti] = useState(false);
+    const [progress, setProgress] = useState(0);
 
     useEffect(() => {
         const randomFact = funCatFacts[Math.floor(Math.random() * funCatFacts.length)];
         setDailyFact(randomFact);
-
-        const interval = setInterval(() => {
-            setFunFactIndex((prev) => (prev + 1) % funCatFacts.length);
-        }, 10000);
-
-        return () => clearInterval(interval);
     }, []);
 
-    const handleLikeFact = (factId: number) => {
-        if (likedFacts.includes(factId)) {
-            setLikedFacts(likedFacts.filter((id) => id !== factId));
-        } else {
-            setLikedFacts([...likedFacts, factId]);
-            setShowConfetti(true);
-            setTimeout(() => setShowConfetti(false), 1500);
-        }
-    };
+    useEffect(() => {
+        setProgress(0);
+        const duration = 10000;
+        const intervalTime = 100;
+        const step = (intervalTime / duration) * 100;
+
+        const interval = setInterval(() => {
+            setProgress((prev) => {
+                if (prev + step >= 100) {
+                    setFunFactIndex((i) => (i + 1) % funCatFacts.length);
+                    return 0;
+                }
+                return prev + step;
+            });
+        }, intervalTime);
+
+        return () => clearInterval(interval);
+    }, [funFactIndex]);
 
     const handleShare = async () => {
         if (navigator.share) {
@@ -152,244 +142,185 @@ const CatFactsPage = () => {
     };
 
     const handleNewFact = () => {
-        const newIndex = (funFactIndex + 1) % funCatFacts.length;
-        setFunFactIndex(newIndex);
+        setFunFactIndex((prev) => (prev + 1) % funCatFacts.length);
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-blue-50 to-purple-50 dark:from-default-100 dark:via-default-200 dark:to-default-300 py-8 px-4">
-            {showConfetti && (
-                <div className="fixed inset-0 pointer-events-none z-50">
-                    {[...Array(50)].map((_, i) => (
-                        <div
-                            key={i}
-                            className="absolute w-2 h-2 animate-bounce"
-                            style={{
-                                left: `${Math.random() * 100}%`,
-                                top: `${Math.random() * 100}%`,
-                                backgroundColor: ['#ff6b8b', '#ffd166', '#06d6a0', '#118ab2', '#ef476f'][Math.floor(Math.random() * 5)],
-                                borderRadius: '50%',
-                                animationDelay: `${Math.random() * 1}s`,
-                                animationDuration: `${1 + Math.random() * 2}s`,
-                            }}
-                        />
-                    ))}
-                </div>
-            )}
-
+        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-blue-50 to-purple-50 dark:from-default-100 dark:via-default-200 dark:to-default-300 py-6 sm:py-8 px-3 sm:px-4">
             <div className="max-w-6xl mx-auto">
-                <div className="text-center mb-10">
-                    <div className="inline-flex items-center justify-center gap-3 mb-4">
-                        <Sparkles className="text-yellow-500" size={32} />
-                        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
+                <div className="text-center mb-8 sm:mb-10">
+                    <div className="inline-flex items-center justify-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                        <Sparkles className="text-yellow-500" size={24} />
+                        <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
                             Мир кошачьих фактов
                         </h1>
-                        <Sparkles className="text-yellow-500" size={32} />
+                        <Sparkles className="text-yellow-500" size={24} />
                     </div>
-                    <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
+                    <p className="text-sm sm:text-lg text-foreground/70 max-w-2xl mx-auto">
                         Узнай самые интересные, удивительные и забавные секреты наших пушистых друзей! 🐱
                     </p>
                 </div>
 
-                <Card className="mb-10 shadow-2xl rounded-3xl bg-gradient-to-r from-pink-100 to-blue-100 dark:from-pink-900/20 dark:to-blue-900/20 backdrop-blur-md border-2 border-white/50">
-                    <CardContent className="p-8">
-                        <div className="flex flex-col md:flex-row items-center gap-6">
+                <Card className="mb-8 sm:mb-10 shadow-2xl rounded-3xl bg-gradient-to-r from-pink-100 to-blue-100 dark:from-pink-900/20 dark:to-blue-900/20 backdrop-blur-md border-2 border-white/50">
+                    <CardContent className="p-5 sm:p-8">
+                        <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6">
                             <div className="flex-shrink-0">
                                 <div className="relative">
-                                    <div className="w-24 h-24 rounded-full bg-gradient-to-r from-pink-300 to-blue-300 flex items-center justify-center animate-pulse">
-                                        <BookOpen size={48} className="text-white" />
+                                    <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-gradient-to-r from-pink-300 to-blue-300 flex items-center justify-center animate-pulse">
+                                        <BookOpen size={32} className="text-white sm:hidden" />
+                                        <BookOpen size={48} className="text-white hidden sm:block" />
                                     </div>
                                     <Badge
                                         color="warning"
                                         variant="solid"
-                                        className="absolute -top-2 -right-2 animate-bounce"
+                                        className="absolute -top-2 -right-2 animate-bounce text-[10px] sm:text-xs"
                                     >
                                         СЕГОДНЯ
                                     </Badge>
                                 </div>
                             </div>
-                            <div className="flex-grow text-center md:text-left">
-                                <div className="flex items-center gap-2 mb-3 justify-center md:justify-start">
-                                    <Coffee className="text-amber-600" />
-                                    <h2 className="text-2xl font-bold text-foreground">Факт дня</h2>
+                            <div className="flex-grow w-full text-center md:text-left">
+                                <div className="flex items-center gap-2 mb-2 sm:mb-3 justify-center md:justify-start">
+                                    <Coffee className="text-amber-600" size={20} />
+                                    <h2 className="text-lg sm:text-2xl font-bold text-foreground">Факт дня</h2>
                                 </div>
-                                <p className="text-xl italic text-foreground/80 mb-4">
-                                    {`"${dailyFact}"`}
+
+                                <p className="text-base sm:text-xl italic text-foreground/80 mb-3">
+                                    {`"${funCatFacts[funFactIndex]}"`}
                                 </p>
-                                <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                                    <Button
-                                        color="primary"
-                                        variant="shadow"
-                                        startContent={<Share2 size={20} />}
-                                        onClick={handleShare}
-                                    >
-                                        Поделиться
-                                    </Button>
-                                    <Button
-                                        color="default"
-                                        variant="flat"
-                                        startContent={<RefreshCw size={20} />}
-                                        onClick={handleNewFact}
-                                    >
-                                        Другой факт
-                                    </Button>
+
+                                {/* На десктопе: прогресс + кнопки в одну строку */}
+                                <div className="flex flex-col md:flex-row md:items-center md:gap-4">
+                                    {/* Прогресс-бар: на мобиле — полная ширина сверху, на десктопе — рядом с кнопками */}
+                                    <div className="w-full md:flex-1 mb-3 md:mb-0 md:order-2">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="text-[10px] sm:text-xs text-foreground/60">
+                                                Следующий факт через
+                                            </span>
+                                            <span className="text-[10px] sm:text-xs font-semibold text-foreground/70">
+                                                {Math.ceil((100 - progress) / 10)} с
+                                            </span>
+                                        </div>
+                                        <div className="h-1.5 sm:h-2 w-full bg-white/60 dark:bg-default-100/60 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 rounded-full transition-[width] duration-100 ease-linear"
+                                                style={{ width: `${progress}%` }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Кнопки: на мобиле — в один ряд по центру, на десктопе — слева */}
+                                    <div className="flex flex-row gap-2 sm:gap-3 justify-center md:justify-start md:order-1">
+                                        <Button
+                                            color="primary"
+                                            variant="shadow"
+                                            size="sm"
+                                            startContent={<Share2 size={16} />}
+                                            onClick={handleShare}
+                                            className="text-xs sm:text-sm"
+                                        >
+                                            Поделиться
+                                        </Button>
+                                        <Button
+                                            color="default"
+                                            variant="flat"
+                                            size="sm"
+                                            startContent={<RefreshCw size={16} />}
+                                            onClick={handleNewFact}
+                                            className="text-xs sm:text-sm"
+                                        >
+                                            Другой факт
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <div className="mb-10 p-6 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-3xl shadow-xl border-2 border-emerald-100 dark:border-emerald-800/30">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                            <Zap className="text-emerald-500" />
-                            <h3 className="text-xl font-bold">Быстрый факт</h3>
-                        </div>
-                        <Badge color="success" variant="flat">
-                            Обновляется каждые 10 сек
-                        </Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <p className="text-lg flex-grow mr-4">
-                            {funCatFacts[funFactIndex]}
-                        </p>
-                        <Button
-                            isIconOnly
-                            color="success"
-                            variant="light"
-                            onClick={handleNewFact}
-                        >
-                            <RefreshCw size={20} />
-                        </Button>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8 sm:mb-10">
                     {catFacts.map((category) => (
                         <Card
                             key={category.id}
                             className={`shadow-xl rounded-2xl backdrop-blur-md border-2 border-white/50 bg-gradient-to-br ${category.color} dark:bg-gradient-to-br dark:from-default-200 dark:to-default-300`}
                         >
-                            <CardContent className="p-6">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="p-2 rounded-full bg-white/50 dark:bg-default-100">
-                                        {category.icon}
-                                    </div>
-                                    <div className="flex-grow">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-2xl">{category.emoji}</span>
-                                            <h3 className="text-xl font-bold">{category.title}</h3>
-                                        </div>
-                                        <Chip
-                                            color={category.badgeColor as any}
-                                            variant="flat"
-                                            size="sm"
-                                            className="mt-1"
-                                        >
-                                            {category.facts.length}
-                                            {' '}
-                                            фактов
-                                        </Chip>
-                                    </div>
-                                    <Button
-                                        isIconOnly
-                                        color={likedFacts.includes(category.id) ? 'danger' : 'default'}
-                                        variant="light"
-                                        onClick={() => handleLikeFact(category.id)}
-                                        className="self-start"
-                                    >
-                                        <Heart
-                                            size={20}
-                                            fill={likedFacts.includes(category.id) ? 'currentColor' : 'none'}
-                                        />
-                                    </Button>
+                            <CardContent className="p-4 sm:p-6">
+                                <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                                    <span className="text-xl sm:text-2xl">{category.emoji}</span>
+                                    <h3 className="text-lg sm:text-xl font-bold">{category.title}</h3>
                                 </div>
 
-                                <Accordion type="single" collapsible className="px-0">
+                                <div className="px-0">
                                     {category.facts.map((fact, index) => (
-                                        <AccordionItem
+                                        <div
                                             key={index}
-                                            value={`fact-${index}`}
-                                            className="rounded-xl border border-default-200 dark:border-default-100 bg-white/60 dark:bg-default-100/60 mb-2 px-0 overflow-hidden"
+                                            className="rounded-xl border border-default-200 dark:border-default-100 bg-white/60 dark:bg-default-100/60 mb-2 px-3 sm:px-4 py-2 sm:py-3"
                                         >
-                                            <AccordionTrigger className="py-3 px-4">
-                                                <div className="flex items-center gap-2 min-w-0">
-                                                    <Badge
-                                                        color="default"
-                                                        variant="flat"
-                                                        size="sm"
-                                                    >
-                                                        #
-                                                        {index + 1}
-                                                    </Badge>
-                                                    <span className="line-clamp-1">{fact}</span>
-                                                </div>
-                                            </AccordionTrigger>
-                                            <AccordionContent className="px-4 pb-4 text-foreground/70">
-                                                <div className="pl-6">
-                                                    <p className="text-foreground/80">
-                                                        {index === 0 && 'Интересно, что...'}
-                                                        {index === 1 && 'Знаете ли вы...'}
-                                                        {index === 2 && 'А ещё...'}
-                                                        {index === 3 && 'И напоследок...'}
-                                                    </p>
-                                                    <p className="mt-2">{fact}</p>
-                                                </div>
-                                            </AccordionContent>
-                                        </AccordionItem>
+                                            <div className="flex items-start gap-2 min-w-0">
+                                                <Badge
+                                                    color="default"
+                                                    variant="flat"
+                                                    size="sm"
+                                                    className="flex-shrink-0"
+                                                >
+                                                    #{index + 1}
+                                                </Badge>
+                                                <span className="font-semibold text-sm sm:text-base">{fact}</span>
+                                            </div>
+                                        </div>
                                     ))}
-                                </Accordion>
+                                </div>
                             </CardContent>
                         </Card>
                     ))}
                 </div>
 
                 <Card className="shadow-2xl rounded-3xl bg-gradient-to-r from-rose-50 to-amber-50 dark:from-rose-900/20 dark:to-amber-900/20 backdrop-blur-md border-2 border-white/50 overflow-hidden">
-                    <CardContent className="p-8">
-                        <div className="flex flex-col md:flex-row items-center gap-8">
+                    <CardContent className="p-5 sm:p-8">
+                        <div className="flex flex-col md:flex-row items-center gap-5 sm:gap-8">
                             <div className="flex-shrink-0">
                                 <div className="relative">
                                     <img
-                                        src="/cat-facts-illustration.png"
+                                        src="/25.jpg"
                                         alt="Милый котик"
                                         width={200}
                                         height={200}
-                                        className="rounded-2xl shadow-lg"
+                                        className="rounded-2xl shadow-lg w-32 h-32 sm:w-[200px] sm:h-[200px] object-cover"
                                     />
-                                    <div className="absolute -bottom-3 -right-3 bg-pink-500 text-white px-4 py-2 rounded-full text-sm font-bold animate-bounce">
+                                    <div className="absolute -bottom-3 -right-3 bg-pink-500 text-white px-3 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold animate-bounce">
                                         Ми-ми-ми! 🥰
                                     </div>
                                 </div>
                             </div>
                             <div className="flex-grow">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <Smile className="text-rose-500" size={28} />
-                                    <h2 className="text-2xl font-bold">Кошки делают нас счастливее!</h2>
+                                <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 justify-center md:justify-start">
+                                    <Smile className="text-rose-500" size={22} />
+                                    <h2 className="text-lg sm:text-2xl font-bold">Кошки делают нас счастливее!</h2>
                                 </div>
-                                <p className="text-lg mb-4">
+                                <p className="text-sm sm:text-lg mb-3 sm:mb-4 text-center md:text-left">
                                     Научно доказано, что общение с кошками снижает стресс, нормализует давление
                                     и повышает уровень окситоцина — гормона счастья!
                                 </p>
-                                <div className="flex flex-wrap gap-3">
-                                    <Chip color="success" variant="dot">Снижение стресса на 30%</Chip>
-                                    <Chip color="primary" variant="dot">Улучшение настроения</Chip>
-                                    <Chip color="warning" variant="dot">Терапевтический эффект</Chip>
+                                <div className="flex flex-wrap gap-2 sm:gap-3 justify-center md:justify-start">
+                                    <Chip color="success" variant="dot" size="sm">Снижение стресса на 30%</Chip>
+                                    <Chip color="primary" variant="dot" size="sm">Улучшение настроения</Chip>
+                                    <Chip color="warning" variant="dot" size="sm">Терапевтический эффект</Chip>
                                 </div>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <div className="text-center mt-10 pt-6 border-t border-default-200">
-                    <p className="mb-4 text-foreground/70">
+                <div className="text-center mt-8 sm:mt-10 pt-6 border-t border-default-200">
+                    <p className="mb-4 text-sm sm:text-base text-foreground/70">
                         Понравились факты? Расскажи друзьям о чудесном мире котиков!
                     </p>
                     <Button
                         color="warning"
                         variant="shadow"
                         size="lg"
-                        startContent={<Share2 size={22} />}
-                        className="bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold px-8 py-6 text-lg rounded-2xl"
+                        startContent={<Share2 size={20} />}
+                        className="bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg rounded-2xl"
                         onClick={handleShare}
                     >
                         Поделиться фактами с друзьями
@@ -410,13 +341,13 @@ const CatFactsPage = () => {
                 </div>
             </div>
 
-            <div className="fixed top-4 left-4 opacity-10 pointer-events-none z-0">
+            <div className="fixed top-20 left-4 opacity-10 pointer-events-none z-0 hidden sm:block">
                 <span className="text-6xl">🐱</span>
             </div>
-            <div className="fixed top-4 right-4 opacity-10 pointer-events-none z-0">
+            <div className="fixed top-20 right-4 opacity-10 pointer-events-none z-0 hidden sm:block">
                 <span className="text-6xl">🐾</span>
             </div>
-            <div className="fixed bottom-4 left-4 opacity-10 pointer-events-none z-0">
+            <div className="fixed bottom-24 left-4 opacity-10 pointer-events-none z-0 hidden sm:block">
                 <span className="text-6xl">😻</span>
             </div>
         </div>
